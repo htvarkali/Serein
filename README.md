@@ -307,7 +307,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 
 **Status key:** **Done** = finished and merged · **In progress** = claimed, being worked on · **Open** = free to claim · **Blocked** = waiting on something outside the repo. ⭐ = on the critical path for the headline result. **(non-code)** = needs a person, not code.
 
-### Summary: what is left (updated 2026-11-06)
+### Summary: what is left (updated 2026-11-07)
 
 | Area | Done | In progress | Open | Blocked |
 |---|---|---|---|---|
@@ -315,7 +315,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | B: SmokeCast (Model 1) | 16 | 1 | 3 | 0 |
 | C: AirPlan (Model 2) | 9 | 0 | 4 | 0 |
 | D: Proof & science | 8 | 0 | 3 | 1 |
-| E: Product & pitch | 3 | 0 | 8 | 0 |
+| E: Product & pitch | 3 | 1 | 7 | 0 |
 | S: Submission (Conrad) | 2 | 0 | 9 | 0 |
 | Q: Code quality | 6 | 2 | 1 | 0 |
 
@@ -425,7 +425,7 @@ not establish conditional or spatial calibration.
 | E-3 | SMS and WhatsApp mockups in English and Spanish, made from the real code, with SMS part counts for pricing ([docs/mockups/messages.md](docs/mockups/messages.md)) | Done | Aadi-Tiwari | 2026-11-02 |
 | E-3b | Third language for the mockups (only after C-7 sets the review process; see C-11) | Open | | |
 | E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources | Open | | |
-| E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models) | Open | | |
+| E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models) | In progress | Kwilier | 2026-11-07 |
 | E-6 | **(non-code)** Business plan and pitch from the Lean Canvas | Open | | |
 | E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit) | Open | | |
 | E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" | Open | | |

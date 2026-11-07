@@ -313,7 +313,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 |---|---|---|---|---|
 | A: Data pipeline | 13 | 1 | 1 | 0 |
 | B: SmokeCast (Model 1) | 16 | 1 | 3 | 0 |
-| C: AirPlan (Model 2) | 9 | 0 | 4 | 0 |
+| C: AirPlan (Model 2) | 9 | 1 | 3 | 0 |
 | D: Proof & science | 8 | 0 | 3 | 1 |
 | E: Product & pitch | 3 | 1 | 7 | 0 |
 | S: Submission (Conrad) | 2 | 0 | 9 | 0 |
@@ -396,7 +396,7 @@ not establish conditional or spatial calibration.
 | C-8 | **(non-code)** Pediatric pulmonologist, asthma educator or school nurse reviews action-plan wording and the priors table (includes C-5b). Record their feedback | Open | | |
 | C-9 | Daily check-in: 6 taps (`serein/personal/log.py`) + "Daily check-in" tab in the app; fictional entries held in server memory for the session, with CSV export and a clear-log button | Done | Aadi-Tiwari | 2026-11-01 |
 | C-10 | Confounders in the child model: ozone (prior from Strickland 2010), hot day and high-pollen day (wide "no effect" priors), next to the existing cold/virus term. They never trigger a smoke warning on their own (`docs/METHODS.md#priors`) | Done | Aadi-Tiwari | 2026-11-02 |
-| C-10b | Feed real values into plans: AQM ozone and HRRR max temperature from the forecast; a "high pollen today?" box in the app check-in | Open | | |
+| C-10b | Feed real values into plans: AQM ozone and HRRR max temperature from the forecast; a "high pollen today?" box in the app check-in | In progress | Kwilier | 2026-11-07 |
 | C-11 | More languages in `messages/` (only after C-7 sets the review process) | Open | | |
 
 ### D: Proof & science

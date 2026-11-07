@@ -23,21 +23,29 @@ Replaces the placeholder text for sections 6 to 10 in `innovation_brief.md`. Sec
 
 **Bottom-up size.** At $5,000 per district per year, the 1,427 districts in our three states are a $7.1 million annual market; 70 districts (5%) within three years is $350,000 a year. [TEAM: adjust once the first interviews tell us which districts actually make smoke-day decisions.]
 
-## 7. Competition (300 words) [draft: ~300 words incl. table]
+## 7. Competition (300 words)
 
-| Who | What they give | What they don't |
-|---|---|---|
-| EPA AirNow, EnviroFlash | Free official forecast and alerts by "reporting area" (part of a city to a whole county), usually today and tomorrow | Neighborhood detail; live-monitor correction; per-child advice |
-| NOAA HRRR-Smoke and AQM (successor: RRFS) | Free model forecasts, 3 to 5 km grid, 48 to 72 hours; AQM has a bias-corrected PM2.5 product | Uncertainty ranges; plain-language advice; any health layer |
-| Google Air Quality (BreezoMeter), also inside Apple Weather | 500 m, 96-hour fused forecast from monitors, PurpleAir and smoke models; generic asthma advice | Per-person learning; published uncertainty; head-to-head skill against NOAA or AirNow |
-| IQAir AirVisual | 7-day AI forecast, threshold alerts, wildfire notices | Symptom personalization; smoke-model forecasts |
-| PurpleAir map | Live sensor readings | Any forecast |
-| California Smoke Spotter (CARB) | Next-day statewide smoke forecast app | 2 to 3 day lead; symptom input |
-| AirRater (Australia, since 2015) | Per-user symptom-trigger learning with individual alerts; now a district-level forecast | US coverage; child or caregiver mode; Spanish; published accuracy |
-| Propeller Health; EPA Smoke Sense | Smart-inhaler tracking; citizen-science symptom diary | Both unavailable: Propeller "has ceased operations" (Resmed); Smoke Sense offline since December 2024 |
-| Research: GNN PM2.5 forecasting (Liao et al., 2025); ML correction of HRRR-Smoke (Dong et al.); per-child PM-sensitivity model (Korea, 2025 preprint) | Published methods | A product; uncertainty; a family plan |
+Existing services cover substantial parts of our idea. Sources were checked
+November 7, 2026; the [verification record](../COMPETITOR_VERIFICATION_2026-11-07.md)
+distinguishes advertised features from tested performance.
 
-**Our difference.** Pieces of Serein exist; the whole does not. Google fuses monitors and smoke models at 500 m but publishes no uncertainty or skill scores and learns nothing about a child. AirRater proved per-user trigger learning works, in Australia, for adults. Serein is the first family-facing US product to join the layers: a monitor-corrected neighborhood forecast with calibrated ranges, scored on held-out seasons against NOAA, AirNow and persistence, turned into a green, yellow or red plan for one child in English or Spanish. Families use it free.
+| Alternative | Documented offering or status |
+|---|---|
+| EPA AirNow | Reporting-area AQI forecasts, one to six days where available; Fire and Smoke Map adds monitors, corrected sensors and local smoke outlooks. |
+| NOAA HRRR-Smoke / AQM | Selected HRRR cycles reach 48 hours; AQM reaches 72 hours and includes monitor-informed bias correction. |
+| PurpleAir / ExactAQ | Sensor observations also feed ExactAQ's 48-hour forecasts, including estimates between monitors. |
+| IQAir AirVisual | Advertises seven-day forecasts, alerts and exposure advice. |
+| Google / Apple | Google's API documents 500 m, 96-hour forecasts and sensitive-group advice. Apple names BreezoMeter for US air quality; its AQI horizon is not established by that source. |
+| AirRater | Australian environmental forecasts, symptom-trigger learning and alerts; its developer explicitly includes caregivers of children. |
+| Propeller Health / EPA Smoke Sense | Historical inhaler tracking and citizen-science symptom research, respectively. Resmed says Propeller ceased operations; EPA retains an app-unavailability notice for Smoke Sense. |
+| Research | Liao et al. (2025) forecast PM2.5 with a graph network; Wang et al. (2020 preprint) combine sparse observations and smoke-model forecasts for dense predictions. AGATNet already applies graph attention to forecast correction. |
+
+**Our proposed emphasis** is reproducible daily smoke-forecast evaluation,
+uncertainty ranges, and a caregiver check-in linked to a family plan. These are
+design choices to test, not a claim that the combination is unique. Our current
+family demonstration uses simulated children. Accuracy, interval coverage and
+usefulness require their own evaluation; competitor features and research results
+do not validate Serein. Pilot workflow and distribution remain team decisions.
 
 ## 8. Go-to-market (150 words) [draft: 124 words]
 
@@ -61,17 +69,17 @@ To reach the Summit and run one pilot season we need about $3,000 to $5,000: the
 
 ---
 
-## Claims elsewhere in the brief to fix before submission (from the competitor check)
+## Competition claims to carry into later revisions
 
-1. Never say "first neighborhood-level smoke forecast." Google/BreezoMeter is 500 m, 96 h; NOAA AQM has a bias-corrected PM2.5 product; Trace AQ sells a 4-day ML smoke forecast. Say: first to publish calibrated uncertainty and held-out head-to-head scores in a free family product.
-2. Never say "no app personalizes from symptoms." AirRater has since 2015. Say: no US, child-focused, forecast-linked product does.
-3. Never say "first per-child smoke-sensitivity model." A 272-child Korean study (2025 preprint) built one. Say: first in a free consumer product using a daily caregiver check-in and a wildfire-smoke forecast.
-4. Add a **persistence baseline** to the scored comparison. An MIT paper in BAMS (2026) found that for day-level decisions, morning AirNow persistence matched or beat every operational smoke model. If a judge knows that paper and we have no persistence row, we lose the argument. (The fallback baseline already includes persistence as a last resort; report plain persistence on its own.)
-5. HRRR-Smoke's successor RRFS v1 (3 km, 84 h, smoke and dust) was scheduled operational November 3, 2026, with HRRR frozen until about 2028. Say "HRRR-Smoke and its successor RRFS" and plan to ingest RRFS.
-6. Propeller Health: Resmed confirms it "has ceased operations" but gives no date. Cite without a date.
-7. Smoke Sense: EPA says "unavailable for use" from December 8, 2024 and "down through Summer 2025"; relaunch unknown. Do not say "permanently."
-8. Apple Weather: Apple's page says air quality is "provided by BreezoMeter." Do not quote an in-app forecast horizon; it is not documented.
-9. Health plans: replace any generic "Kaiser/Blue Shield" mention with the verified UW Medicine 2025-26 outreach (64,000 patients, 14% engaged, 7% booked telehealth).
+The [E-5 source check](../COMPETITOR_VERIFICATION_2026-11-07.md) supersedes the
+previous “first/only” wording and missing-feature table. Neither a narrower
+first-in-the-US claim nor “no product combines these layers” is established.
+AirRater includes caregiver use; ExactAQ uses PurpleAir for forecasts; AQM has
+monitor-informed bias correction. The cited forecast evaluation supports reporting
+multiple decision metrics and persistence, not “persistence beats every model.”
+Use dated availability notices for Propeller and Smoke Sense; do not assume a
+scheduled NOAA rollout has occurred. Other sections' market, pricing, clinical
+and delivery claims remain outside this Q7 check and need separate review.
 
 ## Word-count script
 

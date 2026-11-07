@@ -113,19 +113,27 @@ Who pays, in order of how likely we think they are:
 
 ## 7. Competition (300 words)
 
-[TEAM: E-5. Check every line below against the product's current website before submitting. Fix anything that is wrong.]
+Existing services cover substantial parts of our idea. Sources were checked
+November 7, 2026; the [verification record](../COMPETITOR_VERIFICATION_2026-11-07.md)
+distinguishes advertised features from tested performance.
 
-| Who | What they give | What they don't |
-|---|---|---|
-| EPA AirNow | Free official AQI forecast by metro reporting area | Neighborhood detail, live sensor correction, per-child advice |
-| NOAA HRRR-Smoke and AQM | Free smoke model forecasts on a 3 to 12 km grid | Plain-language advice; not corrected with live monitors |
-| PurpleAir map | Live readings from low-cost sensors | [TEAM: verify whether it offers any forecast] |
-| IQAir / AirVisual, Google and Apple weather air quality | Consumer AQI forecasts | [TEAM: verify their lead time and method]; no published head-to-head vs. NOAA on smoke days that we could find; no per-child plan |
-| Asthma apps (e.g. Propeller Health) | Smart-inhaler tracking; learns a patient's triggers from inhaler use, shows local air quality | [TEAM: verify]; needs a sensor on the inhaler; we did not find a smoke forecast 1-3 days ahead turned into a per-child plan |
-| EPA Smoke Sense app | Smoke info and a citizen-science symptom diary | [TEAM: verify]; no personal forecast or personal risk model |
-| Research models (e.g. graph-network PM2.5 forecasting, NSF PAR 10611007; UBC smoke CNN, arXiv 2009.11362) | Published methods for forecasting PM2.5 or smoke | Research code, not a family-facing service; [TEAM: read both and say in one sentence how our approach differs] |
+| Alternative | Documented offering or status |
+|---|---|
+| EPA AirNow | Reporting-area AQI forecasts, one to six days where available; Fire and Smoke Map adds monitors, corrected sensors and local smoke outlooks. |
+| NOAA HRRR-Smoke / AQM | Selected HRRR cycles reach 48 hours; AQM reaches 72 hours and includes monitor-informed bias correction. |
+| PurpleAir / ExactAQ | Sensor observations also feed ExactAQ's 48-hour forecasts, including estimates between monitors. |
+| IQAir AirVisual | Advertises seven-day forecasts, alerts and exposure advice. |
+| Google / Apple | Google's API documents 500 m, 96-hour forecasts and sensitive-group advice. Apple names BreezoMeter for US air quality; its AQI horizon is not established by that source. |
+| AirRater | Australian environmental forecasts, symptom-trigger learning and alerts; its developer explicitly includes caregivers of children. |
+| Propeller Health / EPA Smoke Sense | Historical inhaler tracking and citizen-science symptom research, respectively. Resmed says Propeller ceased operations; EPA retains an app-unavailability notice for Smoke Sense. |
+| Research | Liao et al. (2025) forecast PM2.5 with a graph network; Wang et al. (2020 preprint) combine sparse observations and smoke-model forecasts for dense predictions. AGATNet already applies graph attention to forecast correction. |
 
-Our difference: we publish a scored comparison against the official forecasts on fire seasons the model never saw, we forecast where there is no monitor, and we turn the forecast into a plan for one child. Families use Serein for free.
+**Our proposed emphasis** is reproducible daily smoke-forecast evaluation,
+uncertainty ranges, and a caregiver check-in linked to a family plan. These are
+design choices to test, not a claim that the combination is unique. Our current
+family demonstration uses simulated children. Accuracy, interval coverage and
+usefulness require their own evaluation; competitor features and research results
+do not validate Serein. Pilot workflow and distribution remain team decisions.
 
 ## 8. Go-to-market (150 words)
 

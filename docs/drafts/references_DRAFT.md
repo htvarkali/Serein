@@ -36,23 +36,29 @@ submission.
 
 ## Competition (Q7)
 
-23. US EPA AirNow. API FAQ: reporting areas and forecast horizon. https://docs.airnowapi.org/faq
-24. US EPA AirNow. Fire and Smoke Map FAQ. https://document.airnow.gov/airnow-fire-and-smoke-map-faqs.pdf
-25. NOAA GSL. HRRR-Smoke. https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/
-26. NOAA NWS. 2026. Service Change Notice 26-048: RRFS and REFS implementation. https://www.weather.gov/media/notification/pdf_2026/scn26-048_Updated_RRFS_and_REFS_Implementation.aaf.pdf
-27. NOAA NAQFC on AWS. https://registry.opendata.aws/noaa-nws-naqfc-pds/
-28. Google. Air Quality API overview. https://developers.google.com/maps/documentation/air-quality/overview
-29. Apple. Weather app data sources (BreezoMeter). https://support.apple.com/HT211777
-30. IQAir. AirVisual app. https://www.iqair.com/us/air-quality-monitors/air-quality-app
-31. California Air Resources Board. 2022. California Smoke Spotter 2.0. https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2
-32. Resmed. Propeller Health notice. https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/
-33. US EPA. Smoke Sense. https://www.epa.gov/air-research/smoke-sense
-34. Johnston, F. H., et al. 2018. Using smartphone technology to reduce health impacts from atmospheric environmental hazards (AirRater). Environmental Research Letters 13: 044019. https://acuresearchbank.acu.edu.au/download/ea80c7d8cb8878d4146e198cc6c5ccbfded5b9f331db02a99ecf648dd4d7b138/2978923/OA_Johnston_2018_Using_smartphone_technology_to_reduce_health.pdf
-35. Liao, Buch, Lamb, Gentine. 2025. Spatial-temporal graph neural network for hourly PM2.5 across California. Environmental Data Science. https://arxiv.org/abs/2312.04291
-36. Dong, Mao, Sayeed, Gupta, Zhao, Ahmadov, James. Machine learning bias correction of HRRR-Smoke surface PM2.5 forecasts during the Alaska wildfire season. ACS ES&T Air. https://haqast.org/publications/machine-learning-bias-correction-of-hrrr-smoke-surface-pm2-5-forecasts-during-the-alaska-wildfire-season/
-37. Berlinghieri, Burt, Giani, Fiore, Broderick. 2026. Evaluating PM2.5 forecasts for individual decisions. Bulletin of the American Meteorological Society 107(3). https://journals.ametsoc.org/view/journals/bams/107/3/BAMS-D-24-0291.1.xml
-38. Liu, Ma, Dhillon, Mei. 2024. PM2.5 forecasting under distribution shift: a graph learning approach. AI Open. https://experts.illinois.edu/en/publications/pm25-forecasting-under-distribution-shift-a-graph-learning-approa/
-39. JMIR Preprints. 2025. Individualized PM-sensitivity alerts for pediatric asthma (272 patients, Korea). Preprint 84513. https://preprints.jmir.org/preprint/84513
+These competition sources were accessed November 7, 2026. The
+[verification record](../COMPETITOR_VERIFICATION_2026-11-07.md) identifies the
+claim each source supports and distinguishes current products, availability
+notices and research. Existing reference numbers are retained; additional Q7
+sources are numbered 48–53 below.
+
+23. US EPA AirNow. API FAQ: reporting areas and forecast availability. [Official documentation](https://docs.airnowapi.org/faq).
+24. US EPA AirNow. About the Fire and Smoke Map. [Official map overview](https://www.airnow.gov/fasm-v4/about/).
+25. NOAA GSL. HRRR-Smoke. [Model documentation](https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/).
+26. NOAA NCEP EMC. Operational Air Quality Forecast Change Log. [Implementation history and AirNow-based bias correction](https://www.emc.ncep.noaa.gov/mmb/aq/AQChangelog.html).
+27. NOAA. National Air Quality Forecast Capability archive, Registry of Open Data on AWS. [Dataset description](https://registry.opendata.aws/noaa-nws-naqfc-pds/).
+28. Google. Air Quality API overview. [Official API documentation](https://developers.google.com/maps/documentation/air-quality/overview).
+29. Apple. 2026. Feature availability and data sources in the Weather app. [Official support page](https://support.apple.com/en-us/105038).
+30. IQAir. AirVisual air-quality app. [Product page](https://www.iqair.com/air-quality-monitors/air-quality-app).
+31. California Air Resources Board. 2022. California Air Resources Board releases California Smoke Spotter 2.0. [Historical launch announcement](https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2). A dated precedent, not confirmation of current app availability; not needed for the shortened Q7.
+32. Resmed. Propeller Health operating-status notice. [Current notice](https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/).
+33. US EPA. Smoke Sense Study: A Citizen Science Project Using a Mobile App. [Project and app-availability notice](https://www.epa.gov/air-research/smoke-sense-study-citizen-science-project-using-mobile-app).
+34. AirRater. Environmental information, symptoms and personal alerts. [Current product page](https://airrater.org/). See also the developer listing, reference 50.
+35. Liao, K., Buch, J., Lamb, K., Gentine, P. 2025. Simulating the air quality impact of prescribed fires using graph neural network-based PM2.5 forecasts. Environmental Data Science. [Published paper, DOI 10.1017/eds.2025.4](https://doi.org/10.1017/eds.2025.4). This is the paper in the original NSF PAR 10611007 reference.
+36. Dong, Z., Mao, J., Sayeed, A., Gupta, P., Zhao, T., Ahmadov, R., James, E. 2026. Machine Learning Bias Correction of HRRR-Smoke Surface PM2.5 Forecasts during the Alaska Wildfire Season. ACS ES&T Air 3(5): 1263–1275. [NOAA publication record and abstract](https://repository.library.noaa.gov/view/noaa/74016); [DOI 10.1021/acsestair.5c00409](https://doi.org/10.1021/acsestair.5c00409).
+37. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A., Broderick, T. 2025, version 2. Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision Making in the Face of Increasing Wildfire Smoke. [Author manuscript actually reviewed, arXiv 2409.05866v2](https://arxiv.org/html/2409.05866v2). The journal page could not be retrieved in this check; claims here are tied to this identified manuscript version.
+38. Liu, Y., Ma, J., Dhillon, P., Mei, Q. 2024. PM2.5 forecasting under distribution shift: A graph learning approach. AI Open 5: 23–29. [Published paper, DOI 10.1016/j.aiopen.2023.11.001](https://doi.org/10.1016/j.aiopen.2023.11.001).
+39. Kim, P., et al. 2025. mHealth Intervention Integrating Personal PM2.5 Monitoring and Deep Learning to Reduce Pediatric Asthma Exacerbations: Pilot Study. JMIR Preprints 84513, September 22. [Preprint and status page](https://preprints.jmir.org/preprint/84513), DOI 10.2196/preprints.84513. Do not describe this source as a validated Serein intervention.
 
 ## Costs and fundraising (Q9, Q10)
 
@@ -64,3 +70,14 @@ submission.
 45. Space Center Houston. 2026. Conrad Challenge 2026-27 Student Guide. https://conrad.spacecenter.org/wp-content/uploads/2026/08/2026-2027-Conrad-Challenge-Student-Guide-Official.pdf
 46. Conrad Challenge. 2024-25 prizes (1517 Fund, AWS credits). https://www.conradchallenge.org/24-25conradprizes
 47. Davidson Institute. Davidson Fellows Scholarship, 2027 cycle. https://www.davidsongifted.org/gifted-programs/fellows-scholarship/eligibility/how-to-apply/
+
+## Additional competition references (Q7)
+
+Accessed November 7, 2026.
+
+48. Sonoma Technology. 2023. Adding PurpleAir Data to the ExactAQ Hyper-Local Air Quality Map. [Provider's article](https://www.sonomatech.com/node/4916).
+49. ExactAQ / Sonoma Technology. Air Quality Forecast. [Current forecast feature](https://exactaq.com/features/air-quality-forecast/).
+50. AirHealth. AirRater. Google Play developer listing. [Current description of forecasts, symptom triggers and caregiver use](https://play.google.com/store/apps/details?id=com.senset.airrater&hl=en-AU).
+51. Wang, R., Bhudia, A., Dos Remedios, B., Teng, M., Ng, R. 2020. Dense Forecasting of Wildfire Smoke Particulate Matter Using Sparsity Invariant Convolutional Neural Networks. Workshop preprint, arXiv 2009.11362. [Abstract and version record](https://arxiv.org/abs/2009.11362); [full text](https://arxiv.org/html/2009.11362v1).
+52. Dimri, R., Choi, Y., Salman, A. K., Park, J., Singh, D. 2024. AGATNet: An Adaptive Graph Attention Network for Bias Correction of CMAQ-Forecasted PM2.5 Concentrations Over South Korea. Journal of Geophysical Research: Machine Learning and Computation 1(3): e2024JH000244. [Published paper, DOI 10.1029/2024JH000244](https://doi.org/10.1029/2024JH000244).
+53. Resmed. 2018. ResMed to Acquire Propeller Health, a Leader in COPD and Asthma Connected Health Solutions, for $225 Million. [Historical product description, December 3](https://newsroom.resmed.com/news-releases/news-details/2018/ResMed-to-Acquire-Propeller-Health-a-Leader-in-COPD-and-Asthma-Connected-Health-Solutions-for-225-Million/default.aspx). Current operating status is documented separately in reference 32.

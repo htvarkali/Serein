@@ -1,5 +1,10 @@
 # Competitor source checks for the Innovation Brief
 
+**Historical preliminary check (November 6).** The
+[November 7 verification](COMPETITOR_VERIFICATION_2026-11-07.md) supersedes this
+record and updates both Q7 drafts. The open items and draft status below describe
+the earlier check, not the current E-5 status.
+
 Checked November 6, 2026 against product-owner pages. These notes support review
 of section 7 of the [Innovation Brief draft](drafts/innovation_brief.md).
 They cover the named product examples and both research references, but do not

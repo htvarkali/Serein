@@ -26,6 +26,7 @@ from serein.aqi import pm25_to_category
 from serein.config import Study
 from serein.data.firms import bearing_rad, haversine_km
 from serein.data.points import load_points
+from serein.features.context import forecast_context
 from serein.features.graph import Graph, build_knn_graph
 from serein.features.prepare import leads_of, neighbor_base, to_graph_data
 from serein.features.table import build_table
@@ -240,7 +241,10 @@ def forecast_day(study: Study, day: date, run_dir: Path, with_grid: bool = True)
             **{f"q{int(100 * lv):02d}": np.expm1(q[:, li, j]) for j, lv in enumerate(QUANTILES)},
             "aqi_cat": pm25_to_category(med, valid), "obs": tab.get(f"y_L{lead}"),
         }))
-    return pd.concat(rows, ignore_index=True)
+    forecasts = pd.concat(rows, ignore_index=True)
+    context = forecast_context(study, day, use, leads)
+    return forecasts.merge(context, on=["point_id", "valid_date"], how="left",
+                            validate="one_to_one")
 
 
 STATES_URL = "https://www2.census.gov/geo/tiger/GENZ2023/shp/cb_2023_us_state_20m.zip"

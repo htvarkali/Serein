@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import threading
 from dataclasses import dataclass
+from datetime import datetime
 
 import eccodes
 import numpy as np
@@ -48,6 +49,8 @@ class GribField:
     end_step: int
     values: np.ndarray  # flat, NaN for missing
     units: str
+    reference_time: datetime | None = None
+    step_type: str = ""
 
 
 def decode_messages(blob: bytes, with_grid: bool = False):
@@ -96,11 +99,18 @@ def _decode(blob: bytes, with_grid: bool):
                 except Exception:  # noqa: BLE001 - missing key just means blank
                     return ""
 
+            try:
+                reference_day, reference_clock = s("dataDate"), s("dataTime")
+                reference = (datetime.strptime(reference_day + reference_clock.zfill(4), "%Y%m%d%H%M")
+                             if reference_day and reference_clock else None)
+            except ValueError:
+                reference = None
             fields.append(GribField(
                 short_name=s("shortName"), level=s("typeOfLevel") + ":" + s("level"),
                 start_step=int(eccodes.codes_get_long(h, "startStep")),
                 end_step=int(eccodes.codes_get_long(h, "endStep")),
                 values=vals, units=s("units"),
+                reference_time=reference, step_type=s("stepType"),
             ))
         finally:
             eccodes.codes_release(h)

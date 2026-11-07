@@ -41,6 +41,16 @@ SHORT = {"MASSDEN:8 m above ground": "smoke", "UGRD:10 m above ground": "u10",
          "TMP:2 m above ground": "t2m", "RH:2 m above ground": "rh2m",
          "COLMD:entire atmosphere (considered as a single layer)": "colmd"}
 COLMD = "COLMD:entire atmosphere (considered as a single layer)"
+TEMPERATURE = "TMP:2 m above ground"
+
+
+def temperature_to_c(values: np.ndarray, units: str) -> np.ndarray:
+    """Convert the explicitly identified GRIB temperature unit, never infer it."""
+    if units not in ("K", "degC", "C"):
+        raise ValueError(f"Unsupported HRRR temperature units: {units!r}")
+    values = np.asarray(values, dtype=float)
+    celsius = values - 273.15 if units == "K" else values
+    return np.where(np.isfinite(celsius) & (celsius >= -273.15), celsius, np.nan)
 
 
 def file_url(d: date, cycle: int, fhr: int) -> str:
@@ -95,7 +105,8 @@ def _fetch_fields(d: date, cycle: int, fhr: int, wanted: list[str]):
 def extract_cycle(d: date, points: pd.DataFrame, cycle: int = 12, max_fhr: int = 48,
                   smoke_every: int = 1, met_every: int = 3,
                   met_vars: list[str] | None = None, overwrite: bool = False,
-                  workers: int = 12, store: str = "west_us") -> pd.DataFrame | None:
+                  workers: int = 12, store: str = "west_us", *,
+                  _temperature_only: bool = False) -> pd.DataFrame | None:
     """Sample HRRR smoke + weather at points for one cycle. Cached as parquet.
 
     Output columns: point_id, valid_utc, fhr, var, value.
@@ -121,22 +132,29 @@ def extract_cycle(d: date, points: pd.DataFrame, cycle: int = 12, max_fhr: int =
     if workers <= 0:
         raise ValueError("workers must be positive")
     met_vars = DEFAULT_MET if met_vars is None else met_vars
+    if _temperature_only:
+        met_vars, met_every = [TEMPERATURE], 1
     point_hash = hashlib.sha256(pd.util.hash_pandas_object(
         points[["point_id", "lat", "lon"]], index=False).to_numpy().tobytes()).hexdigest()
     request = {"version": 2, "points": point_hash, "max_fhr": max_fhr, "smoke_every": smoke_every,
                "met_every": met_every, "met_vars": list(met_vars)}
+    t0 = datetime(d.year, d.month, d.day, cycle)
+    if _temperature_only:
+        request["temperature_units"] = "degC"
     # Cached per study ("store"): different studies sample different points.
-    out_path = interim_dir(f"{store}/hrrr") / f"{d:%Y%m%d}_{cycle:02d}z.parquet"
+    folder = "hrrr_temperature" if _temperature_only else "hrrr"
+    out_path = interim_dir(f"{store}/{folder}") / f"{d:%Y%m%d}_{cycle:02d}z.parquet"
     if out_path.exists() and not overwrite:
         cached = pd.read_parquet(out_path)
         if (cached.attrs.get("hrrr_request") == request
-                and cached.attrs.get("hrrr_complete") is True):
+                and cached.attrs.get("hrrr_complete") is True
+                and (not _temperature_only or cached.attrs.get("context_cycle_utc") == t0.isoformat())):
             return cached
 
     jobs = []
     for fhr in range(max_fhr + 1):
         wanted = []
-        if fhr % smoke_every == 0:
+        if not _temperature_only and fhr % smoke_every == 0:
             wanted.append(SMOKE)
         if fhr % met_every == 0:
             wanted += met_vars
@@ -169,7 +187,16 @@ def extract_cycle(d: date, points: pd.DataFrame, cycle: int = 12, max_fhr: int =
                                    points["lat"].to_numpy(), points["lon"].to_numpy(),
                                    max_km=5.0)
             for f in fields:
-                if name == SMOKE:
+                if _temperature_only:
+                    if (f.short_name != "2t" or f.step_type != "instant"
+                            or f.reference_time != t0):
+                        raise ValueError("HRRR temperature identity or initialization does not match request")
+                    if f.start_step != fhr or f.end_step != fhr:
+                        raise ValueError("HRRR temperature must be instantaneous at its forecast hour")
+                    if f.level != "heightAboveGround:2":
+                        raise ValueError("HRRR temperature must be at 2 m above ground")
+                    vals = temperature_to_c(f.values, f.units)
+                elif name == SMOKE:
                     vals = smoke_to_ugm3(f.values)
                 elif name == COLMD:
                     vals = colmd_to_mgm2(f.values)
@@ -183,6 +210,8 @@ def extract_cycle(d: date, points: pd.DataFrame, cycle: int = 12, max_fhr: int =
                     "fhr": np.int16(fhr),
                     "var": SHORT.get(name, name),
                     "value": sampled,
+                    **({"lat": points["lat"].to_numpy(), "lon": points["lon"].to_numpy()}
+                       if _temperature_only else {}),
                 }))
     if not rows:
         if out_path.exists():
@@ -193,17 +222,46 @@ def extract_cycle(d: date, points: pd.DataFrame, cycle: int = 12, max_fhr: int =
     df.attrs["hrrr_request"] = request
     df.attrs["hrrr_complete"] = samples_complete and all(
         (fhr, name) in decoded for fhr, wanted in jobs for name in wanted)
+    if _temperature_only:
+        df.attrs["temperature_units"] = "degC"
+        df.attrs["context_cycle_utc"] = t0.isoformat()
     df.to_parquet(out_path, index=False)
     return df
 
 
-def load_cycles(days: list[date], cycle: int = 12, store: str = "west_us") -> pd.DataFrame:
+def extract_temperature_cycle(d: date, points: pd.DataFrame, cycle: int = 12,
+                              max_fhr: int = 48, overwrite: bool = False,
+                              workers: int = 12, store: str = "west_us") -> pd.DataFrame | None:
+    """Cache hourly instantaneous 2 m temperature in Celsius, separately from smoke features.
+
+    A daily maximum of these samples is a maximum hourly forecast, not a true
+    interval maximum (TMAX). HRRR's shorter horizon leaves later days unknown.
+    """
+    if max_fhr > 48:
+        raise ValueError("HRRR temperature context cannot extend beyond 48 hours")
+    return extract_cycle(d, points, cycle=cycle, max_fhr=max_fhr, overwrite=overwrite,
+                         workers=workers, store=store, _temperature_only=True)
+
+
+def load_cycles(days: list[date], cycle: int = 12, store: str = "west_us", *,
+                _temperature_only: bool = False) -> pd.DataFrame:
     validate_cycle_hour(cycle)
     parts = []
     for d in days:
-        p = interim_dir(f"{store}/hrrr") / f"{d:%Y%m%d}_{cycle:02d}z.parquet"
+        folder = "hrrr_temperature" if _temperature_only else "hrrr"
+        p = interim_dir(f"{store}/{folder}") / f"{d:%Y%m%d}_{cycle:02d}z.parquet"
         if p.exists():
             df = pd.read_parquet(p)
+            if _temperature_only and df.attrs.get("temperature_units") != "degC":
+                raise ValueError(f"Temperature cache lacks verified Celsius units: {p}")
+            if (_temperature_only and df.attrs.get("context_cycle_utc")
+                    != datetime(d.year, d.month, d.day, cycle).isoformat()):
+                raise ValueError(f"Temperature cache initialization does not match request: {p}")
             df["issue_date"] = d
             parts.append(df)
     return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
+
+
+def load_temperature_cycles(days: list[date], cycle: int = 12,
+                            store: str = "west_us") -> pd.DataFrame:
+    return load_cycles(days, cycle=cycle, store=store, _temperature_only=True)

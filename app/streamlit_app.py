@@ -15,7 +15,7 @@ import streamlit as st
 from serein.aqi import CATEGORIES
 from serein.config import REPO_ROOT
 from serein.models.infer import AQI_COLORS
-from serein.personal.action_plan import make_plan
+from serein.personal.action_plan import forecast_confounders, forecast_context_values, make_plan
 from serein.personal.model import ChildModel, design_row
 from serein.personal.simulate import simulate_children, simulate_log, simulate_pm_season
 
@@ -91,9 +91,11 @@ with tab_family:
         X = design_row(log["pm"], log["lag1"], log["lag2"], log["outdoor"], log["cold"], log["missed"])
         model.fit(X, log["y"].to_numpy())
     q = {0.05: near.q05, 0.25: near.q25, 0.5: near.q50, 0.75: near.q75, 0.95: near.q95}
+    context_values = forecast_context_values(near)
+    context = forecast_confounders(near)
     plan = make_plan(model, name, q, pm_lag1=near.q50, pm_lag2=near.q50, outdoor_frac=outdoor,
                      cold=int(cold), day_label=["today", "tomorrow", "day_after", "day_plus3"][lead],
-                     on=near.valid_date, language=lang)
+                     on=near.valid_date, language=lang, **context)
     with c2:
         color = {"green": "#1e8449", "yellow": "#b7950b", "red": "#c0392b"}[plan.zone]
         st.markdown(f"<h2 style='color:{color}'>{plan.zone.upper()}</h2>", unsafe_allow_html=True)
@@ -102,6 +104,19 @@ with tab_family:
         st.caption(f"Model: odds of symptoms x{s['or_per_10']:.2f} per +10 µg/m³ "
                    f"(90% range {s['lo']:.2f}-{s['hi']:.2f}) after {days} simulated days "
                    f"(synthetic child, true type: {kid.kind.replace('_', ' ')}).")
+        with st.expander("Forecast context", expanded=True):
+            st.caption(f"For {pd.Timestamp(near.valid_date).date()}, at the selected forecast location.")
+            ozone_col, temperature_col = st.columns(2)
+            ozone = context_values["ozone_ppb"]
+            temperature = context_values["temperature_max_c"]
+            ozone_col.metric("Ozone (max 8-hour mean)",
+                             "Not available" if ozone is None else f"{ozone:.1f} ppb")
+            temperature_col.metric("Temperature (hourly max)",
+                                   "Not available" if pd.isna(temperature)
+                                   else f"{temperature:.1f} °C")
+            st.caption("NOAA AQM ozone and HRRR temperature, using complete hourly coverage "
+                       "of the local standard day. Temperature is the maximum of 24 hourly "
+                       "forecasts. Missing weather inputs are omitted from this simulation.")
 
 with tab_log:
     from datetime import date as _date

@@ -42,6 +42,7 @@ def _run_parallel(fn, days, workers, label):
                 fail += 1
                 print(f"  {label} {futs[f]} failed: {e}", file=sys.stderr)
     print(f"{label}: {ok} ok, {fail} missing/failed")
+    return ok, fail
 
 
 def cmd_download(args):
@@ -71,6 +72,19 @@ def cmd_download(args):
         _run_parallel(lambda d: aqm.extract_cycle(
             d, pts, cycle=study.raw["availability"]["aqm_cycle"], store=study.name),
             days, max(1, args.workers // 4), "aqm")
+    if src == "context":
+        # Separate caches keep optional family context out of SmokeCast features.
+        from serein.data.availability import Availability
+        av = Availability.from_study(study.raw)
+        pts = load_points(study.name)
+        _, missing_ozone = _run_parallel(lambda d: aqm.extract_cycle(
+            d, pts, cycle=av.aqm_cycle, store=study.name, pollutant="o3"),
+            days, max(1, args.workers // 4), "aqm-ozone")
+        _, missing_temperature = _run_parallel(lambda d: hrrr.extract_temperature_cycle(
+            d, pts, cycle=av.hrrr_cycle, max_fhr=min(study.raw["hrrr"]["max_fhr"], 48),
+            store=study.name), days, max(1, args.workers // 4), "hrrr-temperature")
+        if missing_ozone or missing_temperature:
+            sys.exit("Context download incomplete: one or more cycles are missing or failed.")
     if src == "firms":
         from serein.data import firms
         # Only the season days (plus the day before each run, for the 24 h window),
@@ -246,7 +260,7 @@ def main(argv=None):
         sp.add_argument("--split", choices=["train", "calibrate", "test"])
 
     sp = sub.add_parser("download", help="download + extract one data source")
-    sp.add_argument("source", choices=["airnow", "hms", "hrrr", "aqm", "firms", "all"])
+    sp.add_argument("source", choices=["airnow", "hms", "hrrr", "aqm", "firms", "context", "all"])
     common(sp)
     sp.add_argument("--workers", type=int, default=8)
     sp.set_defaults(fn=cmd_download)

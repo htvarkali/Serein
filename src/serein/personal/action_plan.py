@@ -22,12 +22,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date
+from numbers import Real
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import yaml
 
 from serein.aqi import CATEGORIES, pm25_to_category
+from serein.personal.model import HOT_DAY_C
 
 ZONES = ["green", "yellow", "red"]
 MSG_DIR = Path(__file__).parent / "messages"
@@ -163,6 +166,48 @@ def render_sms(zone: str, child_name: str, day_label: str, pm_median: float,
         parts.append(sms["emergency"])
     parts.append(sms["opt_out"])
     return " ".join(parts)
+
+
+def forecast_context_values(row) -> dict:
+    """Read complete-day values consistently for display and model use."""
+    def complete_value(column, prefix, statistic):
+        value = row.get(column)
+        if value is None or value is pd.NA:
+            return None
+        if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+            raise TypeError(f"{column} must be a finite numeric scalar or missing")
+        if np.isnan(value):
+            return None
+        if not np.isfinite(value):
+            raise ValueError(f"{column} must be a finite numeric scalar or missing")
+        hours = row.get(f"{prefix}_hours")
+        recorded_statistic = row.get(f"{prefix}_statistic")
+        if (isinstance(hours, (bool, np.bool_)) or not isinstance(hours, Real)
+                or not np.isfinite(hours) or hours != 24
+                or not isinstance(recorded_statistic, str) or recorded_statistic != statistic):
+            return None
+        return float(value)
+
+    ozone = complete_value("ozone_max8h_ppb", "ozone", "max_8h_within_local_day")
+    temperature = complete_value("temperature_max_c", "temperature", "maximum_hourly_forecast")
+    if ozone is not None and ozone < 0:
+        raise ValueError("ozone_max8h_ppb must be nonnegative")
+    if temperature is not None and temperature < -273.15:
+        raise ValueError("temperature_max_c is below absolute zero")
+    return {"ozone_ppb": ozone, "temperature_max_c": temperature}
+
+
+def forecast_confounders(row) -> dict:
+    """Adapt complete-day context to the existing family model.
+
+    Unknowns remain missing in the exported forecast. At this model boundary they
+    use its established defaults: no ozone term and a zero heat term. Hourly
+    temperature maxima are a forecast proxy, not a measured daily maximum.
+    """
+    values = forecast_context_values(row)
+    temperature = values["temperature_max_c"]
+    return {"ozone_ppb": values["ozone_ppb"],
+            "hot_day": int(temperature is not None and temperature >= HOT_DAY_C)}
 
 
 def make_plan(child_model, child_name: str, pm_quantiles: dict, pm_lag1: float,

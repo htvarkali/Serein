@@ -29,8 +29,8 @@ class SmokeCastEnsemble(nn.Module):
         self.use_graph = first.use_graph
         self.last_attention = None
 
-    def forward(self, x, wind, base, src, dst, bearing, static_attr):
-        forecasts = [member(x, wind, base, src, dst, bearing, static_attr)
+    def forward(self, x, wind, base, src, dst, bearing, static_attr, xh=None):
+        forecasts = [member(x, wind, base, src, dst, bearing, static_attr, xh)
                      for member in self.members]
         attention = [member.last_attention for member in self.members]
         self.last_attention = (torch.stack(attention).mean(0)

@@ -115,6 +115,25 @@ number.
 - Running the test once. If a bug is found *after* the final run, we fix it,
   re-run, and report **both** results.
 
+## 7b. Live test (prospective; rules written 2026-11-03, before the first live forecast)
+
+The backtest replays the past. The live test forecasts days that have not happened
+yet (`serein live`, run daily at 11:45 AM Pacific by `scripts/run_live.sh`).
+
+- **What is scored:** every EPA monitor-day in the West with a forecast, smoke or not,
+  against the same local-day mean PM2.5 target as section 4. Same competitors as
+  section 5 (`noaa_best`, `aqm_bc`, persistence, EPA's official forecast), same rows.
+- **Primary:** RMSE vs. `noaa_best` per lead, with the day-block bootstrap of section 6.
+  The main live window is the **June-October 2027 fire season**. November-May is
+  reported separately as off-season: the model never trained on winter days.
+- **On time only:** a forecast counts only if it was made within 6 h of the 18:30 UTC
+  issue time. A missed day stays missed; it is never filled in afterwards.
+- **No edits:** a forecast file is never changed after it is written. Each file's
+  SHA-256 is appended to `outputs/live/west_us/forecast_hashes.txt` when it is made.
+  Committing that list regularly is what makes the dates checkable by anyone.
+- **Model changes:** each forecast records which trained model made it. If the model
+  is replaced, the scoreboard is split at that date and both parts are reported.
+
 ## 8. Change log
 
 | Date | Change | Why |
@@ -125,3 +144,4 @@ number.
 | 2026-11-01 | Neighbor-based base for places without a sensor | Grid/hidden sites fell back to generic clean air on day 3; hidden-monitor day-3 error 12.9 → 11.5 |
 | 2026-11-01 | Code-review bug fixes, dev suite rerun (no settings changed) | (1) `hrrr_pm` carried each site's own clean-air history and is now hidden wherever sensor data is hidden (masking, leave-sites-out, no-sensor ablation); (2) co-located monitors no longer get self-edges; (3) EPA comparison now matches reporting areas by name AND state, inside the study region only; (4) `figures.py` crashed before the calibration chart, improvement map and peak report, so those had not been regenerated since an earlier run. New dev numbers: RMSE 4.5 / 7.9 / 9.8 / 11.4; hidden monitors 6.9 / 8.6 / 10.1 / 11.3; day-1 warnings 71% vs. EPA 46%; day-1 peak capture 78%. Test seasons still untouched |
 | 2026-11-02 | Repeatable training (deterministic GPU algorithms), faster code, dev suite rerun (no settings changed) | Two runs of the same code gave different results because the graph step sums messages with GPU atomics in a changing order: the day-2 warning rate moved from 70% to 63%. With `torch.use_deterministic_algorithms` the same seed now gives the identical model (test added), so the one-shot final test can be reproduced exactly. The vectorized CQR, GBM features and warning probabilities gave identical numbers to the old loops. New dev numbers: RMSE 4.5 / 7.9 / 9.7 / 11.4; hidden monitors 7.0 / 8.5 / 10.1 / 11.3; day-1 warnings 71% vs. EPA 46% (81 vs. 98 false alarms); day-2 66% vs. 37%; day-1 peak capture 80%. Test seasons still untouched |
+| 2026-11-03 | Added 7b (live test rules), before the first live forecast | Daily prospective forecasts start 2026-11-03; scored like the backtest, on-time forecasts only, hashed when made |

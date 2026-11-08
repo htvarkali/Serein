@@ -38,6 +38,7 @@ class TrainConfig:
     # whose order changes run to run; without this, two runs of the same code moved
     # the day-2 warning rate by 7 points. Costs ~1.8x training time.
     deterministic: bool = True
+    history: int = 1            # days of inputs each sensor reads (1 = today only)
 
 
 def _device():
@@ -53,7 +54,8 @@ class Trainer:
         torch.manual_seed(cfg.seed)
         np.random.seed(cfg.seed)
         self.model = SmokeCastGNN(n_feat, n_leads, cfg.hidden, cfg.layers, cfg.heads,
-                                  drop=cfg.dropout, use_graph=cfg.use_graph).to(self.dev)
+                                  drop=cfg.dropout, use_graph=cfg.use_graph,
+                                  history=cfg.history).to(self.dev)
         self.src = torch.as_tensor(graph.src, device=self.dev)
         self.dst = torch.as_tensor(graph.dst, device=self.dev)
         self.bearing = torch.as_tensor(graph.bearing, dtype=torch.float32, device=self.dev)
@@ -67,20 +69,14 @@ class Trainer:
 
     def _tensors(self, gd: GraphData, idx):
         f = lambda a: torch.as_tensor(a[idx], device=self.dev)
-        return f(gd.X), f(gd.wind), f(gd.base), f(gd.Y)
+        xh = f(gd.hist) if self.cfg.history > 1 else None
+        return f(gd.X), f(gd.wind), f(gd.base), f(gd.Y), xh
 
-    def _forward(self, x, w, b):
-        return self.model(x, w, b, self.src, self.dst, self.bearing, self.eattr)
+    def _forward(self, x, w, b, xh=None):
+        return self.model(x, w, b, self.src, self.dst, self.bearing, self.eattr, xh)
 
-    def _mask_nodes(self, x, b=None, b_nbr=None):
-        """Hide readings of random sensors; their base forecast switches to the
-        neighbor-based one (as for a place with no sensor)."""
-        if self.cfg.node_mask_frac <= 0 or not self.obs_val:
-            return x, b
-        B, N, _ = x.shape
-        m = torch.rand(B, N, device=x.device) < self.cfg.node_mask_frac
-        if b is not None and b_nbr is not None:
-            b = torch.where(m.unsqueeze(-1), b_nbr, b)
+    def _hide(self, x, m):
+        """Zero sensor readings (and set their missing flags) where mask m is True."""
         x = x.clone()
         xv = x[..., self.obs_val]
         xv[m] = 0.0
@@ -89,7 +85,22 @@ class Trainer:
             xf = x[..., self.obs_flag]
             xf[m] = 1.0
             x[..., self.obs_flag] = xf
-        return x, b
+        return x
+
+    def _mask_nodes(self, x, b=None, b_nbr=None, xh=None):
+        """Hide readings of random sensors; their base forecast switches to the
+        neighbor-based one (as for a place with no sensor). Their past days' readings
+        are hidden too, or the memory would leak them."""
+        if self.cfg.node_mask_frac <= 0 or not self.obs_val:
+            return x, b, xh
+        B, N, _ = x.shape
+        m = torch.rand(B, N, device=x.device) < self.cfg.node_mask_frac
+        if b is not None and b_nbr is not None:
+            b = torch.where(m.unsqueeze(-1), b_nbr, b)
+        x = self._hide(x, m)
+        if xh is not None:
+            xh = self._hide(xh, m.unsqueeze(-1).expand(-1, -1, xh.shape[2]))
+        return x, b, xh
 
     def _loss(self, q, y):
         w = None
@@ -105,9 +116,9 @@ class Trainer:
         tot, n = 0.0, 0
         for s in range(0, len(gd.days), 16):
             idx = np.arange(s, min(s + 16, len(gd.days)))
-            x, w, b, y = self._tensors(gd, idx)
+            x, w, b, y, xh = self._tensors(gd, idx)
             k = torch.isfinite(y).sum().item()
-            tot += self._loss(self._forward(x, w, b), y).item() * k
+            tot += self._loss(self._forward(x, w, b, xh), y).item() * k
             n += k
         return tot / max(n, 1)
 
@@ -123,11 +134,11 @@ class Trainer:
             tl = []
             for s in range(0, T, self.cfg.batch_days):
                 idx = perm[s:s + self.cfg.batch_days]
-                x, w, b, y = self._tensors(train, idx)
+                x, w, b, y, xh = self._tensors(train, idx)
                 b_nbr = (torch.as_tensor(train.base_nbr[idx], device=self.dev)
                          if train.base_nbr is not None else None)
-                x, b = self._mask_nodes(x, b, b_nbr)
-                loss = self._loss(self._forward(x, w, b), y)
+                x, b, xh = self._mask_nodes(x, b, b_nbr, xh)
+                loss = self._loss(self._forward(x, w, b, xh), y)
                 opt.zero_grad()
                 loss.backward()
                 torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -156,6 +167,6 @@ class Trainer:
         outs = []
         for s in range(0, len(gd.days), 16):
             idx = np.arange(s, min(s + 16, len(gd.days)))
-            x, w, b, _ = self._tensors(gd, idx)
-            outs.append(self._forward(x, w, b).cpu().numpy())
+            x, w, b, _, xh = self._tensors(gd, idx)
+            outs.append(self._forward(x, w, b, xh).cpu().numpy())
         return np.concatenate(outs, 0)

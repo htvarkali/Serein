@@ -30,7 +30,14 @@ from serein.eval.metrics import (
     point_metrics,
 )
 from serein.features.graph import build_knn_graph, idw_neighbor_mean
-from serein.features.prepare import Prep, is_sensor_feature, leads_of, neighbor_base, to_graph_data
+from serein.features.prepare import (
+    Prep,
+    history_from,
+    is_sensor_feature,
+    leads_of,
+    neighbor_base,
+    to_graph_data,
+)
 from serein.features.table import processed_dir
 from serein.models.baselines import baselines
 from serein.models.conformal import CQR, calibrate_quantiles
@@ -215,19 +222,36 @@ def run_backtest(study: Study, args) -> dict:
     # a sensor.
     holdout = np.zeros(len(node_ids), bool)
     frac = float(getattr(args, "holdout_sites", 0.0) or 0.0)
+    names = gds["train"].feat_names
+    val_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and not n.endswith("__missing")]
+    flag_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and n.endswith("__missing")]
+
+    def hide_holdout(X):
+        sub = X[:, holdout]
+        sub[..., val_cols] = 0.0
+        sub[..., flag_cols] = 1.0
+        X[:, holdout] = sub
+
     if frac > 0:
         rng = np.random.default_rng(1234)
         holdout[rng.choice(len(node_ids), round(frac * len(node_ids)), replace=False)] = True
-        names = gds["train"].feat_names
-        val_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and not n.endswith("__missing")]
-        flag_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and n.endswith("__missing")]
-        for k, gd in gds.items():
-            sub = gd.X[:, holdout]
-            sub[..., val_cols] = 0.0
-            sub[..., flag_cols] = 1.0
-            gd.X[:, holdout] = sub
+        for gd in gds.values():
+            hide_holdout(gd.X)
         gds["train"].Y[:, holdout] = np.nan
         log(f"leave-sites-out: {holdout.sum()} of {len(node_ids)} monitors hidden")
+
+    # Memory of past days (B-18): each day also gets the inputs of the K-1 days before
+    # it, taken from all seasons loaded (inputs only, never targets).
+    history = int(getattr(args, "history", 1) or 1)
+    if history > 1:
+        parts = [train, cal] + ([test] if final else [])
+        full = to_graph_data(pd.concat(parts, ignore_index=True), prep, node_ids)
+        if holdout.any():
+            hide_holdout(full.X)
+        for gd in gds.values():
+            gd.hist = history_from(full, gd.days, history)
+        del full
+        log(f"history: each sensor reads its last {history} days of inputs")
 
     # Base forecast without a node's own readings (neighbors' readings instead): used
     # for sensors hidden by node masking in training and for hidden monitors.
@@ -258,7 +282,8 @@ def run_backtest(study: Study, args) -> dict:
                               dropout=getattr(args, "dropout", 0.1),
                               weight_decay=getattr(args, "weight_decay", 1e-4),
                               lr=getattr(args, "lr", 2e-3),
-                              smoke_weight=getattr(args, "smoke_weight", 1.0))
+                              smoke_weight=getattr(args, "smoke_weight", 1.0),
+                              history=history)
             log(f"\n## training {name} (seed {args.seed + k})")
             tr = Trainer(F, len(leads), g, gds["train"].feat_names, cfg)
             tr.fit(gds["train"], gds["val"], log=log)
@@ -348,6 +373,7 @@ def run_backtest(study: Study, args) -> dict:
     met = pd.DataFrame(rows)
     met.to_csv(out_dir / "metrics.csv", index=False)
     log(f"warning cut-offs P(>=35.5) tuned on calibration: {cutoffs}")
+    (out_dir / "warn_cutoffs.json").write_text(json.dumps({str(k): v for k, v in cutoffs.items()}))
 
     # Head-to-head on IDENTICAL rows, with day-block bootstrap CIs.
     h2h = []

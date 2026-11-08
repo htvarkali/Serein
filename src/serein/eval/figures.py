@@ -22,7 +22,7 @@ INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e4e3df"
 COLORS = {  # fixed slots: blue, orange, aqua, yellow
     "smokecast": "#2a78d6", "noaa_best": "#eb6834", "persistence": "#1baf7a", "gbm": "#eda100",
 }
-LABELS = {"smokecast": "SmokeCast (ours)", "noaa_best": "Best NOAA forecast",
+LABELS = {"smokecast": "SmokeCast (ours)", "noaa_best": "NOAA/persistence fallback",
           "persistence": "Yesterday's value", "gbm": "Boosted trees (no graph)"}
 
 
@@ -146,17 +146,24 @@ def peak_report(run: Path, thr: float = 35.5) -> pd.DataFrame:
         y = pr.get(f"y_L{lead}")
         if y is None:
             continue
-        m = y >= thr
+        m = np.isfinite(y) & (y >= thr)
         if m.sum() == 0:
             continue
         rec = {"lead": lead, "n_smoky_site_days": int(m.sum())}
         for model in ["smokecast", "noaa_best", "persistence"]:
             c = f"{model}_L{lead}"
             if c in pr:
-                ok = m & pr[c].notna()
-                rec[f"{model}_median_ratio"] = float(np.median(pr.loc[ok, c] / y[ok]))
+                ok = m & np.isfinite(pr[c])
+                rec[f"{model}_n"] = int(ok.sum())
+                rec[f"{model}_median_ratio"] = (float(np.median(pr.loc[ok, c] / y[ok]))
+                                                if ok.any() else np.nan)
         lo, hi = pr[f"smokecast_lo_L{lead}"], pr[f"smokecast_hi_L{lead}"]
-        rec["smokecast_in_90pct_range"] = float(((y >= lo) & (y <= hi))[m].mean())
+        paired = m & np.isfinite(lo) & np.isfinite(hi)
+        if (lo[paired] > hi[paired]).any():
+            raise ValueError("interval lower bounds must not exceed upper bounds")
+        rec["smokecast_n_intervals"] = int(paired.sum())
+        rec["smokecast_in_90pct_range"] = (float(((y >= lo) & (y <= hi))[paired].mean())
+                                           if paired.any() else np.nan)
         rows.append(rec)
     return pd.DataFrame(rows)
 
@@ -164,17 +171,22 @@ def peak_report(run: Path, thr: float = 35.5) -> pd.DataFrame:
 def calibration_by_level(run: Path, out: Path | None = None):
     """Coverage of the 90% range, split by how smoky the forecast was (D-7b)."""
     pr = pd.read_parquet(run / "predictions.parquet")
-    bins = [0, 12, 35.5, 1e9]
-    names = ["clean (<12)", "moderate (12-35)", "smoky (>35)"]
+    bins = [-np.inf, 12, 35.5, np.inf]
+    names = ["clean (<12)", "moderate (12-<35.5)", "smoky (>=35.5)"]
     fig, ax = plt.subplots(figsize=(6.4, 3.8))
     width = 0.2
     for lead in range(4):
         if f"y_L{lead}" not in pr:
             continue
         y, med = pr[f"y_L{lead}"], pr[f"smokecast_L{lead}"]
-        inside = (y >= pr[f"smokecast_lo_L{lead}"]) & (y <= pr[f"smokecast_hi_L{lead}"])
-        grp = pd.cut(med, bins, labels=names)
-        cov = inside[y.notna()].groupby(grp[y.notna()], observed=False).mean()
+        lo, hi = pr[f"smokecast_lo_L{lead}"], pr[f"smokecast_hi_L{lead}"]
+        paired = np.isfinite(y) & np.isfinite(med) & np.isfinite(lo) & np.isfinite(hi)
+        if (lo[paired] > hi[paired]).any():
+            plt.close(fig)
+            raise ValueError("interval lower bounds must not exceed upper bounds")
+        inside = (y >= lo) & (y <= hi)
+        grp = pd.cut(med, bins, labels=names, right=False)
+        cov = inside[paired].groupby(grp[paired], observed=False).mean()
         x = np.arange(len(names)) + (lead - 1.5) * width
         ax.bar(x, cov.to_numpy(), width=width * 0.9,
                color=["#2a78d6", "#1baf7a", "#eda100", "#6250d6"][lead],
@@ -184,9 +196,9 @@ def calibration_by_level(run: Path, out: Path | None = None):
                 color=INK, fontsize=8, ha="right")
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels(names)
-    ax.set_ylim(0.5, 1.0)
+    ax.set_ylim(0, 1.0)
     ax.set_ylabel("share of days inside the 90% range", color=MUTED)
-    ax.set_title("Are the uncertainty ranges honest at every smoke level?", color=INK, loc="left")
+    ax.set_title("Interval coverage by predicted smoke level", color=INK, loc="left")
     ax.legend(frameon=False, ncol=4, fontsize=8, loc="lower left")
     _style(ax)
     fig.tight_layout()
@@ -195,7 +207,7 @@ def calibration_by_level(run: Path, out: Path | None = None):
 
 
 def improvement_map(run: Path, lead: int = 1, out: Path | None = None):
-    """Map: % lower error than the best NOAA forecast, per monitor (D-7b)."""
+    """Map: % lower error than the NOAA/persistence fallback, per monitor (D-7b)."""
     from serein.data.points import load_points
     from serein.models.infer import state_boundaries
 
@@ -212,14 +224,14 @@ def improvement_map(run: Path, lead: int = 1, out: Path | None = None):
     st = state_boundaries()
     if st is not None:
         st.boundary.plot(ax=ax, color=MUTED, linewidth=0.5)
-    # Diverging: blue = SmokeCast better, orange = NOAA better, gray near 0.
+    # Diverging: blue = SmokeCast better, orange = fallback better, gray near 0.
     from matplotlib.colors import LinearSegmentedColormap, TwoSlopeNorm
     cmap = LinearSegmentedColormap.from_list("div", ["#eb6834", "#e9e8e4", "#2a78d6"])
     sc = ax.scatter(g["lon"], g["lat"], c=g["gain"].clip(-50, 80), cmap=cmap,
                     norm=TwoSlopeNorm(vcenter=0, vmin=-50, vmax=80), s=26,
                     edgecolors=INK, linewidths=0.3)
     cb = fig.colorbar(sc, ax=ax, shrink=0.6)
-    cb.set_label("% lower error than best NOAA forecast", color=MUTED)
+    cb.set_label("% lower error than NOAA/persistence fallback", color=MUTED)
     ax.set_xlim(g["lon"].min() - 0.5, g["lon"].max() + 0.5)
     ax.set_ylim(g["lat"].min() - 0.5, g["lat"].max() + 0.5)
     ax.set_aspect(1 / np.cos(np.radians(g["lat"].mean())))

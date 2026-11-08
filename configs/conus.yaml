@@ -1,0 +1,49 @@
+# Training-data expansion (B-17): every EPA PM2.5 monitor in the lower 48 states.
+# Used to TRAIN a bigger SmokeCast, which is then scored on the same West dev rows as
+# configs/west_us.yaml. Only 2021-2023 are used: the 2024-25 test seasons stay untouched.
+#
+# The Northeast box of the transfer test (configs/northeast_2023.yaml) is cut out, so
+# that test still sees a region the model never trained or calibrated on.
+
+name: conus
+
+region:
+  lon_min: -125.0
+  lon_max: -66.5
+  lat_min: 24.0
+  lat_max: 49.5
+
+exclude_regions:
+  - {lon_min: -80.5, lon_max: -69.5, lat_min: 38.0, lat_max: 45.5}  # transfer test
+
+season_months: [6, 7, 8, 9, 10]
+
+split:
+  train: [2021, 2022]
+  calibrate: [2023]
+  test: [2024, 2025]  # not downloaded for this study; the final test is the West config
+
+issue_hour_utc: 18.5
+availability:
+  hrrr_cycle: 12
+  aqm_cycle: 12
+  obs_lag_hours: 1.5
+  hms_lag_days: 1
+  firms_window_hours: 24
+
+leads: [0, 1, 2, 3]
+
+hrrr:
+  max_fhr: 48
+  smoke_every: 1
+  met_every: 3
+  met_vars: ["UGRD:10 m above ground", "VGRD:10 m above ground", "HPBL:surface",
+             "TMP:2 m above ground", "RH:2 m above ground",
+             "COLMD:entire atmosphere (considered as a single layer)"]
+
+graph:
+  k_neighbors: 10
+  max_km: 300
+
+# No map grid: this study is for training only.
+grid_step_deg: null

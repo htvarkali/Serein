@@ -71,6 +71,18 @@ class Study:
         return Region(**self.raw["region"])
 
     @property
+    def excluded(self) -> list[Region]:
+        """Boxes inside the region that must stay out (e.g. a transfer-test area)."""
+        return [Region(**r) for r in self.raw.get("exclude_regions") or []]
+
+    def in_study(self, lat, lon):
+        """Inside the region and outside every excluded box."""
+        ok = self.region.contains(lat, lon)
+        for r in self.excluded:
+            ok = ok & ~r.contains(lat, lon)
+        return ok
+
+    @property
     def leads(self) -> list[int]:
         return list(self.raw["leads"])
 

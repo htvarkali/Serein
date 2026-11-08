@@ -85,10 +85,18 @@ def download_hourly_day(d: date, overwrite: bool = False) -> pd.DataFrame | None
     df = df.drop_duplicates(subset=["site_id", "time_utc"], keep="last")
     # A recent day with missing hours may still be filling in: don't freeze it in the
     # cache, or later runs would skip it forever. Old gaps are permanent, so cache those.
+    # The partial copy is kept beside it (live forecasts read it) and replaced later.
+    partial = _partial_path(path)
     if len(parts) < 24 and d >= date.today() - timedelta(days=2):
+        df.to_parquet(partial, index=False)
         return df
     df.to_parquet(path, index=False)
+    partial.unlink(missing_ok=True)
     return df
+
+
+def _partial_path(path):
+    return path.with_name(path.stem + ".partial.parquet")
 
 
 def parse_reportingarea(text: str) -> pd.DataFrame:
@@ -129,6 +137,8 @@ def load_hourly(days: list[date]) -> pd.DataFrame:
     parts = []
     for d in sorted(want):
         p = raw_dir("airnow") / "hourly" / f"{d:%Y%m%d}.parquet"
+        if not p.exists():
+            p = _partial_path(p)  # today's hours so far (live forecasts)
         if p.exists():
             parts.append(pd.read_parquet(p))
     if not parts:

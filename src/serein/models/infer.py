@@ -94,6 +94,7 @@ def save_artifacts(out_dir: Path, prep, node_ids, n_feat, leads, cfg, cqr, state
         "node_ids": list(node_ids), "n_feat": int(n_feat), "leads": list(leads),
         "hidden": cfg.hidden, "layers": cfg.layers, "heads": cfg.heads,
         "use_graph": getattr(cfg, "use_graph", True), "format_version": 2,
+        "history": int(getattr(cfg, "history", 1)),
         "n_members": len(states),
         "seeds": list(seeds), "aggregation": "mean_log1p_quantiles",
     }
@@ -128,7 +129,8 @@ def load_artifacts(run_dir: Path):
     members = []
     for state in states:
         member = SmokeCastGNN(meta["n_feat"], len(meta["leads"]), meta["hidden"], meta["layers"],
-                             meta["heads"], drop=0.0, use_graph=meta.get("use_graph", True))
+                             meta["heads"], drop=0.0, use_graph=meta.get("use_graph", True),
+                             history=meta.get("history", 1))
         try:
             member.load_state_dict(state)
         except (RuntimeError, TypeError) as exc:
@@ -189,6 +191,17 @@ class ForecastInputs:
     graph: Graph
     leads: list
     nodes: list
+    xh: np.ndarray | None = None  # [N, K-1, F] past days' inputs (history models)
+
+    def run(self, x=None, xh=None):
+        """Model output [1, N, L, Q] (log1p), optionally with replaced inputs."""
+        t = lambda a: a if torch.is_tensor(a) else torch.as_tensor(a).unsqueeze(0)
+        g = self.graph
+        xh = xh if xh is not None else (None if self.xh is None else t(self.xh))
+        return self.model(t(self.X if x is None else x), t(self.wind), t(self.base),
+                          torch.as_tensor(g.src), torch.as_tensor(g.dst),
+                          torch.as_tensor(g.bearing, dtype=torch.float32),
+                          torch.as_tensor(g.edge_attr), xh)
 
 
 def build_inputs(study: Study, day: date, run_dir: Path, with_grid: bool = True) -> ForecastInputs:
@@ -217,18 +230,30 @@ def build_inputs(study: Study, day: date, run_dir: Path, with_grid: bool = True)
         is_sensor = np.r_[np.ones(len(sensors), bool), np.zeros(len(grid), bool)]
         b_nbr = neighbor_base(gd, tab, prep, g, sources=is_sensor)[0]
         base = np.where(is_sensor[:, None], base, b_nbr).astype(np.float32)
+    xh = None
+    k = int(meta.get("history", 1))
+    if k > 1:
+        # Past days' inputs, built exactly like today's (same issue-time rules).
+        days = [day - pd.Timedelta(days=b).to_pytimedelta() for b in range(k - 1, 0, -1)]
+        past = build_table(study, days, use, progress=False)
+        Xp, _ = prep.transform(past)
+        absent = np.array([n.endswith("__missing") for n in names], np.float32)
+        xh = np.broadcast_to(absent, (len(tab), k - 1, X.shape[1])).copy()
+        pos = {n: i for i, n in enumerate(sensors + grid)}
+        for j, d in enumerate(days):
+            sel = (past["issue_date"] == d).to_numpy()
+            idx = past.loc[sel, "point_id"].map(pos)
+            ok = idx.notna().to_numpy()
+            xh[idx[ok].astype(int).to_numpy(), j] = Xp[np.where(sel)[0][ok]]
     return ForecastInputs(model, prep, cqr, meta, tab, use, X, names, wind, base, g, leads,
-                          sensors + grid)
+                          sensors + grid, xh)
 
 
 def forecast_day(study: Study, day: date, run_dir: Path, with_grid: bool = True) -> pd.DataFrame:
     inp = build_inputs(study, day, run_dir, with_grid)
-    model, cqr, tab, use, leads = inp.model, inp.cqr, inp.tab, inp.use, inp.leads
-    X, wind, base, g = inp.X, inp.wind, inp.base, inp.graph
-    t = lambda a: torch.as_tensor(a).unsqueeze(0)
+    cqr, tab, use, leads = inp.cqr, inp.tab, inp.use, inp.leads
     with torch.no_grad():
-        q = model(t(X), t(wind), t(base), torch.as_tensor(g.src), torch.as_tensor(g.dst),
-                  torch.as_tensor(g.bearing, dtype=torch.float32), torch.as_tensor(g.edge_attr))[0].numpy()
+        q = inp.run()[0].numpy()
     q = calibrate_quantiles(q, cqr, QUANTILES)
     rows = []
     for li, lead in enumerate(leads):

@@ -382,6 +382,14 @@ development bounds by monitor, issue month and previous-day smoke, with missing
 row counts and calendar-block bootstrap intervals. These exploratory checks do
 not establish conditional or spatial calibration.
 
+The [spatial diagnostic report](docs/SPATIAL_EVALUATION.md) compares saved
+development errors by distance from a declared reference-sensor set. It keeps
+models on common rows and reports missing evaluation sites. The declared split
+does not by itself verify exclusion from fitting, selection or calibration.
+The separate [reference-only experiment](docs/SPATIAL_EXPERIMENT.md) excludes
+evaluation monitors from preprocessing, training, early stopping and calibration.
+Both workflows are development diagnostics.
+
 ### C: AirPlan (Model 2)
 | ID | Task | Status | Owner | Date |
 |---|---|---|---|---|

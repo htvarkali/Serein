@@ -92,13 +92,11 @@ def explain_point(study: Study, day: date, run_dir: Path, point_id: str, lead: i
     i, li = inp.nodes.index(point_id), inp.leads.index(lead)
     mid = inp.model.nq // 2
     t = lambda a: torch.as_tensor(a).unsqueeze(0)
-    wind, base = t(inp.wind), t(inp.base)
     g = inp.graph
-    src, dst = torch.as_tensor(g.src), torch.as_tensor(g.dst)
-    bear, eattr = torch.as_tensor(g.bearing, dtype=torch.float32), torch.as_tensor(g.edge_attr)
 
+    # Attributions are for today's inputs; past days (history models) stay as they were.
     def f(x):
-        return inp.model(x, wind, base, src, dst, bear, eattr)[0, i, li, mid]
+        return inp.run(x)[0, i, li, mid]
 
     x = t(inp.X)
     flags = torch.tensor([n.endswith("__missing") for n in inp.feat_names])

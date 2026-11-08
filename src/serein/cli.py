@@ -100,6 +100,7 @@ def cmd_build_points(args):
         pa = pd.read_parquet(pa_path)
     grid = study.raw.get("grid_step_deg") if not args.no_grid else None
     pts = build_points(sites, study.region, grid, pa)
+    pts = pts[study.in_study(pts["lat"], pts["lon"])].reset_index(drop=True)
     save_points(pts, study.name)
     print(pts["kind"].value_counts().to_string())
 
@@ -148,6 +149,19 @@ def cmd_explain(args):
     run = REPO_ROOT / "outputs" / "backtest" / args.run
     ex = explain_point(study, parse_date(args.date), run, args.point, lead=args.lead)
     print(ex.text())
+
+
+def cmd_live(args):
+    from serein import live
+    from serein.data.airnow import parse_date
+
+    study = load_study(args.config)
+    if not args.score_only:
+        day = parse_date(args.date) if args.date else date.today()
+        live.make_forecast(study, day, run=args.run, force=args.force,
+                           allow_missing=args.allow_missing)
+    live.score(study)
+    print(f"scoreboard: {live.LIVE / study.name / 'SCOREBOARD.md'}")
 
 
 def cmd_transfer(args):
@@ -288,6 +302,8 @@ def main(argv=None):
     sp.add_argument("--dropout", type=float, default=0.3)
     sp.add_argument("--weight-decay", type=float, default=1e-3)
     sp.add_argument("--lr", type=float, default=2e-3)
+    sp.add_argument("--history", type=int, default=1,
+                    help="days of inputs each sensor reads (1 = today only)")
     sp.add_argument("--smoke-weight", type=float, default=6.0,
                     help="loss weight for days >= 35.5 ug/m3 (1 = none)")
     sp.set_defaults(fn=cmd_backtest)
@@ -306,6 +322,15 @@ def main(argv=None):
     sp.add_argument("--lead", type=int, default=1, help="days ahead (0-3)")
     sp.add_argument("--run", default="west_us_dev", help="folder in outputs/backtest/")
     sp.set_defaults(fn=cmd_explain)
+
+    sp = sub.add_parser("live", help="today's forecast (after 18:30 UTC) + score older ones")
+    sp.add_argument("--config", default=DEFAULT_CONFIG)
+    sp.add_argument("--date", help="issue day (default: today)")
+    sp.add_argument("--run", default="west_us_dev", help="folder in outputs/backtest/")
+    sp.add_argument("--force", action="store_true", help="overwrite / run before issue time")
+    sp.add_argument("--allow-missing", action="store_true", help="run even if AQM/HRRR missing")
+    sp.add_argument("--score-only", action="store_true")
+    sp.set_defaults(fn=cmd_live)
 
     sp = sub.add_parser("transfer", help="apply a trained run to another region (test!)")
     sp.add_argument("--config", default=str(REPO_ROOT / "configs" / "northeast_2023.yaml"))

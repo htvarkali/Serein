@@ -7,6 +7,9 @@ Plain-English version
 2. Message passing, repeated 3 times: every sensor looks at its neighbors'
    summaries. An attention score decides how much to trust each neighbor, using
    distance, direction, and whether the wind blows from the neighbor toward it.
+   (Optional, ``history`` > 1: step 1 first reads the last few days of each sensor's
+   inputs with a small recurrent network (a GRU), so a sensor can notice things like
+   "NOAA has run high here all week". history = 1 is the original model.)
 3. A final layer outputs, for each lead day, five quantiles (5%, 25%, 50%, 75%,
    95%) of the CORRECTION to the base forecast (in log space).
 
@@ -70,13 +73,16 @@ class WindEdgeAttention(nn.Module):
 class SmokeCastGNN(nn.Module):
     def __init__(self, n_feat: int, n_leads: int, hidden: int = 96, layers: int = 3,
                  heads: int = 4, static_edge_dim: int = 4, drop: float = 0.1,
-                 quantiles=QUANTILES, use_graph: bool = True):
+                 quantiles=QUANTILES, use_graph: bool = True, history: int = 1):
         super().__init__()
+        self.history = history
         self.q = torch.tensor(quantiles)
         self.n_leads, self.nq = n_leads, len(quantiles)
         self.use_graph = use_graph
         edge_dim = static_edge_dim + 3  # + wind-from-src-toward-dst, |wind| src, same at dst
         self.enc = mlp(n_feat, hidden, hidden, drop)
+        if history > 1:
+            self.gru = nn.GRU(hidden, hidden, batch_first=True)
         self.layers = nn.ModuleList(
             [WindEdgeAttention(hidden, edge_dim, heads, drop) for _ in range(layers)])
         self.head = mlp(hidden + n_feat, hidden, n_leads * self.nq)
@@ -96,9 +102,20 @@ class SmokeCastGNN(nn.Module):
         return torch.cat([st, toward_src.unsqueeze(-1), toward_dst.unsqueeze(-1),
                           speed.unsqueeze(-1)], dim=-1)
 
-    def forward(self, x, wind, base, src, dst, bearing, static_attr):
-        """x [B,N,F], wind [B,N,2], base [B,N,L] -> quantiles [B,N,L,Q] (log1p space)."""
-        h = self.enc(x)
+    def forward(self, x, wind, base, src, dst, bearing, static_attr, xh=None):
+        """x [B,N,F], wind [B,N,2], base [B,N,L] -> quantiles [B,N,L,Q] (log1p space).
+
+        xh [B,N,K-1,F]: inputs of the previous K-1 days, oldest first (history > 1).
+        """
+        if self.history > 1:
+            if xh is None:
+                raise ValueError("this model reads past days: pass xh")
+            seq = self.enc(torch.cat([xh, x.unsqueeze(2)], 2))       # [B,N,K,H]
+            B, N, K, H = seq.shape
+            _, last = self.gru(seq.reshape(B * N, K, H))
+            h = last[-1].view(B, N, H)
+        else:
+            h = self.enc(x)
         if self.use_graph:
             e = self.edge_features(wind, src, dst, bearing, static_attr)
             for layer in self.layers:

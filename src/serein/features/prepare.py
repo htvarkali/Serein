@@ -152,6 +152,30 @@ class GraphData:
     feat_names: list
     row_index: np.ndarray  # [T, N] index into the source table (-1 = absent)
     base_nbr: np.ndarray | None = None  # [T, N, L] base without the node's own readings
+    hist: np.ndarray | None = None      # [T, N, K-1, F] inputs of the K-1 previous days
+
+
+def _day(d):
+    return pd.Timestamp(d).date()
+
+
+def history_from(full: GraphData, days: list, k: int) -> np.ndarray:
+    """Inputs of the k-1 days before each of ``days``, oldest first: [T, N, k-1, F].
+
+    ``full`` must hold every day that may be needed (all splits together): the day
+    before a validation day can belong to another split, and its inputs were public
+    at issue time either way. Days with no data look like absent rows (all missing).
+    """
+    di = {_day(d): i for i, d in enumerate(full.days)}
+    T, (N, F) = len(days), full.X.shape[1:]
+    absent = np.array([n.endswith("__missing") for n in full.feat_names], np.float32)
+    out = np.broadcast_to(absent, (T, N, k - 1, F)).copy()
+    for t, d in enumerate(days):
+        for j, back in enumerate(range(k - 1, 0, -1)):
+            i = di.get(_day(d) - pd.Timedelta(days=back).to_pytimedelta())
+            if i is not None:
+                out[t, :, j] = full.X[i]
+    return out
 
 
 def to_graph_data(df: pd.DataFrame, prep: Prep, nodes: list[str]) -> GraphData:

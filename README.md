@@ -424,11 +424,11 @@ not establish conditional or spatial calibration.
 | E-2c | Sample forecast shipped in `app/sample/` so the app works without the data download | Done | Aadi-Tiwari | 2026-11-01 |
 | E-3 | SMS and WhatsApp mockups in English and Spanish, made from the real code, with SMS part counts for pricing ([docs/mockups/messages.md](docs/mockups/messages.md)) | Done | Aadi-Tiwari | 2026-11-02 |
 | E-3b | Third language for the mockups (only after C-7 sets the review process; see C-11) | Open | | |
-| E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources | Open | | |
+| E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources ([numbers](docs/BUSINESS_NUMBERS_2026-11-07.md) done; price confirmation needs E-1) | In progress | AbhinavGGarg | 2026-11-08 |
 | E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models); [source verification](docs/COMPETITOR_VERIFICATION_2026-11-07.md) | Done | Kwilier | 2026-11-07 |
 | E-6 | **(non-code)** Business plan and pitch from the Lean Canvas | Open | | |
 | E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit) | Open | | |
-| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" | Open | | |
+| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): live SEREIN mark in classes 9/42/44; decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
 
 ### S: Submission (Conrad Innovation Stage, due 2027-01-07, internal target 2027-01-01)
 | ID | Task | Status | Owner | Date |
@@ -437,12 +437,12 @@ not establish conditional or spatial calibration.
 | S-2 | Brief first draft with all 10 questions and dev numbers: [docs/drafts/innovation_brief.md](docs/drafts/innovation_brief.md) | Done | Aadi-Tiwari | 2026-11-01 |
 | S-3 | **(non-code)** Brief Q2 Team: names, grades, roles, advisor | Open | | |
 | S-4 | **(non-code)** Brief Q3 and Q5: add interview findings (E-1) and expert feedback (C-8) | Open | | |
-| S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) | Open | | |
+| S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
 | S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link | Open | | |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
-| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) | Open | | |
+| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |
 
 ### Q: Code quality

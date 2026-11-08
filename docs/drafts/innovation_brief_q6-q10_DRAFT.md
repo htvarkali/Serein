@@ -69,6 +69,33 @@ To reach the Summit and run one pilot season we need about $3,000 to $5,000: the
 
 ---
 
+## Status note (2026-11-08)
+
+Sections 6, 8, 9 and 10 below were merged into `innovation_brief.md` on 2026-11-08.
+Section 7 in the brief is the E-5 rewrite by Kwilier (merged 2026-11-07), which is the
+version of record. This file stays as the sourced working copy.
+
+## Alternative closing paragraph for Q7 (team decision)
+
+The Innovation criterion (30%) asks judges "Is it unique?" A closing paragraph that
+says we make no uniqueness claim answers that question for them. The version in the
+brief is accurate; the version below is equally accurate and answers the rubric. Pick
+one at the next meeting. Every statement in it is a report of what the E-5 check found,
+not a guarantee.
+
+> **What we found, and what we are testing.** Each layer of Serein exists somewhere:
+> Google fuses monitors and smoke models at 500 m; NOAA's AQM bias-corrects with
+> monitors; AirRater in Australia learns a user's triggers from check-ins, including
+> for caregivers. In our search we did not find a US service that publishes its skill
+> against the official forecast and persistence on held-out fire seasons, reports
+> calibrated ranges, and turns that forecast into a per-child plan a family can act on
+> the night before. That combination is what we built and what we are testing; our
+> family model is still evaluated on simulated children, and the competitors' features
+> do not validate ours.
+
+(About 120 words; replaces the 75-word "Our proposed emphasis" paragraph, keeping Q7
+under 300.)
+
 ## Competition claims to carry into later revisions
 
 The [E-5 source check](../COMPETITOR_VERIFICATION_2026-11-07.md) supersedes the

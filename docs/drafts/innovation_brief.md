@@ -82,7 +82,7 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 **Evaluation plan.** The draft protocol (docs/BACKTEST_PROTOCOL.md) reserves 2024-25 for a final test after the team freezes the methods. That final test has not run. Development trains on 2021-22 and uses 2023 for tuning and scoring. Availability cutoffs are enforced using documented posting-lag assumptions; historical availability still needs an audit. Comparisons use archived forecasts for paired places and days.
 
 **What the tests showed (development weeks of 2023).**
-- One day ahead, Serein's RMSE was 7.9 µg/m³ vs. 11.0 for the AQM-first fallback.
+- One day ahead, Serein's RMSE was 7.9 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). We report persistence on its own because a 2026 evaluation in BAMS found that for day-level decisions it matched or beat every operational smoke model; Serein's warning skill one day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
 - It warned on 71% of "Unhealthy for Sensitive Groups" days vs. 46% for EPA, with fewer false alarms.
 - With 20% of monitors hidden, it still beat NOAA at the hidden sites, so it can forecast for neighborhoods with no monitor.
 - We removed one input at a time to see what matters. Without NOAA's HRRR smoke and weather forecasts, tomorrow's error got 29% worse. Without live monitor readings, today's error got 66% worse. Wind direction between monitors, which we expected to help, made no difference, and satellite fire detections helped only a little (1-4%). We report both.
@@ -100,16 +100,16 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 
 ## 6. Market (300 words)
 
-[TEAM: E-4. Fill each with a sourced number. Suggested sources in brackets.]
+**Who benefits.** About 4.8 million US children under 18 have current asthma (CDC, 2023 NHIS), including an estimated 548,709 in California, 26,594 in Oregon and 83,411 in Washington (CDC, 2023 NSCH); across the western states, roughly 0.9 to 1.1 million. Each year US children make about 374,000 asthma emergency visits and 61,000 hospital stays (CDC, 2023), at a mean hospital cost of $7,464 per stay (Gabbay et al., 2025). Smoke makes this worse: in San Diego, each 10 µg/m³ of wildfire PM2.5 raised pediatric respiratory emergency and urgent-care visits about 30% (Aguilera et al., 2021); in Washington, asthma emergency visits rose 4% to 12% on smoke days (WA OFM); in Oregon they rose about 25% during the 2020 Labor Day fires (OHA, 2025).
 
-Who benefits: families of children with asthma in smoke-affected states (about 4.8 million U.S. children with asthma, CDC 2023; [TEAM: share living in western states, CDC state asthma data]).
+**Who pays.** Three buyer groups already spend money acting on smoke days.
 
-Who pays, in order of how likely we think they are:
-1. School districts, which decide on recess, sports and closures on smoke days. [TEAM: number of districts in CA, OR, WA; NCES]
-2. Medicaid managed care plans and children's hospitals with asthma programs, which pay for emergency visits we aim to prevent. [TEAM: average cost of a pediatric asthma ED visit, with source]
-3. Local air districts and health departments that already send smoke advisories. [TEAM: count of air districts, e.g. 35 in California per CARB]
+1. School districts: 935 in California, 197 in Oregon, 295 in Washington (1,427; state education agencies, 2026), 13,303 nationally (NCES, 2023-24). Districts already buy safety and messaging tools: one district's ParentSquare contract was $69,913 for 2024-25; Raptor emergency software runs about $2,095 per school building per year.
+2. Medicaid managed care plans and children's hospitals: 4.4 million California, 463,000 Oregon and 810,000 Washington children are enrolled in Medicaid or CHIP (KFF, July 2026). Medi-Cal reimburses asthma self-management education at $26.66 per 30-minute unit. In 2025-26 UW Medicine texted smoke guidance to 64,000 asthma and COPD patients using neighborhood-level pollution data; 14% engaged.
+3. Air districts and health departments: the Bay Area district alone budgets $1.95 million a year for Spare the Air advertising and alerts.
 
-[TEAM: one sentence on market size, computed bottom-up: number of districts times our price, not a "billion-dollar market" headline.]
+**Bottom-up size.** At $5,000 per district per year, the 1,427 districts in our three states are a $7.1 million annual market; 70 districts (5%) within three years is $350,000 a year. [TEAM: adjust once the first interviews tell us which districts actually make smoke-day decisions.]
+
 
 ## 7. Competition (300 words)
 
@@ -137,25 +137,26 @@ do not validate Serein. Pilot workflow and distribution remain team decisions.
 
 ## 8. Go-to-market (150 words)
 
-[TEAM: E-4 and E-7.] Start with one partner that already acts on smoke days: a school district or school nurse group in a smoke-affected area. Serein sends their nurses a neighborhood forecast each morning in fire season and gives families a free sign-up link for AirPlan. Success in the first season is measured in two numbers: how many smoke days the district got warned on in advance, and how many families kept logging after 30 days.
+Start with one partner that already acts on smoke days: a school district or school-nurse group in a smoke-affected part of California, Oregon or Washington. Serein sends its nurses a neighborhood forecast each morning of fire season and gives families a free sign-up link for AirPlan, alongside the AirNow Flag Program many schools already run. Precedent that organizations will do this: UW Medicine reached 64,000 patients with neighborhood smoke guidance in 2025 and renewed for 2026, and Ventura County already texts farmworkers smoke alerts in English and Spanish. First-season success is two numbers: how many smoke days the district was warned about a day ahead, and how many families still log after 30 days. A clinician reviews every message before any family sees it. [TEAM: name any district, nurse, clinic or air district that has agreed to talk; attach letters of support (E-7).]
 
-[TEAM: name any district, nurse, air district or clinic that has agreed to talk, and attach letters of support if we get them (E-7).]
 
 ## 9. Business model (300 words)
 
-[TEAM: E-4. Draft shape below; replace bracketed numbers with researched ones.]
+Families never pay. Organizations that make decisions on smoke days pay a yearly subscription for the neighborhood forecast, alerts and a dashboard; the personal plan rides along free.
 
-Families never pay. Organizations that make decisions on smoke days pay a yearly subscription for the neighborhood forecast, alerts and a dashboard.
+**Pricing, anchored to what buyers already pay.**
 
-- School districts: [TEAM: price per district per year, and why that price; compare with what districts pay for other safety tools].
-- Health plans and children's hospitals: per-enrolled-child pricing for AirPlan, justified by avoided emergency visits. [TEAM: show the break-even: how many avoided ED visits per 1,000 children pay for the service.]
-- Air districts and health departments: a license to embed the forecast in their existing alerts.
+- School districts: $500 to $1,000 per school building per year, or about $0.50 to $1.50 per student, with a $1,500 floor. That is a quarter to half of one Raptor emergency-software license ($2,095 per building) and 7% to 21% of one observed ParentSquare contract ($69,913). A 10,000-student district pays $5,000 to $15,000 a year.
+- Health plans and children's hospitals: $10 to $20 per enrolled child with asthma per year, less than one Medi-Cal asthma-education unit ($26.66 per 30 minutes). A child asthma hospitalization costs $7,464, so one avoided stay funds 370 to 750 child-years of Serein. We do not yet have evidence that Serein avoids visits; a pilot would measure it.
+- Air districts and health departments: a license to embed the forecast in alerts they already send.
 
-Costs: all input data is free public data from NOAA, NASA and EPA. Running the daily forecast for the whole western U.S. takes [TEAM: measure: minutes of compute per day on one cloud GPU or CPU, times cloud price] plus hosting and text-message costs for families. [TEAM: add PurpleAir data fees if we use their sensors commercially.]
+**Costs.** All inputs are free public data from NOAA, NASA and EPA. [TEAM: paste the measured median seconds per issue day and the hardware from `outputs/timing/`.] A T4 GPU costs $0.53 an hour on demand, so a daily forecast for the western US costs cents a day, and a small web host is $7 to $25 a month. Text alerts cost about $0.013 per SMS part; our messages fit in one or two parts, so 60 smoke-day alerts to 1,000 families cost about $1,100 a season. WhatsApp utility messages cost $0.0034 each. PurpleAir sensor history, if added, costs about $1 to $5 per sensor-year. At the prices above, compute and messaging together stay under 10% of revenue.
+
 
 ## 10. Fundraising (150 words)
 
-[TEAM: E-4.] What we need to reach the Summit and a first pilot: [TEAM: list items with dollar amounts: Conrad fee ($499, or financial aid), cloud hosting for one fire season, text-message costs, PurpleAir data access, translation review.] Where it comes from: [TEAM: sponsors, school or district grants, science fair prizes, a crowdfunding page]. After the pilot, the first paying customer funds the next season.
+To reach the Summit and run one pilot season we need about $3,000 to $5,000: the $499 Conrad fee (or financial aid), $65 for a provisional patent (micro-entity) and $350 for a trademark application on the name, about $300 for a fire season of hosting, roughly $1,100 of text messages for 1,000 families, $500 for native-speaker and translation review, and travel. Sources: Conrad's prize partners (1517 Fund has given Scholar teams $1,000 plus $10,000 in AWS credits), the Davidson Fellows Scholarship (deadline February 17, 2027), small rolling seed grants such as The Pollination Project, in-kind sensors or data from an air district or PurpleAir, and a crowdfunding page. Federal environmental-justice grants are not realistically available in 2026-27. After the pilot, the first paying district funds the next season. [TEAM: confirm 1517 Fund and AWS are still 2026-27 prize partners.]
+
 
 ---
 

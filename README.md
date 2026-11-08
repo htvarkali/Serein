@@ -406,7 +406,7 @@ not establish conditional or spatial calibration.
 | D-2 | Backtest runner with strict season split and a `--final` lock file | Done | Aadi-Tiwari | 2026-11-01 |
 | D-2b | Warning rule: warn when P(PM2.5 ≥ 35.5) beats a cut-off tuned on calibration weeks | Done | Aadi-Tiwari | 2026-11-01 |
 | D-3 | **(non-code)** PurpleAir research access: draft in `docs/drafts/purpleair_data_request.md`, not sent; someone must decide whether to send it | Blocked | | |
-| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) | Open | | |
+| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08) | Open | | |
 | D-5 ⭐ | Run the final test once (`--final`), with day-bootstrap 95% CIs and a Diebold-Mariano test vs. each baseline | Open | | |
 | D-6a | Northeast June 2023 transfer test prepared: data downloaded, `serein transfer` built | Done | Aadi-Tiwari | 2026-11-01 |
 | D-6b ⭐ | Run the transfer test once, right after D-5 | Open | | |
@@ -440,7 +440,7 @@ not establish conditional or spatial calibration.
 | S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
-| S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link | Open | | |
+| S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link (copy rewritten, team slots, pilot CTA, Pages workflow `.github/workflows/pages.yml`; admin must set Settings → Pages → Source: GitHub Actions; names/contact still needed) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
 | S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |

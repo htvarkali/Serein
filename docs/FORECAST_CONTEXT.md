@@ -125,3 +125,5 @@ locations, source horizons, issue-time cutoffs, export alignment, legacy forecas
 the Streamlit day selector, and the paired clean-smoke context. The new context
 download command exits with failure when a source cycle is missing or fails to
 decode; existing download commands retain their behavior.
+
+If an optional cache cannot be read or fails validation, forecasting emits a runtime warning and exports unknown context values while preserving the PM forecast. Direct context validation still raises the underlying error.

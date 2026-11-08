@@ -74,6 +74,25 @@ def _daily_values(frame: pd.DataFrame, points: pd.DataFrame, day: date,
     return pd.DataFrame(rows, columns=columns)
 
 
+CONTEXT_SPECS = [
+    ("ozone", "ozone_max8h_ppb", "AQM bias-corrected hourly ozone",
+     "max_8h_within_local_day"),
+    ("temperature", "temperature_max_c", "HRRR hourly 2 m temperature",
+     "maximum_hourly_forecast"),
+]
+
+def unavailable_context(day: date, points: pd.DataFrame, leads: list[int]) -> pd.DataFrame:
+    """Return unknown optional context without changing forecast identity."""
+    out = pd.DataFrame([{"point_id": point, "valid_date": day + timedelta(days=int(lead))}
+                        for lead in leads for point in points["point_id"]])
+    for prefix, value, _, _ in CONTEXT_SPECS:
+        out[value], out[f"{prefix}_hours"] = np.nan, 0
+        out[f"{prefix}_source"] = pd.Series(None, index=out.index, dtype=object)
+        out[f"{prefix}_statistic"] = pd.Series(None, index=out.index, dtype=object)
+        out[f"{prefix}_cycle_utc"] = pd.NaT
+    return out
+
+
 def forecast_context(study: Study, day: date, points: pd.DataFrame,
                      leads: list[int]) -> pd.DataFrame:
     """Read already-cached context from the configured, issue-time-eligible cycles.
@@ -82,19 +101,7 @@ def forecast_context(study: Study, day: date, points: pd.DataFrame,
     Historical archive re-upload timestamps are not evidence of original posting
     time. This function performs no downloads and does not change model inputs.
     """
-    out = pd.DataFrame([{"point_id": point, "valid_date": day + timedelta(days=int(lead))}
-                        for lead in leads for point in points["point_id"]])
-    specs = [
-        ("ozone", "ozone_max8h_ppb", "AQM bias-corrected hourly ozone",
-         "max_8h_within_local_day"),
-        ("temperature", "temperature_max_c", "HRRR hourly 2 m temperature",
-         "maximum_hourly_forecast"),
-    ]
-    for prefix, value, _, _ in specs:
-        out[value], out[f"{prefix}_hours"] = np.nan, 0
-        out[f"{prefix}_source"] = pd.Series(None, index=out.index, dtype=object)
-        out[f"{prefix}_statistic"] = pd.Series(None, index=out.index, dtype=object)
-        out[f"{prefix}_cycle_utc"] = pd.NaT
+    out = unavailable_context(day, points, leads)
     # Old/synthetic forecast inputs without offsets still work, with unknown context.
     if "gmt_offset" not in points:
         return out
@@ -102,7 +109,7 @@ def forecast_context(study: Study, day: date, points: pd.DataFrame,
     if points.empty:
         return out
     av = Availability.from_study(study.raw)
-    for prefix, value, source, statistic in specs:
+    for prefix, value, source, statistic in CONTEXT_SPECS:
         ozone = prefix == "ozone"
         cycle, lag = ((av.aqm_cycle, AQM_OZONE_POSTED_LAG_H) if ozone
                       else (av.hrrr_cycle, HRRR_POSTED_LAG_H))

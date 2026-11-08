@@ -269,8 +269,8 @@ def test_same_context_reaches_smoke_and_clean_air_comparison():
     assert plan.zone == "green"
 
 
-def test_forecast_exports_context_without_changing_pm_quantiles(monkeypatch, points):
-    study, _ = cached_context(monkeypatch, points)
+@pytest.fixture
+def forecast_inputs(monkeypatch, points):
     q = torch.log1p(torch.tensor([5., 8., 10., 12., 15.])).repeat(1, 2, 2, 1)
     graph = SimpleNamespace(src=np.array([], int), dst=np.array([], int),
                             bearing=np.array([], float), edge_attr=np.zeros((0, 3)))
@@ -281,6 +281,12 @@ def test_forecast_exports_context_without_changing_pm_quantiles(monkeypatch, poi
         X=np.zeros((2, 1)), feat_names=["feature"], wind=np.zeros((2, 2)),
         base=np.zeros((2, 2)), graph=graph, nodes=points.point_id.tolist())
     monkeypatch.setattr(infer, "build_inputs", lambda *args: inputs)
+    return inputs
+
+
+def test_forecast_exports_context_without_changing_pm_quantiles(monkeypatch, points, forecast_inputs):
+    study, _ = cached_context(monkeypatch, points)
+    inputs = forecast_inputs
     result = infer.forecast_day(study, DAY, None)
     assert result.q50.tolist() == pytest.approx([10.] * 4)
     assert result[result.lead == 1].temperature_max_c.tolist() == [43., 43.]
@@ -289,6 +295,36 @@ def test_forecast_exports_context_without_changing_pm_quantiles(monkeypatch, poi
     legacy = infer.forecast_day(study, DAY, None)
     assert legacy.temperature_max_c.isna().all()
     np.testing.assert_array_equal(legacy.q50, result.q50)
+
+
+@pytest.mark.parametrize("source", ["ozone", "temperature"])
+@pytest.mark.parametrize("damage", ["duplicates", "unreadable"])
+def test_optional_context_failure_preserves_smoke_forecast(monkeypatch, points, forecast_inputs,
+                                                          source, damage):
+    study, _ = cached_context(monkeypatch, points)
+    baseline = infer.forecast_day(study, DAY, None)
+    module, loader = ((aqm, "load_cycles") if source == "ozone"
+                      else (hrrr, "load_temperature_cycles"))
+    if damage == "duplicates":
+        frame = hourly(points, ozone=source == "ozone")
+        frame = pd.concat([frame, frame.iloc[:1]], ignore_index=True)
+        monkeypatch.setattr(module, loader, lambda *args, **kwargs: frame.copy())
+    else:
+        def unreadable(*args, **kwargs):
+            raise OSError("Unreadable optional context cache")
+        monkeypatch.setattr(module, loader, unreadable)
+
+    with pytest.raises((ValueError, OSError)):
+        context.forecast_context(study, DAY, points, [0, 1])
+    with pytest.warns(RuntimeWarning, match="Optional forecast context unavailable"):
+        result = infer.forecast_day(study, DAY, None)
+    smoke = [name for name in baseline if not name.startswith(("ozone_", "temperature_"))]
+    pd.testing.assert_frame_equal(result[smoke], baseline[smoke])
+    for prefix, value in (("ozone", "ozone_max8h_ppb"), ("temperature", "temperature_max_c")):
+        assert result[value].isna().all()
+        assert result[f"{prefix}_hours"].eq(0).all()
+        for suffix in ("source", "statistic", "cycle_utc"):
+            assert result[f"{prefix}_{suffix}"].isna().all()
 
 
 @pytest.mark.parametrize("attribute,bad", [

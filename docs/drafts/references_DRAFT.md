@@ -1,12 +1,33 @@
-# Reference list for the Innovation Brief attachment (task S-10), draft
+# Reference list for the Innovation Brief attachment (task S-10), draft 2
 
-Format: author/organization, year, title, venue, URL. Add the citations from
-`docs/METHODS.md` (priors table) and `docs/DATA.md` (data sources) above the line.
-Everything below supports sections 3, 6, 7, 9 and 10 of the brief. Remove any
-reference whose number is cut from the final text. Verify every link the day before
-submission.
+Format: author/organization, year, title, venue, URL. Sections A and B are the
+model's own citations (from `docs/METHODS.md` and `docs/DATA.md`); sections C to F
+support brief sections 3, 6, 7, 9 and 10. Remove any reference whose number is cut
+from the final text. Verify every link the day before submission. Where a DOI is
+known it is given; where only a journal citation exists, add the DOI before submitting.
 
-## Health burden and smoke effects (Q3, Q6)
+## A. Model priors and clinical evidence (Q4, Q5; from METHODS.md)
+
+A1. Sugrue, R., et al. 2026. Wildfire-specific PM2.5 and pediatric asthma hospital encounters. GeoHealth 10(2): e2025GH001530. [TEAM: add DOI]
+A2. Khetsuriani, N., et al. 2007. Prevalence of viral respiratory tract infections in children with asthma. Journal of Allergy and Clinical Immunology 119(2): 314-321.
+A3. Williams, L. K., et al. 2011. Quantifying the proportion of severe asthma exacerbations attributable to inhaled corticosteroid nonadherence. Journal of Allergy and Clinical Immunology 128(6): 1185-1191.
+A4. Strickland, M. J., et al. 2010. Short-term associations between ambient air pollutants and pediatric asthma emergency department visits. American Journal of Respiratory and Critical Care Medicine 182(3): 307-316.
+A5. Gent, J. F., et al. 2009. Symptoms and medication use in children with asthma and traffic-related sources of fine particle pollution. Environmental Health Perspectives 117(7): 1168-1174. (Evidence considered and not used; cite only if Q4 mentions it.)
+A6. CDC. Asthma Call-back Survey (ACBS): definition of "not well controlled" asthma. https://www.cdc.gov/asthma/acbs/
+A7. US EPA. 2024. Final reconsideration of the PM NAAQS: updated AQI breakpoints for PM2.5. https://www.epa.gov/pm-pollution/final-reconsideration-national-ambient-air-quality-standards-particulate-matter-pm
+A8. Barkjohn, K. K., Gantt, B., Clements, A. L. 2021. Development and application of a United States-wide correction for PM2.5 data collected with the PurpleAir sensor. Atmospheric Measurement Techniques 14: 4617-4637. https://doi.org/10.5194/amt-14-4617-2021
+
+## B. Data sources (Q4, Q5; from DATA.md and README)
+
+B1. US EPA AirNow. Hourly AQ observations and reporting-area forecasts (files.airnowtech.org). https://docs.airnowapi.org/
+B2. NOAA NESDIS. Hazard Mapping System (HMS) fire and smoke product. https://www.ospo.noaa.gov/products/land/hms.html
+B3. NASA FIRMS. Fire Information for Resource Management System. https://firms.modaps.eosdis.nasa.gov/
+B4. NOAA GSL. HRRR-Smoke (High-Resolution Rapid Refresh with smoke). https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/ ; AWS Open Data: https://registry.opendata.aws/noaa-hrrr-pds/
+B5. NOAA NWS. National Air Quality Forecast Capability (AQM/NAQFC). AWS Open Data: https://registry.opendata.aws/noaa-nws-naqfc-pds/
+B6. PurpleAir. API documentation and pricing. https://develop.purpleair.com/ ; https://community.purpleair.com/t/api-pricing/4523
+B7. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. Evaluating PM2.5 forecasts for individual decisions. Bulletin of the American Meteorological Society 107(3). https://journals.ametsoc.org/view/journals/bams/107/3/BAMS-D-24-0291.1.xml (motivates the persistence baseline)
+
+## C. Health burden and smoke effects (Q3, Q6)
 
 1. CDC. 2026 (2023 data). Most Recent National Asthma Data. https://www.cdc.gov/asthma-data/about/most-recent-asthma-data.html
 2. Sugrue, R., et al. 2026. Wildfire PM2.5 and pediatric asthma hospital encounters. GeoHealth 10(2): e2025GH001530. [TEAM: full citation from METHODS.md]
@@ -19,7 +40,7 @@ submission.
 9. AHRQ HCUP. 2024. Statistical Brief 311: Costs of emergency department visits, 2021. https://hcup-us.ahrq.gov/reports/statbriefs/sb311-ED-visit-costs-2021.pdf
 10. Nurmagambetov, T., Kuwahara, R., Garbe, P. 2018. The Economic Burden of Asthma in the United States, 2008-2013. Annals ATS 15(3). (cited via AAFA Asthma Facts and Figures, 2026: https://aafa.org/wp-content/uploads/2025/04/aafa-asthma-facts-and-figures.pdf)
 
-## Market and payers (Q6, Q8, Q9)
+## D. Market and payers (Q6, Q8, Q9)
 
 11. California Department of Education. 2026. School district organization list (935 districts). https://www.cde.ca.gov/re/lr/do/schooldistrictlist.asp
 12. Oregon Department of Education. Schools and districts (197 districts). https://www.oregon.gov/ode/schools-and-districts/pages/default.aspx
@@ -34,27 +55,33 @@ submission.
 21. Times News. 2025. LASD buys subscription for emergency system (Raptor pricing). https://www.tnonline.com/20250702/lasd-buys-subscription-for-emergency-system/
 22. US EPA. Air Quality Flag Program. https://www.epa.gov/air-quality/air-quality-flag-program
 
-## Competition (Q7)
+## E. Competition (Q7)
 
-23. US EPA AirNow. API FAQ: reporting areas and forecast horizon. https://docs.airnowapi.org/faq
-24. US EPA AirNow. Fire and Smoke Map FAQ. https://document.airnow.gov/airnow-fire-and-smoke-map-faqs.pdf
-25. NOAA GSL. HRRR-Smoke. https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/
-26. NOAA NWS. 2026. Service Change Notice 26-048: RRFS and REFS implementation. https://www.weather.gov/media/notification/pdf_2026/scn26-048_Updated_RRFS_and_REFS_Implementation.aaf.pdf
-27. NOAA NAQFC on AWS. https://registry.opendata.aws/noaa-nws-naqfc-pds/
-28. Google. Air Quality API overview. https://developers.google.com/maps/documentation/air-quality/overview
-29. Apple. Weather app data sources (BreezoMeter). https://support.apple.com/HT211777
-30. IQAir. AirVisual app. https://www.iqair.com/us/air-quality-monitors/air-quality-app
-31. California Air Resources Board. 2022. California Smoke Spotter 2.0. https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2
-32. Resmed. Propeller Health notice. https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/
-33. US EPA. Smoke Sense. https://www.epa.gov/air-research/smoke-sense
-34. Johnston, F. H., et al. 2018. Using smartphone technology to reduce health impacts from atmospheric environmental hazards (AirRater). Environmental Research Letters 13: 044019. https://acuresearchbank.acu.edu.au/download/ea80c7d8cb8878d4146e198cc6c5ccbfded5b9f331db02a99ecf648dd4d7b138/2978923/OA_Johnston_2018_Using_smartphone_technology_to_reduce_health.pdf
-35. Liao, Buch, Lamb, Gentine. 2025. Spatial-temporal graph neural network for hourly PM2.5 across California. Environmental Data Science. https://arxiv.org/abs/2312.04291
-36. Dong, Mao, Sayeed, Gupta, Zhao, Ahmadov, James. Machine learning bias correction of HRRR-Smoke surface PM2.5 forecasts during the Alaska wildfire season. ACS ES&T Air. https://haqast.org/publications/machine-learning-bias-correction-of-hrrr-smoke-surface-pm2-5-forecasts-during-the-alaska-wildfire-season/
-37. Berlinghieri, Burt, Giani, Fiore, Broderick. 2026. Evaluating PM2.5 forecasts for individual decisions. Bulletin of the American Meteorological Society 107(3). https://journals.ametsoc.org/view/journals/bams/107/3/BAMS-D-24-0291.1.xml
-38. Liu, Ma, Dhillon, Mei. 2024. PM2.5 forecasting under distribution shift: a graph learning approach. AI Open. https://experts.illinois.edu/en/publications/pm25-forecasting-under-distribution-shift-a-graph-learning-approa/
-39. JMIR Preprints. 2025. Individualized PM-sensitivity alerts for pediatric asthma (272 patients, Korea). Preprint 84513. https://preprints.jmir.org/preprint/84513
+These competition sources were accessed November 7, 2026. The
+[verification record](../COMPETITOR_VERIFICATION_2026-11-07.md) identifies the
+claim each source supports and distinguishes current products, availability
+notices and research. Existing reference numbers are retained; additional Q7
+sources are numbered 48–53 below.
 
-## Costs and fundraising (Q9, Q10)
+23. US EPA AirNow. API FAQ: reporting areas and forecast availability. [Official documentation](https://docs.airnowapi.org/faq).
+24. US EPA AirNow. About the Fire and Smoke Map. [Official map overview](https://www.airnow.gov/fasm-v4/about/).
+25. NOAA GSL. HRRR-Smoke. [Model documentation](https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/).
+26. NOAA NCEP EMC. Operational Air Quality Forecast Change Log. [Implementation history and AirNow-based bias correction](https://www.emc.ncep.noaa.gov/mmb/aq/AQChangelog.html).
+27. NOAA. National Air Quality Forecast Capability archive, Registry of Open Data on AWS. [Dataset description](https://registry.opendata.aws/noaa-nws-naqfc-pds/).
+28. Google. Air Quality API overview. [Official API documentation](https://developers.google.com/maps/documentation/air-quality/overview).
+29. Apple. 2026. Feature availability and data sources in the Weather app. [Official support page](https://support.apple.com/en-us/105038).
+30. IQAir. AirVisual air-quality app. [Product page](https://www.iqair.com/air-quality-monitors/air-quality-app).
+31. California Air Resources Board. 2022. California Air Resources Board releases California Smoke Spotter 2.0. [Historical launch announcement](https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2). A dated precedent, not confirmation of current app availability; not needed for the shortened Q7.
+32. Resmed. Propeller Health operating-status notice. [Current notice](https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/).
+33. US EPA. Smoke Sense Study: A Citizen Science Project Using a Mobile App. [Project and app-availability notice](https://www.epa.gov/air-research/smoke-sense-study-citizen-science-project-using-mobile-app).
+34. AirRater. Environmental information, symptoms and personal alerts. [Current product page](https://airrater.org/). See also the developer listing, reference 50.
+35. Liao, K., Buch, J., Lamb, K., Gentine, P. 2025. Simulating the air quality impact of prescribed fires using graph neural network-based PM2.5 forecasts. Environmental Data Science. [Published paper, DOI 10.1017/eds.2025.4](https://doi.org/10.1017/eds.2025.4). This is the paper in the original NSF PAR 10611007 reference.
+36. Dong, Z., Mao, J., Sayeed, A., Gupta, P., Zhao, T., Ahmadov, R., James, E. 2026. Machine Learning Bias Correction of HRRR-Smoke Surface PM2.5 Forecasts during the Alaska Wildfire Season. ACS ES&T Air 3(5): 1263–1275. [NOAA publication record and abstract](https://repository.library.noaa.gov/view/noaa/74016); [DOI 10.1021/acsestair.5c00409](https://doi.org/10.1021/acsestair.5c00409).
+37. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A., Broderick, T. 2025, version 2. Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision Making in the Face of Increasing Wildfire Smoke. [Author manuscript actually reviewed, arXiv 2409.05866v2](https://arxiv.org/html/2409.05866v2). The journal page could not be retrieved in this check; claims here are tied to this identified manuscript version.
+38. Liu, Y., Ma, J., Dhillon, P., Mei, Q. 2024. PM2.5 forecasting under distribution shift: A graph learning approach. AI Open 5: 23–29. [Published paper, DOI 10.1016/j.aiopen.2023.11.001](https://doi.org/10.1016/j.aiopen.2023.11.001).
+39. Kim, P., et al. 2025. mHealth Intervention Integrating Personal PM2.5 Monitoring and Deep Learning to Reduce Pediatric Asthma Exacerbations: Pilot Study. JMIR Preprints 84513, September 22. [Preprint and status page](https://preprints.jmir.org/preprint/84513), DOI 10.2196/preprints.84513. Do not describe this source as a validated Serein intervention.
+
+## F. Costs and fundraising (Q9, Q10)
 
 40. Twilio. 2026. US SMS pricing. https://www.twilio.com/en-us/sms/pricing/us
 41. Meta. WhatsApp Business Platform pricing. https://developers.facebook.com/docs/whatsapp/pricing
@@ -64,3 +91,34 @@ submission.
 45. Space Center Houston. 2026. Conrad Challenge 2026-27 Student Guide. https://conrad.spacecenter.org/wp-content/uploads/2026/08/2026-2027-Conrad-Challenge-Student-Guide-Official.pdf
 46. Conrad Challenge. 2024-25 prizes (1517 Fund, AWS credits). https://www.conradchallenge.org/24-25conradprizes
 47. Davidson Institute. Davidson Fellows Scholarship, 2027 cycle. https://www.davidsongifted.org/gifted-programs/fellows-scholarship/eligibility/how-to-apply/
+
+## Additional competition references (Q7)
+
+Accessed November 7, 2026.
+
+48. Sonoma Technology. 2023. Adding PurpleAir Data to the ExactAQ Hyper-Local Air Quality Map. [Provider's article](https://www.sonomatech.com/node/4916).
+49. ExactAQ / Sonoma Technology. Air Quality Forecast. [Current forecast feature](https://exactaq.com/features/air-quality-forecast/).
+50. AirHealth. AirRater. Google Play developer listing. [Current description of forecasts, symptom triggers and caregiver use](https://play.google.com/store/apps/details?id=com.senset.airrater&hl=en-AU).
+51. Wang, R., Bhudia, A., Dos Remedios, B., Teng, M., Ng, R. 2020. Dense Forecasting of Wildfire Smoke Particulate Matter Using Sparsity Invariant Convolutional Neural Networks. Workshop preprint, arXiv 2009.11362. [Abstract and version record](https://arxiv.org/abs/2009.11362); [full text](https://arxiv.org/html/2009.11362v1).
+52. Dimri, R., Choi, Y., Salman, A. K., Park, J., Singh, D. 2024. AGATNet: An Adaptive Graph Attention Network for Bias Correction of CMAQ-Forecasted PM2.5 Concentrations Over South Korea. Journal of Geophysical Research: Machine Learning and Computation 1(3): e2024JH000244. [Published paper, DOI 10.1029/2024JH000244](https://doi.org/10.1029/2024JH000244).
+53. Resmed. 2018. ResMed to Acquire Propeller Health, a Leader in COPD and Asthma Connected Health Solutions, for $225 Million. [Historical product description, December 3](https://newsroom.resmed.com/news-releases/news-details/2018/ResMed-to-Acquire-Propeller-Health-a-Leader-in-COPD-and-Asthma-Connected-Health-Solutions-for-225-Million/default.aspx). Current operating status is documented separately in reference 32.
+
+## Optional attachments (up to 2): recommendation
+
+The Student Guide allows two attachments beyond the reference list. Judges skim; pick the
+two that carry the most of the argument on their own.
+
+1. **`docs/results/figures/fig_warnings_vs_epa.png`** (warnings a day ahead, Serein vs
+   EPA's official forecast, hits and false alarms). It is the single chart that says
+   "we warn earlier and cry wolf less," which is the claim a parent, a nurse and an
+   investor all care about. Regenerate after the final test; caption it with the season
+   and the word "held-out."
+2. **`docs/results/figures/map_20230818.png`** (the neighborhood forecast map on a real
+   smoke day) **or** `fig_improvement_map_L1.png` (monitors where Serein beat NOAA).
+   The forecast map shows the product; the improvement map shows the evidence. If the
+   video already shows the map, attach the improvement map here. Either way, add a
+   caption that names the date, the lead, and the baseline.
+
+Not recommended as attachments: `fig_rmse_by_lead_all.png` (RMSE is already in the text
+and a line chart of error adds little for non-specialists); `airplan_learning_curve.png`
+(simulated children; a judge may read it as real data unless captioned carefully).

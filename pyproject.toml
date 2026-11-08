@@ -19,6 +19,8 @@ dependencies = [
     "xarray>=2024.1",
     "cfgrib>=0.9.14",
     "eccodes>=2.37",
+    # Declare the native library explicitly: eccodes wheel metadata differs by platform.
+    "eccodeslib; platform_system != 'Windows'",
     "shapely>=2.0",
     "pyogrio>=0.9",
     "geopandas>=1.0",

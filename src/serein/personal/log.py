@@ -2,7 +2,7 @@
 
 Design rules
 ------------
-* Six taps, no typing. Parents of sick kids are tired.
+* Six required answers and optional pollen context, no typing. Parents of sick kids are tired.
 * Ask about TODAY only (memory of past days is unreliable).
 * The demo holds fictional check-ins in server memory for the current session.
   A hosted app receives entries on that server; CSV export is an explicit download.
@@ -15,6 +15,7 @@ Questions -> fields
   4. Time outdoors today? little (<1 h) / some (1-3 h) / a lot (3h+) -> outdoor 0.1/0.3/0.6
   5. Has a cold or is sick? yes / no                                 -> cold
   6. Took daily controller medicine? yes / no / doesn't have one     -> missed_controller
+  7. High pollen on this day? yes / no / not sure (optional)         -> high_pollen
 
 "Symptom day" (the model's outcome) = symptoms >= 1 OR any rescue puffs OR night waking.
 This mirrors how asthma control is judged clinically (daytime symptoms, reliever
@@ -58,8 +59,11 @@ class CheckIn:
     outdoor: int             # 0 little, 1 some, 2 a lot
     cold: bool
     missed_controller: bool  # False if took it OR has no controller
+    high_pollen: bool | None = None  # None preserves an unknown or skipped answer
 
     def __post_init__(self):
+        if self.high_pollen is not None and not isinstance(self.high_pollen, (bool, np.bool_)):
+            raise ValueError("check-in high_pollen answer must be boolean or None")
         if not isinstance(self.day, date) or isinstance(self.day, datetime):
             raise TypeError("check-in day must be a calendar date")
         if not all(isinstance(value, (bool, np.bool_)) for value in
@@ -100,6 +104,8 @@ def model_rows(log: pd.DataFrame, pm_by_day: dict) -> tuple[np.ndarray, np.ndarr
     excludes the row. Available readings must be nonnegative real numbers.
     Optional ozone_ppb, hot_day and high_pollen columns supply model confounders.
     Missing ozone is unknown; absent heat and pollen columns default to zero.
+    Unknown pollen is preserved in the log and exported as a blank CSV field.
+    For fitting, unknown pollen contributes zero, an explicit neutral assumption.
     """
     required = ("day", "cold", "missed_controller", "outdoor", "symptom_day")
     missing = [column for column in required if column not in log.columns]
@@ -126,7 +132,10 @@ def model_rows(log: pd.DataFrame, pm_by_day: dict) -> tuple[np.ndarray, np.ndarr
             ).all():
                 raise ValueError(f"check-in {column} answers must be integer categories")
         for column in ("hot_day", "high_pollen"):
-            if column in log and not log[column].map(
+            if column not in log:
+                continue
+            values = log[column].dropna() if column == "high_pollen" else log[column]
+            if not values.map(
                 lambda value: isinstance(value, (Real, np.bool_))
                 and np.isfinite(value) and value in (0, 1)
             ).all():
@@ -151,11 +160,12 @@ def model_rows(log: pd.DataFrame, pm_by_day: dict) -> tuple[np.ndarray, np.ndarr
         if any(pd.isna(pm) or not np.isfinite(pm) for pm in (pm0, pm1, pm2)):
             continue
         ozone = getattr(r, "ozone_ppb", None)
+        pollen = getattr(r, "high_pollen", None)
         X.append(design_row(pm0, pm1, pm2, OUTDOOR_FRAC[r.outdoor], int(r.cold),
                             int(r.missed_controller),
                             ozone_ppb=ozone if pd.notna(ozone) else None,
                             hot_day=getattr(r, "hot_day", 0),
-                            high_pollen=getattr(r, "high_pollen", 0)))
+                            high_pollen=pollen if pd.notna(pollen) else 0))
         y.append(r.symptom_day)
     if not X:
         return np.zeros((0, len(FEATURES))), np.zeros(0)

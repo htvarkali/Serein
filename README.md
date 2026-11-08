@@ -307,15 +307,15 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 
 **Status key:** **Done** = finished and merged · **In progress** = claimed, being worked on · **Open** = free to claim · **Blocked** = waiting on something outside the repo. ⭐ = on the critical path for the headline result. **(non-code)** = needs a person, not code.
 
-### Summary: what is left (updated 2026-11-06)
+### Summary: what is left (updated 2026-11-07)
 
 | Area | Done | In progress | Open | Blocked |
 |---|---|---|---|---|
 | A: Data pipeline | 13 | 1 | 1 | 0 |
 | B: SmokeCast (Model 1) | 16 | 1 | 3 | 0 |
-| C: AirPlan (Model 2) | 9 | 0 | 4 | 0 |
+| C: AirPlan (Model 2) | 10 | 0 | 3 | 0 |
 | D: Proof & science | 8 | 0 | 3 | 1 |
-| E: Product & pitch | 3 | 0 | 8 | 0 |
+| E: Product & pitch | 4 | 0 | 7 | 0 |
 | S: Submission (Conrad) | 2 | 0 | 9 | 0 |
 | Q: Code quality | 6 | 2 | 1 | 0 |
 
@@ -404,7 +404,7 @@ Both workflows are development diagnostics.
 | C-8 | **(non-code)** Pediatric pulmonologist, asthma educator or school nurse reviews action-plan wording and the priors table (includes C-5b). Record their feedback | Open | | |
 | C-9 | Daily check-in: 6 taps (`serein/personal/log.py`) + "Daily check-in" tab in the app; fictional entries held in server memory for the session, with CSV export and a clear-log button | Done | Aadi-Tiwari | 2026-11-01 |
 | C-10 | Confounders in the child model: ozone (prior from Strickland 2010), hot day and high-pollen day (wide "no effect" priors), next to the existing cold/virus term. They never trigger a smoke warning on their own (`docs/METHODS.md#priors`) | Done | Aadi-Tiwari | 2026-11-02 |
-| C-10b | Feed real values into plans: AQM ozone and HRRR max temperature from the forecast; a "high pollen today?" box in the app check-in | Open | | |
+| C-10b | AQM ozone and maximum hourly HRRR temperature feed family plans with complete-day coverage checks; optional pollen check-in ([guide](docs/FORECAST_CONTEXT.md)) | Done | Kwilier | 2026-11-07 |
 | C-11 | More languages in `messages/` (only after C-7 sets the review process) | Open | | |
 
 ### D: Proof & science
@@ -414,7 +414,7 @@ Both workflows are development diagnostics.
 | D-2 | Backtest runner with strict season split and a `--final` lock file | Done | Aadi-Tiwari | 2026-11-01 |
 | D-2b | Warning rule: warn when P(PM2.5 ≥ 35.5) beats a cut-off tuned on calibration weeks | Done | Aadi-Tiwari | 2026-11-01 |
 | D-3 | **(non-code)** PurpleAir research access: draft in `docs/drafts/purpleair_data_request.md`, not sent; someone must decide whether to send it | Blocked | | |
-| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) | Open | | |
+| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08) | Open | | |
 | D-5 ⭐ | Run the final test once (`--final`), with day-bootstrap 95% CIs and a Diebold-Mariano test vs. each baseline | Open | | |
 | D-6a | Northeast June 2023 transfer test prepared: data downloaded, `serein transfer` built | Done | Aadi-Tiwari | 2026-11-01 |
 | D-6b ⭐ | Run the transfer test once, right after D-5 | Open | | |
@@ -432,11 +432,11 @@ Both workflows are development diagnostics.
 | E-2c | Sample forecast shipped in `app/sample/` so the app works without the data download | Done | Aadi-Tiwari | 2026-11-01 |
 | E-3 | SMS and WhatsApp mockups in English and Spanish, made from the real code, with SMS part counts for pricing ([docs/mockups/messages.md](docs/mockups/messages.md)) | Done | Aadi-Tiwari | 2026-11-02 |
 | E-3b | Third language for the mockups (only after C-7 sets the review process; see C-11) | Open | | |
-| E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources | Open | | |
-| E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models) | Open | | |
+| E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources ([numbers](docs/BUSINESS_NUMBERS_2026-11-07.md) done; price confirmation needs E-1) | In progress | AbhinavGGarg | 2026-11-08 |
+| E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models); [source verification](docs/COMPETITOR_VERIFICATION_2026-11-07.md) | Done | Kwilier | 2026-11-07 |
 | E-6 | **(non-code)** Business plan and pitch from the Lean Canvas | Open | | |
 | E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit) | Open | | |
-| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" | Open | | |
+| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): live SEREIN mark in classes 9/42/44; decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
 
 ### S: Submission (Conrad Innovation Stage, due 2027-01-07, internal target 2027-01-01)
 | ID | Task | Status | Owner | Date |
@@ -445,12 +445,12 @@ Both workflows are development diagnostics.
 | S-2 | Brief first draft with all 10 questions and dev numbers: [docs/drafts/innovation_brief.md](docs/drafts/innovation_brief.md) | Done | Aadi-Tiwari | 2026-11-01 |
 | S-3 | **(non-code)** Brief Q2 Team: names, grades, roles, advisor | Open | | |
 | S-4 | **(non-code)** Brief Q3 and Q5: add interview findings (E-1) and expert feedback (C-8) | Open | | |
-| S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) | Open | | |
+| S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
-| S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link | Open | | |
+| S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link (copy rewritten, team slots, pilot CTA, Pages workflow `.github/workflows/pages.yml`; admin must set Settings → Pages → Source: GitHub Actions; names/contact still needed) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
-| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) | Open | | |
+| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |
 
 ### Q: Code quality

@@ -45,6 +45,7 @@ import numpy as np
 
 FEATURES = ["intercept", "pm0_10", "pm_lag12_10", "pm0_x_outdoor", "cold", "missed_controller",
             "ozone_x30_10", "hot_day", "high_pollen"]
+HOT_DAY_C = 32.0  # Existing hot-day feature definition; hourly forecasts are a proxy for TMAX.
 
 
 def sigmoid(z):

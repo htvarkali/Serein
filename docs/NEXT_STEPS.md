@@ -60,9 +60,10 @@ placement metadata for historical availability without documenting the limitatio
 
 ## 3. Complete the family experience
 
-C-10b remains open: export verified AQM ozone and HRRR daily maximum temperature,
-connect them to the personal model, and add the pollen input with explicit handling
-for unavailable data. The current family plan still uses synthetic history; the
+C-10b's [forecast-context workflow](FORECAST_CONTEXT.md) exports AQM ozone and the
+maximum of complete hourly HRRR temperature forecasts, connects them to the
+existing personal-model inputs, and preserves unavailable data. The optional
+pollen check-in is included. The current family plan still uses synthetic history; the
 check-in demonstration is stored separately. Connecting real check-ins requires
 observed exposure history and the consent/review process in [ETHICS.md](ETHICS.md).
 C-7/C-8 require native-speaker and clinical review; no such review is claimed here.

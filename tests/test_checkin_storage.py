@@ -34,7 +34,7 @@ def test_loaded_checkins_preserve_optional_confounders(tmp_path):
 @pytest.mark.parametrize("column,value", [
     ("ozone_ppb", -1), ("ozone_ppb", np.inf), ("ozone_ppb", "80"),
     ("ozone_ppb", True), ("hot_day", 2), ("hot_day", np.nan),
-    ("high_pollen", "False"), ("high_pollen", None),
+    ("high_pollen", "False"), ("high_pollen", np.inf),
 ])
 def test_loaded_checkins_reject_invalid_confounders_before_pm_lookup(column, value):
     log = to_frame([CheckIn(date(2026, 11, 4), 0, 0, False, 1, False, False)])

@@ -55,10 +55,11 @@ def run_transfer(study: Study, run_dir: Path, split: str = "test", tag: str = ""
     dates = tab["issue_date"].to_numpy()
     out = []
     for li, lead in enumerate(leads):
+        valid_dates = pd.to_datetime(dates) + pd.Timedelta(days=lead)
         intervals = interval_metrics(np.expm1(rows_q[:, li, 0]),
                                      np.expm1(rows_q[:, li, -1]), obs[:, li])
         for m, p in pred.items():
-            rec = {"lead": lead, "model": m, **point_metrics(p[:, li], obs[:, li])}
+            rec = {"lead": lead, "model": m, **point_metrics(p[:, li], obs[:, li], valid_dates)}
             if m == "smokecast":
                 rec.update(intervals)
             elif np.isfinite(p[:, li]).any():

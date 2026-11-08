@@ -1,80 +1,75 @@
-# Competitor verification and novelty search (task E-5)
+# Competitor verification for Brief Q7 (task E-5)
 
-Checked November 7, 2026 against product-owner pages and primary papers. This
-completes the verification that `COMPETITOR_SOURCE_CHECK.md` (Nov 6) started and
-adds a novelty search for the combination Serein claims. Items marked
-**[unverified]** could not be confirmed from a primary source; do not put them in
-the brief, video or website.
+Accessed November 7, 2026. This review completes the source check of the named
+Q7 alternatives, including both original research references, and adds AirRater
+and ExactAQ because they materially change the comparison. It supersedes the
+[November 6 preliminary notes](COMPETITOR_SOURCE_CHECK.md). Both
+[Brief Q7](drafts/innovation_brief.md#7-competition-300-words) and the
+[Q6–Q10 working draft](drafts/innovation_brief_q6-q10_DRAFT.md) use the corrected
+comparison. These are working materials for team review, not a submitted brief.
 
-The claim we must defend (Brief Q4 "What is new"):
-1. Neighborhood-level smoke PM2.5 forecast 1 to 3 days ahead that corrects NOAA
-   HRRR-Smoke/AQM with live regulatory-monitor readings (GNN), with calibrated
-   uncertainty, scored head-to-head against NOAA and AirNow on held-out seasons.
-2. Forecasts for places with no monitor.
-3. A per-child smoke-sensitivity model from a short daily caregiver check-in,
-   producing a green/yellow/red plan in the family's language.
+Evidence is limited to product-owner or agency documentation, developer listings,
+and primary research. Advertised features are not independently tested performance.
+We did not install the apps, measure comparative forecast skill, or conduct an
+exhaustive patent or market search. A feature not mentioned by a source is **not**
+evidence that the competitor lacks it. The review supports no “first,” “only,”
+or “no other product combines these features” claim.
 
-## 1. Corrected competitor table
+## Current services and historical alternatives
 
-| Who | What they give (verified) | What they don't | Source |
-|---|---|---|---|
-| EPA AirNow forecast | Agency forecasts "via reporting areas"; "Reporting areas vary by size and population, covering anywhere from part of a city to an entire county area"; "Forecasts may cover from one to six days"; most show today and tomorrow | No neighborhood or sensor-corrected forecast; "forecasts are not necessarily available for all reporting areas"; no personalization | [AirNow API FAQ](https://docs.airnowapi.org/faq), [AirNow how-to](https://www.airnow.gov/how-to-use-this-site), [AirNowTech forum](https://forum.airnowtech.org/t/what-is-a-reporting-area/109) |
-| AirNow Fire and Smoke Map | NowCast AQI from permanent and temporary monitors plus corrected PurpleAir sensors; satellite plumes; text "Smoke Outlooks" from Air Resource Advisors near large staffed fires | No gridded model forecast; sensor data "is not used to generate the current NowCast AQI" on AirNow's dial/app | [FASM FAQ (PDF)](https://document.airnow.gov/airnow-fire-and-smoke-map-faqs.pdf) |
-| EnviroFlash | "sends air quality information for your city to your email or mobile phone" | City-level; no personalization | [EnviroFlash](https://m.enviroflash.info/about.cfm) |
-| Air Quality Flag Program | Organizations raise a colored flag matching the local AQI forecast | Organization-level; no per-child guidance | [EPA Flag Program](https://www.epa.gov/air-quality/air-quality-flag-program) |
-| NOAA HRRR-Smoke | Operational; "forecast cycles go out to 48 hours"; ~3 km. **RRFS v1** (3 km, 84 h, smoke and dust) scheduled operational Nov 3, 2026; HRRR frozen, retire ~2028 (go-live **[unverified]**) | No monitor assimilation; no health layer | [HRRR-Smoke](https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/), [SCN26-048](https://www.weather.gov/media/notification/pdf_2026/scn26-048_Updated_RRFS_and_REFS_Implementation.aaf.pdf) |
-| NOAA AQM / NAQFC | "hourly forecast guidance for O3 and PM2.5 up to 72 hours twice per day"; ~5 km CONUS; AQMv7 since May 2024; a "Bias-Corrected PM2.5" product exists | ~5 km, not neighborhood; no public uncertainty; no health layer | [AWS registry](https://registry.opendata.aws/noaa-nws-naqfc-pds/), [NOAA ARL](https://www.arl.noaa.gov/news-pubs/arl-news-stories/air-quality-model-helps-during-wildfires/) |
-| PurpleAir map | "real-time, free air quality map"; promotes partner ExactAQ "current and forecast" map | No forecast of its own; no health personalization | [PurpleAir tips](https://www.purpleair.com/blog/tips-for-using-purpleair-s-free-air-quality-map), [ExactAQ post](https://www.purpleair.com/blog/how-purpleair-data-supports-exactaq-a-hyper-local-air-quality-map) |
-| IQAir AirVisual | "7-day forecast developed with machine learning and AI"; threshold notifications; "Stay informed on wildfires, smoke, and air quality events" | No asthma/symptom personalization; no smoke-model forecasts | [IQAir app](https://www.iqair.com/us/air-quality-monitors/air-quality-app), [App Store](https://apps.apple.com/app/id1048912974) |
-| Google Air Quality API (ex-BreezoMeter) | Hourly forecast "up to 96 hours"; "500 x 500 meters"; recommendations for "those with asthma"; Maps layer fuses PurpleAir, NOAA satellite smoke | No per-person learning; no public uncertainty; no published skill vs NOAA/AirNow | [API overview](https://developers.google.com/maps/documentation/air-quality/overview), [Maps help](https://support.google.com/maps/answer/11270845?hl=en) |
-| Apple Weather | "Air quality information is provided by BreezoMeter for ... the United States" | Forecast horizon **[unverified]**; no personalization | [Apple HT211777](https://support.apple.com/HT211777) |
-| California Smoke Spotter 2.0 (CARB) | "Next-day wildfire smoke forecast for localities statewide"; PurpleAir AQI; fire alerts | 24-hour only; no symptom input | [CARB release](https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2) |
-| Propeller Health | Resmed: "has ceased operations"; "Resmed is retaining the Propeller brand, intellectual property, and assets" | Shutdown date **not stated**; successor Hailie app lists no air-quality features | [Resmed](https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/), [Hailie](https://apps.apple.com/us/app/hailie/id421901698) |
-| EPA Smoke Sense | "Starting on December 8, 2024, the Smoke Sense app will be unavailable"; "down through Summer 2025"; relaunch date unknown | Not a forecaster; citizen-science diary | [EPA Smoke Sense](https://www.epa.gov/air-research/smoke-sense) |
-| AirRater (Australia) | See deep-dive below | | |
-| Boise State "Asthma Activity Advisor" (May 2026) | Student app: enter a child's symptom level + location, pulls real-time AQI, recommends activity intensity; English and Spanish; "available shortly" | No forecast; no learning; unreleased | [Boise State](https://www.boisestate.edu/research-resilience/2026/05/08/asthma-attackers-building-a-smarter-way-to-protect-children-during-poor-air-quality/) |
-| UW Medicine smoke outreach (2025-26) | Epic EHR + neighborhood pollution data to reach 64,000 asthma/COPD adults by email, text, portal; 14% engaged, 7% booked telehealth; year 2 launched July 2026 | Adults; no forecast stated; no individual learning. **Evidence that health systems will pay for neighborhood smoke outreach.** | [WSHA report](https://members.wsha.org/weekly-newsletter/weekly-report-friday-july-10-thursday-july-16-2026/uw-medicine-data-and-outreach-connects-patient-to-critical-wildfire-smoke-guidance/) |
-| Ventura County farmworker smoke alert | Daily texts in English and Spanish, audio in Mixteco and Zapoteco, triggered at AQI 151 | Observation-triggered, not forecast | [VCAPCD](https://www.vcapcd.org/farmworker-wildfire-smoke-alert/) |
-| FireSmoke.ca / BlueSky Canada | Forecasts four times a day, Apr to Oct, ~12 km | No per-location time series; no monitor correction; no health layer | [FireSmoke FAQ](https://firesmoke.ca/faq/) |
-| Univ. of Utah / Trace AQ (Aug 2025) | CMAQ with ML augmentation; free demo to one day, paid product four days | No monitor-corrected neighborhood claim; no health layer | [Utah ChE](https://www.che.utah.edu/u-scientists-develop-ai-powered-tool-to-forecast-wildfire-smoke/) |
-| AsthmaMD, Wizdy, AirCare, Kaiser/Blue Shield alerts | Not fetched in depth | **[unverified]**: do not cite | |
+| Alternative | What the primary source supports | Implication for Serein's comparison |
+|---|---|---|
+| **EPA AirNow and Fire and Smoke Map** | Agency AQI forecasts are issued for reporting areas, from part of a city to a county; available horizons vary from one to six days. The Fire and Smoke Map combines monitors, corrected low-cost sensors, fire/smoke information, health guidance and smoke outlooks where available. [API FAQ](https://docs.airnowapi.org/faq); [map overview](https://www.airnow.gov/fasm-v4/about/). | AirNow already provides forecasts, sensor information and advice. Compare a specified reporting area, issue time, lead and pollutant; do not describe all AirNow products as a one-day forecast or a nowcast-only map. |
+| **NOAA HRRR-Smoke and AQM/NAQFC** | NOAA documents 48-hour HRRR-Smoke forecasts for the 00, 06, 12 and 18 UTC cycles. NAQFC includes 72-hour guidance and bias-corrected products; NOAA's change log explicitly identifies AirNow observations in bias correction. [HRRR-Smoke](https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/); [NAQFC archive description](https://registry.opendata.aws/noaa-nws-naqfc-pds/); [NOAA change log](https://www.emc.ncep.noaa.gov/mmb/aq/AQChangelog.html). | “NOAA forecasts do not use monitors” is false as a blanket claim. Name the model, version, cycle and raw/bias-corrected product in a comparison. Do not conflate a model's native grid with a distributed output grid or claim an RRFS rollout from a scheduled date alone. |
+| **PurpleAir and ExactAQ** | Sonoma Technology, the ExactAQ provider, documents its use of PurpleAir observations with AirNow, weather, land use and fire data to estimate air quality at and between sensors. ExactAQ currently advertises hourly updates and forecasts for the next 48 hours. [Provider's PurpleAir integration article](https://www.sonomatech.com/node/4916); [ExactAQ forecast feature](https://exactaq.com/features/air-quality-forecast/). | Distinguish the PurpleAir sensor map from a forecast service using its data. “PurpleAir offers readings, therefore there is no forecast alternative” misses an existing partnership and forecast covering locations between monitors. |
+| **IQAir AirVisual** | IQAir advertises seven-day air-quality and weather forecasts developed with machine learning, alerts, historical/current data and exposure recommendations. [IQAir app page](https://www.iqair.com/air-quality-monitors/air-quality-app). | Forecasts and exposure advice are established features. The page alone does not justify claims that IQAir lacks smoke-model inputs, symptom personalization or useful forecasts. Its advertised horizon is not a measured accuracy guarantee. |
+| **Google Air Quality API** | Google documents hourly forecasts up to 96 hours, 500 × 500 m resolution and recommendations for sensitive groups including children and people with asthma. Coverage varies by region. [API overview](https://developers.google.com/maps/documentation/air-quality/overview). | This is a developer API, not proof of what every consumer app displays. Fine spatial detail and sensitive-group advice cannot be claimed as unique to Serein; neither resolution nor horizon proves forecast skill. |
+| **Apple Weather** | Apple's source page identifies BreezoMeter as the air-quality provider in the US and several other countries, with other providers in some regions. [Apple Weather data sources](https://support.apple.com/en-us/105038). | The page does not establish an air-quality forecast horizon. Do not transfer Google's API's 96-hour specification, or Apple's ten-day **weather** horizon, to Apple AQI. We make no horizon or missing-feature claim for Apple. |
+| **Propeller Health — historical** | Resmed's 2018 announcement describes inhaler sensors paired with an app to record medication use and provide personal feedback. Resmed's current notice says the operating company has ceased operations and Resmed retains the brand, IP and assets. [Historical product description](https://newsroom.resmed.com/news-releases/news-details/2018/ResMed-to-Acquire-Propeller-Health-a-Leader-in-COPD-and-Asthma-Connected-Health-Solutions-for-225-Million/default.aspx); [current notice](https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/). | Relevant precedent for respiratory self-management, not a currently operating competitor. The notice supplies no shutdown date and does not establish the status of other inhaler products or a “successor” app. |
+| **EPA Smoke Sense — research; app unavailable per EPA notice** | EPA describes a citizen-science project studying smoke exposure, symptoms and risk communication. Its current page retains a notice that the app became unavailable December 8, 2024, would be down through summer 2025, and has no known next-version date. [EPA project page](https://www.epa.gov/air-research/smoke-sense-study-citizen-science-project-using-mobile-app). | Separate the continuing research record from app availability. Do not claim that the research project was permanently discontinued or that the app has relaunched because summer 2025 has passed. |
+| **AirRater — Australia** | AirRater documents symptom logging, personal environmental-trigger identification and alerts. Its current developer listing advertises real-time and forecast air quality/pollen across Australia and explicitly addresses people responsible for children's health. [AirRater](https://airrater.org/); [AirHealth developer listing](https://play.google.com/store/apps/details?id=com.senset.airrater&hl=en-AU). | This is a close precedent for combining environmental information and personal symptom support, including caregiver use. Remove “adults only,” “no caregiver mode” and “no app learns from symptoms.” We do not infer a numerical forecast horizon or clinical effectiveness from the listing. |
 
-## 2. AirRater deep-dive (closest precedent at the personalization layer)
+## Research precedents, distinct from product availability
 
-- Free app developed in 2015 by University of Tasmania (Menzies) with Tasmanian EPA, CSIRO, ANU; rolled out Tasmania 2015, ACT 2017, NSW 2019, then national; since the Nov 2023 merger with Melbourne Pollen it is run by AirHealth Pty Ltd. [MDPI IJERPH 2021](https://www.mdpi.com/1660-4601/18/7/3591), [UTAS 2023](https://www.utas.edu.au/about/news-and-stories/articles/2023/unis-establish-national-air-quality-and-pollen-service)
-- Active in 2026: Google Play "Updated on 20 Aug 2026," 10K+ downloads. [Google Play](https://play.google.com/store/apps/details?id=com.senset.airrater&hl=en-AU)
-- Data: near-real-time PM2.5, temperature, pollen; beyond 20 km from a station, an estimate from CSIRO's AQFx model. [CSIRO](https://research.csiro.au/aqfx/aqvx-and-airrater/)
-- Forecast: historically none (2018 paper lists forecasting as future work); now "real-time and forecast air quality"; v5.0.1 "district-level forecast map." Horizon, resolution, skill **not published**.
-- Personalization (documented): "a statistical model using weighted linear discriminant analysis is run for each individual and each of their symptoms" every 24 h; activates after 20+ symptom reports; warnings only when Kappa > 0.6; current app has a "trigger lab" and "Individualised alerts for your symptom triggers." Adult self-report; no caregiver/child mode found; 2021 study: "only available in the English language." [Johnston et al. 2018](https://acuresearchbank.acu.edu.au/download/ea80c7d8cb8878d4146e198cc6c5ccbfded5b9f331db02a99ecf648dd4d7b138/2978923/OA_Johnston_2018_Using_smartphone_technology_to_reduce_health.pdf)
+| Primary work | Supported scope and relevance |
+|---|---|
+| **Liao, Buch, Lamb and Gentine (2025), original NSF PAR 10611007 example** | *Simulating the air quality impact of prescribed fires using graph neural network-based PM2.5 forecasts*, Environmental Data Science. Uses a monitor graph, meteorology and fire information to forecast hourly PM2.5 in California out to 48 hours, with prescribed-fire applications. This establishes graph-based PM2.5 forecasting as prior work. Serein's proposed NOAA residual correction, daily targets and family interface are different design choices, not evidence of superiority. [Published paper](https://doi.org/10.1017/eds.2025.4). |
+| **Wang, Bhudia, Dos Remedios, Teng and Ng (2020), original UBC example** | *Dense Forecasting of Wildfire Smoke Particulate Matter Using Sparsity Invariant Convolutional Neural Networks*, arXiv workshop preprint. Predicts 24-hour-ahead smoke PM2.5 on a 10 km British Columbia grid using sparse observations and FireWork/BlueSky forecasts, among other inputs. Forecast correction and prediction away from monitors already have research precedent; Serein proposes a graph-based correction to different inputs. [Paper](https://arxiv.org/abs/2009.11362); [full text](https://arxiv.org/html/2009.11362v1). |
+| **Dimri et al. (2024), AGATNet** | Adaptive graph attention corrects CMAQ PM2.5 forecasts for South Korean monitoring stations through 72 hours. A graph network correcting a chemical-transport forecast is not a new methodological claim for Serein. [Journal paper](https://doi.org/10.1029/2024JH000244). |
+| **Dong et al. (2026)** | *Machine Learning Bias Correction of HRRR-Smoke Surface PM2.5 Forecasts during the Alaska Wildfire Season*, ACS ES&T Air 3(5), 1263–1275. Studies random-forest and convolutional models for HRRR-Smoke correction using calibrated PurpleAir data. This is directly relevant prior work for Serein's proposed inputs and correction approach. [NOAA-hosted publication record and abstract](https://repository.library.noaa.gov/view/noaa/74016); [DOI](https://doi.org/10.1021/acsestair.5c00409). |
+| **Liu, Ma, Dhillon and Mei (2024)** | *PM2.5 forecasting under distribution shift: A graph learning approach*, AI Open 5, 23–29. Compares graph and non-graph methods under different temporal splits and finds particular vulnerability to distribution shift for the tested GNNs. This motivates temporal evaluation; it does not establish Serein's generalization. [Journal paper](https://doi.org/10.1016/j.aiopen.2023.11.001). |
+| **Berlinghieri et al., author manuscript v2 (2025)** | *Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision Making in the Face of Increasing Wildfire Smoke*. Evaluates six forecasts and persistence for the 2023 CONUS fire season. Results depend on the decision and metric; persistence does **not** beat every model on every metric. Use it to motivate separate miss, false-alarm and exposure metrics, not a universal performance ranking. [Version actually reviewed](https://arxiv.org/html/2409.05866v2). |
+| **Kim et al. (2025), JMIR preprint 84513** | *mHealth Intervention Integrating Personal PM2.5 Monitoring and Deep Learning to Reduce Pediatric Asthma Exacerbations: Pilot Study*. Describes 272 enrolled pediatric patients in Korea, with 109 entering an intervention phase using personalized alerts, forecast-based alerts or no intervention. It is a research precedent for personal PM sensitivity and pediatric alerts, not evidence for Serein's clinical benefit or a currently available consumer product. [Preprint and status page](https://preprints.jmir.org/preprint/84513). |
 
-**Bottom line:** AirRater already combines a smoke forecast, model-filled coverage away from monitors, and per-user symptom-trigger learning with alerts. It does not operate outside Australia, correct an NWP forecast with a GNN, publish uncertainty or skill, model children via caregiver check-ins, or produce a Spanish action plan. Name it in the brief as the closest precedent.
+These publications describe different regions, targets, instruments and study
+protocols. Their scores are not a matched comparison with Serein. The existence
+of a paper also does not prove that its authors have no deployed service.
 
-## 3. Research models and how Serein differs
+## Bounded positioning and remaining team decisions
 
-- **ML bias correction of HRRR-Smoke** (Dong, Mao, Ahmadov et al., NOAA GSL, *ACS ES&T Air*): RF/CNN correcting HRRR-Smoke with PurpleAir and satellite AOD, Alaska only. Research code; no uncertainty; no health layer. [HAQAST](https://haqast.org/publications/machine-learning-bias-correction-of-hrrr-smoke-surface-pm2-5-forecasts-during-the-alaska-wildfire-season/)
-- **GNN PM2.5 forecasting, California** (Liao, Buch, Lamb, Gentine, *Environmental Data Science* 2025): spatio-temporal GNN for hourly PM2.5; monitors only, no NWP correction, no uncertainty. [arXiv 2312.04291](https://arxiv.org/abs/2312.04291)
-- **GNNs under distribution shift** (Liu et al., *AI Open* 2024): "GNN models tend to suffer more from distribution shift." Serein's held-out-season test addresses this; cite as motivation. [Illinois Experts](https://experts.illinois.edu/en/publications/pm25-forecasting-under-distribution-shift-a-graph-learning-approa/)
-- **AGATNet** (Dimri et al., *JGR: ML & Computation* 2024): adaptive graph attention bias-correction of CMAQ PM2.5, South Korea. Closest methodological precedent for "GNN corrects a chemical-transport forecast." [Wiley](https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2024JH000244)
-- **Forecast skill for individual decisions** (Berlinghieri, Burt, Giani, Fiore, Broderick, MIT, *BAMS* 2026): evaluated HRRR-Smoke, CAMS, GEOS-CF, NAQFC, HAQES, Aurora vs AirNow; **no forecast reliably identified high-pollution days; morning AirNow persistence did as well or better.** Serein must report a plain persistence baseline. [arXiv 2409.05866](https://arxiv.org/html/2409.05866v2), [BAMS](https://journals.ametsoc.org/view/journals/bams/107/3/BAMS-D-24-0291.1.xml)
-- **Per-child PM-sensitivity model** (JMIR Preprint 84513, Korea, Sept 2025): 272 pediatric asthma patients, 1D CNN-LSTM identifies PM-sensitive patients, individualized alerts cut exacerbation ratio (median -6.6%, P<0.05) vs regional forecasts. Preprint, hospital study, personal sensors, no wildfire smoke, not a consumer product. [JMIR Preprints](https://preprints.jmir.org/preprint/84513)
+Serein can describe its **proposed emphasis**: reproducible evaluation of daily
+smoke forecasts, uncertainty ranges, and a caregiver check-in connected to a
+family plan. The present family demonstration uses simulated children; clinical
+and translation review remain open. Do not describe prospective interval
+calibration, held-out results, symptom learning or family benefits as validated
+because the code or evaluation protocol exists.
 
-## 4. Novelty verdict
+The team still needs to choose its pilot users, workflow and distribution, and
+test usefulness with them. Those are strategy and validation tasks, not missing
+facts about competitors. This review does not certify novelty or IP protection.
+Public outreach programs are evidence that outreach exists, not evidence of
+willingness to buy Serein, an agreement or a price.
 
-- **Does any product do all three elements?** No.
-- **Does any do two?** AirRater (forecast + per-user learning; Australia, adults, no published skill). Google/BreezoMeter (500 m fused forecast + no-monitor coverage; static advice, no learning, no public skill). Boise State Asthma Activity Advisor (child symptom + real-time AQI; no forecast, no learning, unreleased).
-- The defensible "Our difference" paragraph is in `drafts/innovation_brief_q6-q10_DRAFT.md`, section 7.
+Corrections to carry into any later brief/video revision:
 
-## 5. Claims in our materials to soften or remove
-
-1. "First/only neighborhood-level corrected smoke forecast" → remove "first." Claim: first to publish calibrated uncertainty and held-out head-to-head scores in a free family product.
-2. "AirNow forecasts only one day ahead" → "typically today/tomorrow, by reporting area."
-3. "Fire and Smoke Map is nowcast-only" → "no gridded forecast; text outlooks only where ARAs are deployed."
-4. "No app personalizes from symptoms" → "no US, child-focused, forecast-linked product does."
-5. "First per-child smoke-sensitivity model" → "first in a free consumer product using a daily caregiver check-in and a wildfire-smoke forecast."
-6. "HRRR-Smoke is NOAA's operational smoke model" → add "and its successor RRFS"; verify the Nov 3, 2026 go-live before the pitch.
-7. "Propeller Health shut down in [date]" → cite without a date.
-8. "Smoke Sense discontinued Dec 2024" → use EPA's wording; do not say "permanently."
-9. "Apple Weather uses Google data" → "provided by BreezoMeter (Google)"; do not quote an in-app horizon.
-10. "IQAir has no wildfire features" → it does; the correct gap is symptom personalization and smoke-model forecasts.
-11. "Beats NOAA and AirNow" → add plain persistence as a scored baseline (BAMS 2026).
-12. Generic "Kaiser/Blue Shield programs" → replace with the verified UW Medicine outreach.
+- Remove “first/only,” including narrower replacement claims about the first US,
+  free, caregiver or uncertainty-enabled combination. This search cannot prove
+  them. Both Q7 drafts now use bounded positioning.
+- Remove blanket statements that forecasts ignore monitors or that apps cannot
+  personalize from symptoms. AQM, ExactAQ and AirRater provide counterexamples.
+- Distinguish a documented product feature, advertised accuracy, a research
+  finding and Serein's own measured result. One cannot substitute for another.
+- Preserve dated availability notices for Propeller and Smoke Sense. Do not
+  invent a shutdown date, relaunch or product succession.
+- Other sections of the working briefs are outside this Q7 review and still
+  require their own evidence and team approval.

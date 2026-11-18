@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102321">
+  <meta name="description" content="Explore AirPlan's simulated family smoke forecast and see what the research would test next.">
+  <title>AirPlan | Serein</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="preload" href="assets/fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="assets/site.js" defer></script>
+</head>
+<body class="interior-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="wordmark" href="index.html" aria-label="Serein home"><span class="brand-mark" aria-hidden="true"></span>Serein</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span>Menu</span><span class="menu-icon" aria-hidden="true"></span></button>
+    </div>
+    <nav class="site-menu" id="site-menu" aria-label="Primary">
+      <div class="shell menu-grid">
+        <p class="menu-intro">Wildfire smoke research for families.</p>
+        <div class="menu-links">
+          <a href="index.html">Home</a>
+          <a href="research.html">SmokeCast</a>
+          <a href="airplan.html" aria-current="page">AirPlan</a>
+          <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="section interior-hero family-hero dark">
+      <div class="shell interior-grid">
+        <div>
+          <p class="eyebrow">For families</p>
+          <h1>AirPlan</h1>
+          <p class="lead">What could a smoke forecast look like for one family?</p>
+          <p>AirPlan is a research prototype for making wildfire smoke forecasts easier for families of children with asthma to read and discuss.</p>
+          <a class="button button-primary" href="#example">Try the example <span aria-hidden="true">↓</span></a>
+        </div>
+        <figure class="family-photo">
+          <img src="assets/photo-family.webp" width="1440" height="1080" alt="Evergreen forest and distant mountains reflected in a lake at Olympic National Park.">
+          <figcaption><a href="https://npgallery.nps.gov/AssetDetail/55e40441-11c9-4839-b2cb-4715c01f46f4">Olympic National Park · NPS / USGS / Collin Eagles-Smith</a></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section light" id="example" aria-labelledby="example-title">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">Simulated family forecast</p>
+          <h2 class="section-heading" id="example-title">Meet Maya.</h2>
+          <p class="lead">Maya is a fictional child. This preview shows the same example in English and Spanish.</p>
+          <p class="notice">The example uses illustrative values and takes no personal information. AirPlan's guidance is still under review.</p>
+        </div>
+
+        <div class="demo-card switcher" data-switcher>
+          <div class="switch-controls" role="group" aria-label="Example language" hidden>
+            <button type="button" class="switch-option" data-panel="example-en" aria-controls="example-en" aria-pressed="true" lang="en">English</button>
+            <button type="button" class="switch-option" data-panel="example-es" aria-controls="example-es" aria-pressed="false" lang="es">Español</button>
+          </div>
+          <div class="switch-panel example-panel" id="example-en" lang="en">
+            <p class="example-status">Simulated yellow alert</p>
+            <h3>Maya's forecast for tomorrow</h3>
+            <dl class="example-values">
+              <div><dt>PM<sub>2.5</sub> estimate</dt><dd>38 <small>µg/m³</small></dd></div>
+              <div><dt>Forecast range</dt><dd>27–53 <small>µg/m³</small></dd></div>
+            </dl>
+            <p>The range gives Maya's family a sense of how much smoke levels could vary. A real family would use its clinician-approved asthma action plan.</p>
+          </div>
+          <div class="switch-panel example-panel" id="example-es" lang="es">
+            <p class="example-status">Alerta amarilla simulada</p>
+            <h3>Pronóstico de Maya para mañana</h3>
+            <dl class="example-values">
+              <div><dt>Estimación de PM<sub>2.5</sub></dt><dd>38 <small>µg/m³</small></dd></div>
+              <div><dt>Rango del pronóstico</dt><dd>27–53 <small>µg/m³</small></dd></div>
+            </dl>
+            <p>El rango indica cuánto podrían variar los niveles de humo. Una familia real seguiría su plan de acción para el asma aprobado por su equipo médico.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section light" aria-labelledby="study-title">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2 class="section-heading" id="study-title">What could a check-in add?</h2>
+          <p>AirPlan combines a smoke forecast with a simulated symptom history. The model starts with an estimate for a group and updates its estimate for a fictional child as new examples are added.</p>
+          <p>Ozone and temperature can provide additional context when their forecasts cover the full day. The research team still needs to test whether the model can predict symptoms for real children.</p>
+          <a class="button button-outline" href="https://github.com/htvarkali/Serein/blob/main/docs/FORECAST_CONTEXT.md">Read about forecast context <span aria-hidden="true">↗</span></a>
+        </div>
+        <figure class="figure-frame">
+          <img src="assets/airplan_learning_curve.png" width="1500" height="600" loading="lazy" alt="Simulation results show how AirPlan's performance varies with the number of fictional check-in days.">
+          <figcaption>Research on 300 simulated children. The chart measures performance in a simulation.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cross-link dark" id="pilot" aria-labelledby="pilot-title">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">Proposed research pilot</p>
+          <h2 class="section-heading" id="pilot-title">What would a family study test?</h2>
+        </div>
+        <div>
+          <p>A future school or clinic study could evaluate whether families find the forecasts clear and can keep up with short check-ins. Clinical and research review come first.</p>
+          <a class="button button-primary" href="https://github.com/htvarkali/Serein/blob/main/docs/pilot/PILOT_PROTOCOL.md">Read the draft protocol <span aria-hidden="true">↗</span></a>
+          <a class="button button-outline" href="research.html">Explore SmokeCast <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer dark">
+    <div class="shell footer-grid">
+      <div>
+        <a class="footer-brand" href="index.html">Serein</a>
+        <p>Student research for the Conrad Challenge.</p>
+      </div>
+      <nav aria-label="Explore Serein">
+        <a href="research.html">SmokeCast</a>
+        <a href="airplan.html" aria-current="page">AirPlan</a>
+        <a href="https://github.com/htvarkali/Serein/graphs/contributors">Contributors <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

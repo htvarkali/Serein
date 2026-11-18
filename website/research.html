@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102321">
+  <meta name="description" content="Explore SmokeCast's historical wildfire smoke forecasts, methods, and development results.">
+  <title>SmokeCast | Serein</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="preload" href="assets/fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="assets/site.js" defer></script>
+</head>
+<body class="interior-page research-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="wordmark" href="index.html" aria-label="Serein home"><span class="brand-mark" aria-hidden="true"></span>Serein</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span>Menu</span><span class="menu-icon" aria-hidden="true"></span></button>
+    </div>
+    <nav class="site-menu" id="site-menu" aria-label="Primary">
+      <div class="shell menu-grid">
+        <p class="menu-intro">Wildfire smoke research for families.</p>
+        <div class="menu-links">
+          <a href="index.html">Home</a>
+          <a href="research.html" aria-current="page">SmokeCast</a>
+          <a href="airplan.html">AirPlan</a>
+          <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="section interior-hero research-hero light">
+      <div class="shell interior-grid">
+        <div>
+          <p class="eyebrow">The forecast model</p>
+          <h1>SmokeCast</h1>
+          <p class="lead">A local view of how smoke may move over the next three days.</p>
+          <p>SmokeCast uses readings from air monitors to refine NOAA forecasts. It estimates fine particle pollution, called PM<sub>2.5</sub>, and gives a range of possible values for each day.</p>
+          <a class="button button-primary" href="#results">Explore the results <span aria-hidden="true">↓</span></a>
+        </div>
+        <figure class="figure-frame hero-map">
+          <a href="assets/map_20230818.png" aria-label="Open the four historical forecast maps at full size"><img src="assets/map_20230818.png" width="2352" height="840" alt="Four August 2023 forecasts show a band of higher particle pollution moving across the Pacific Northwest."></a>
+          <figcaption>August 2023 Pacific Northwest smoke event. Four forecast maps from the historical development run.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="section dark" id="results" aria-labelledby="results-title">
+      <div class="shell">
+        <p class="eyebrow">Historical development results · 2023</p>
+        <h2 class="section-heading" id="results-title">How far ahead can we see?</h2>
+        <p class="lead">Compare SmokeCast with the NOAA-based fallback at the same monitor locations and dates. The error measure is RMSE, in µg/m³. Lower is better.</p>
+
+        <div class="forecast-lab switcher" data-switcher>
+          <div class="switch-controls" role="group" aria-label="Forecast horizon" hidden>
+            <button type="button" class="switch-option" data-panel="forecast-today" aria-controls="forecast-today" aria-pressed="false">Same day</button>
+            <button type="button" class="switch-option" data-panel="forecast-one" aria-controls="forecast-one" aria-pressed="true">1 day ahead</button>
+            <button type="button" class="switch-option" data-panel="forecast-two" aria-controls="forecast-two" aria-pressed="false">2 days ahead</button>
+            <button type="button" class="switch-option" data-panel="forecast-three" aria-controls="forecast-three" aria-pressed="false">3 days ahead</button>
+          </div>
+          <div class="switch-panel forecast-panel" id="forecast-today">
+            <h3>Same day</h3>
+            <dl class="stat-grid">
+              <div class="stat"><dt>SmokeCast RMSE</dt><dd>4.46</dd></div>
+              <div class="stat"><dt>Fallback RMSE</dt><dd>10.14</dd></div>
+              <div class="stat"><dt>Paired monitor days</dt><dd>25,030</dd></div>
+            </dl>
+          </div>
+          <div class="switch-panel forecast-panel" id="forecast-one">
+            <h3>1 day ahead</h3>
+            <dl class="stat-grid">
+              <div class="stat"><dt>SmokeCast RMSE</dt><dd>7.86</dd></div>
+              <div class="stat"><dt>Fallback RMSE</dt><dd>11.02</dd></div>
+              <div class="stat"><dt>Paired monitor days</dt><dd>25,041</dd></div>
+            </dl>
+          </div>
+          <div class="switch-panel forecast-panel" id="forecast-two">
+            <h3>2 days ahead</h3>
+            <dl class="stat-grid">
+              <div class="stat"><dt>SmokeCast RMSE</dt><dd>9.70</dd></div>
+              <div class="stat"><dt>Fallback RMSE</dt><dd>12.35</dd></div>
+              <div class="stat"><dt>Paired monitor days</dt><dd>24,730</dd></div>
+            </dl>
+          </div>
+          <div class="switch-panel forecast-panel" id="forecast-three">
+            <h3>3 days ahead</h3>
+            <dl class="stat-grid">
+              <div class="stat"><dt>SmokeCast RMSE</dt><dd>11.18</dd></div>
+              <div class="stat"><dt>Fallback RMSE</dt><dd>15.48</dd></div>
+              <div class="stat"><dt>Paired monitor days</dt><dd>23,787</dd></div>
+            </dl>
+          </div>
+        </div>
+
+        <p class="caption">The fallback uses NOAA AQM first, then HRRR, then the previous day's measurement. The day-three comparison uses the previous day's measurement. <a href="https://github.com/htvarkali/Serein/blob/main/docs/results/head_to_head.csv">See the paired results</a>.</p>
+
+        <div class="chart-grid">
+          <figure class="figure-frame">
+            <a href="assets/fig_rmse_by_lead_all.png" aria-label="Open the historical forecast error chart at full size"><img src="assets/fig_rmse_by_lead_all.png" width="1156" height="680" loading="lazy" alt="Historical chart of forecast error by lead time for SmokeCast and several baselines."></a>
+            <figcaption>Forecast error by lead time across available site-days.</figcaption>
+          </figure>
+          <figure class="figure-frame">
+            <a href="assets/fig_case_530630047_L1.png" aria-label="Open the Spokane historical case study at full size"><img src="assets/fig_case_530630047_L1.png" width="1530" height="646" loading="lazy" alt="Spokane case study comparing measured pollution to the next-day SmokeCast forecast, its uncertainty interval, and a baseline."></a>
+            <figcaption>Spokane, Washington, August 2023. SmokeCast's estimate rose during the event, but underestimated the peak.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section light" aria-labelledby="method-title">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2 class="section-heading" id="method-title">From nearby readings to a local forecast.</h2>
+          <p class="lead">SmokeCast brings air quality observations, weather forecasts, and satellite smoke information into one model.</p>
+          <a class="button button-outline" href="https://github.com/htvarkali/Serein/blob/main/docs/METHODS.md">Read the methods <span aria-hidden="true">↗</span></a>
+        </div>
+        <ol class="rule-list">
+          <li><h3>Begin with NOAA forecasts</h3><p>The model starts with an available pollution forecast and learns how to adjust it using recent observations.</p></li>
+          <li><h3>Connect nearby monitors</h3><p>A graph neural network lets each location use information from nearby stations. The model trains with some readings hidden so it can estimate pollution between monitors.</p></li>
+          <li><h3>Show the uncertainty</h3><p>The model estimates a central value and a range. Calibration measures how often observations fall inside those ranges.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section light" id="evaluation" aria-labelledby="evaluation-title">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">Evaluation</p>
+          <h2 class="section-heading" id="evaluation-title">What remains to test.</h2>
+          <p>The published figures come from a model trained on 2021–22 data and scored on held-out weeks in 2023. Later pipeline changes require a new development run. The separate 2024–25 evaluation is pending.</p>
+          <p>In a separate next-day warning comparison, 244 reporting-area days reached Unhealthy for Sensitive Groups or worse. SmokeCast flagged 173 of those (71%) and the official EPA reporting-area forecast flagged 112 (46%).</p>
+          <a class="button button-outline" href="https://github.com/htvarkali/Serein/blob/main/docs/BACKTEST_PROTOCOL.md">See the evaluation plan <span aria-hidden="true">↗</span></a>
+        </div>
+        <figure class="figure-frame">
+          <img src="assets/fig_improvement_map_L1.png" width="850" height="1190" loading="lazy" alt="Western U.S. map of next-day SmokeCast forecast error compared with the AQM-first fallback at individual monitors.">
+          <figcaption>Blue points mark monitoring sites with lower historical forecast error than the fallback.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="cross-link dark">
+      <div class="shell">
+        <p class="eyebrow">For families</p>
+        <h2 class="section-heading">What could a forecast mean at home?</h2>
+        <a class="button button-primary" href="airplan.html">Explore AirPlan <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer dark">
+    <div class="shell footer-grid">
+      <div>
+        <a class="footer-brand" href="index.html">Serein</a>
+        <p>Student research for the Conrad Challenge.</p>
+      </div>
+      <nav aria-label="Explore Serein">
+        <a href="research.html" aria-current="page">SmokeCast</a>
+        <a href="airplan.html">AirPlan</a>
+        <a href="https://github.com/htvarkali/Serein/graphs/contributors">Contributors <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

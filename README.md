@@ -1,5 +1,7 @@
 # Serein
 
+[Project website](https://htvarkali.github.io/Serein/)
+
 **Neighborhood-level wildfire smoke forecasts, 1 to 3 days ahead, with a personal risk plan for each child with asthma.**
 
 > *Serein* (n.): fine rain falling from a clear sky after sunset. Clean air arriving when you need it.
@@ -448,7 +450,7 @@ Both workflows are development diagnostics.
 | S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
-| S-8 | **(non-code)** Website: team section, contact line, logo and colors; publish at a direct link (copy rewritten, team slots, pilot CTA, Pages workflow `.github/workflows/pages.yml`; admin must set Settings → Pages → Source: GitHub Actions; names/contact still needed) | In progress | AbhinavGGarg | 2026-11-08 |
+| S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). The public page links to the repository and draft pilot protocol. Team bios and a dedicated contact address are still pending. | In progress | AbhinavGGarg | 2026-11-18 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
 | S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |

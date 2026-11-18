@@ -3,10 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Serein: smoke forecasts that know your child</title>
-<meta name="description" content="Neighborhood wildfire-smoke forecasts 1-3 days ahead, with a personal action plan for every child with asthma.">
-<!-- DRAFT built from the team's real results. Edit team section + numbers after the final test.
-     Images come from scripts/build_website.sh. Conrad requires: story, model, brand, direct link. -->
+<title>Serein | Wildfire smoke forecasting research</title>
+<meta name="description" content="A student research project testing local wildfire smoke forecasts and demonstrating how they could help families plan ahead.">
 <style>
   :root { --ink:#0b0b0b; --muted:#52514e; --surface:#fcfcfb; --line:#e4e3df;
           --blue:#2a78d6; --orange:#eb6834; --aqua:#1baf7a; --sky:#eef4fc; }
@@ -33,7 +31,10 @@
   @media (max-width: 800px) { .two { grid-template-columns: 1fr; } h1 { font-size: 34px; } }
   .plan { border-left: 6px solid var(--orange); background: #fff7f2; padding: 16px 20px; border-radius: 8px; font-size: 16px; }
   .note { font-size: 14px; color: var(--muted); }
+  .results-table { margin-top: 28px; overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 16px; background:#fff; }
+  .results-table table { min-width: 520px; }
+  .results-table:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
   th, td { text-align: right; padding: 8px 12px; border-bottom: 1px solid var(--line); }
   th:first-child, td:first-child { text-align: left; }
   tr.us td { font-weight: 700; color: var(--blue); }
@@ -42,8 +43,6 @@
   .btn { display:inline-block; padding: 12px 18px; border-radius: 10px; font-weight: 600; text-decoration:none; border: 1px solid rgba(255,255,255,.6); color:#fff; }
   .btn.primary { background:#fff; color:#10304f; border-color:#fff; }
   .btn.dark { background: var(--blue); color:#fff; border-color: var(--blue); }
-  .team { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-top: 24px; }
-  .team .card .role { color: var(--muted); font-size: 15px; }
   .cta { background: var(--sky); border: 1px solid var(--line); border-radius: 12px; padding: 24px; margin-top: 28px; }
   .fit li { margin-bottom: 8px; }
 </style>
@@ -52,8 +51,8 @@
 <header>
   <div class="wrap">
     <div class="logo">Serein</div>
-    <h1>Tomorrow's smoke forecast is for your whole city. Serein tells you what it means for your street and your child.</h1>
-    <p class="tag">A free neighborhood wildfire-smoke forecast, one to three days ahead, turned into a plan for one child with asthma, in the family's language. Built by students. Scored against NOAA and EPA on days the model never saw.</p>
+    <h1>Helping families plan ahead for wildfire smoke</h1>
+    <p class="tag">Serein is a student research project testing local smoke forecasts up to three days ahead. SmokeCast has preliminary results from historical forecasts, and AirPlan shows how families might use them through simulated examples.</p>
     <div class="btns">
       <a class="btn primary" href="#results">See the results</a>
       <a class="btn" href="#plan">See a plan</a>
@@ -97,7 +96,7 @@
     <li><strong>Gives a range, not a number</strong>, and checks that the range is right about 90% of the time.</li>
     <li><strong>Turns the forecast into a plan for one child</strong>, learned from a six-tap evening check-in, that can only be stricter than EPA's public guidance.</li>
   </ul>
-  <p class="note">Related work we respect: Google's air-quality model (500 m, 96 h), NOAA's bias-corrected AQM, and Australia's AirRater, which learns personal triggers from check-ins. Details and sources are in our competitor review on GitHub.</p>
+  <p class="note">Related work includes Google's air-quality model, NOAA's bias-corrected AQM, and Australia's AirRater. See the <a href="https://github.com/htvarkali/Serein/blob/main/docs/COMPETITOR_VERIFICATION_2026-11-07.md">competitor review</a> for details and sources.</p>
 </div></section>
 
 <section id="results"><div class="wrap">
@@ -108,13 +107,15 @@
     <div class="card"><div class="stat">71% vs 46%<small>of real orange-or-worse days warned a day ahead: Serein vs. EPA's official forecast, with fewer false alarms</small></div></div>
     <div class="card"><div class="stat">87%<small>of 344 monitors where Serein beat the AQM-first fallback (1 day ahead)</small></div></div>
   </div>
-  <table style="margin-top:28px">
+  <div class="results-table" role="region" aria-label="Historical forecast errors" tabindex="0">
+  <table>
     <tr><th>Forecast RMSE (µg/m³)</th><th>Today</th><th>+1 day</th><th>+2 days</th><th>+3 days</th></tr>
     <tr class="us"><td>Serein SmokeCast</td><td>4.5</td><td>7.9</td><td>9.7</td><td>11.4</td></tr>
-    <tr><td>Best available NOAA forecast (AQM → HRRR → persistence)</td><td>10.1</td><td>11.0</td><td>12.3</td><td>15.5</td></tr>
+    <tr><td>AQM-first fallback (AQM, HRRR, then persistence)</td><td>10.1</td><td>11.0</td><td>12.3</td><td>15.5</td></tr>
     <tr><td>Persistence (yesterday's reading carried forward)</td><td>10.2</td><td>13.8</td><td>15.0</td><td>15.5</td></tr>
     <tr class="us"><td>Serein where there is no sensor</td><td>7.0</td><td>8.5</td><td>10.1</td><td>11.3</td></tr>
   </table>
+  </div>
   <div class="two">
     <figure><img src="assets/fig_rmse_by_lead_all.png" alt="Error by lead time chart"><figcaption>Historical development RMSE; lower is better. Baselines are compared on available paired forecasts.</figcaption></figure>
     <figure><img src="assets/fig_improvement_map_L1.png" alt="Map of improvement by monitor"><figcaption>Blue: monitors where Serein beat the AQM-first fallback.</figcaption></figure>
@@ -127,16 +128,16 @@
   <div class="two">
     <div>
       <p>AirPlan experiments with learning individual smoke sensitivity from symptom histories. Its evidence so far comes from 300 simulated children; it has not been validated for predicting a real child's symptoms. The app demonstrates this with a synthetic history, separately from its check-in form.</p>
-      <div class="plan"><strong>YELLOW for Maya tomorrow:</strong> smoke may cause symptoms.<br>
+      <div class="plan"><strong>Simulated example for Maya:</strong> a yellow smoke alert.<br>
         Keep the quick-relief inhaler with Maya, including at school. Swap running and sports practice for indoor activities. Keep windows closed; run an air purifier if you have one.<br>
         <span class="note">Also in Spanish, with more languages coming after review by native speakers and clinicians.</span></div>
     </div>
     <figure><img src="assets/airplan_learning_curve.png" alt="AirPlan learning curve"><figcaption>Simulated children: how fast the personal model learns each child's sensitivity.</figcaption></figure>
   </div>
   <div class="cta">
-    <h3>Run Serein in your district for one fire season, free</h3>
-    <p style="margin:8px 0 14px">We are looking for one school district, school-nurse group, clinic or air district in California, Oregon or Washington to pilot the neighborhood forecast in 2027, with a clinician reviewing every message. Success is two numbers: smoke days warned about a day ahead, and families still checking in after 30 days.</p>
-    <a class="btn dark" href="mailto:[TEAM: contact email]?subject=Serein%20pilot">Talk to us about a pilot</a>
+    <h3>Proposed research pilot</h3>
+    <p>Our draft describes how a school or clinic could help evaluate Serein after research and clinical review.</p>
+    <a class="btn dark" href="https://github.com/htvarkali/Serein/blob/main/docs/pilot/PILOT_PROTOCOL.md">Read the draft pilot protocol</a>
   </div>
 </div></section>
 
@@ -151,19 +152,12 @@
 
 <section><div class="wrap">
   <h2>Team</h2>
-  <p class="lead">[TEAM: two sentences. Who we are, where we are, and the one true reason we care about smoke and asthma.]</p>
-  <div class="team">
-    <div class="card"><h3>[Name]</h3><div class="role">[Grade], [School] · Data pipeline</div><p>Fire, smoke, weather and air-monitor data from NASA, NOAA and EPA; the "no peeking" rule.</p></div>
-    <div class="card"><h3>[Name]</h3><div class="role">[Grade], [School] · SmokeCast</div><p>The neighborhood forecast model, its uncertainty ranges and the backtest.</p></div>
-    <div class="card"><h3>[Name]</h3><div class="role">[Grade], [School] · AirPlan</div><p>The personal model, the action plans and the check-in.</p></div>
-    <div class="card"><h3>[Name]</h3><div class="role">[Grade], [School] · Validation and pitch</div><p>The evaluation protocol, interviews, business plan and this site.</p></div>
-  </div>
-  <p class="note" style="margin-top:16px">Coach: [Name, role]. Clinical reviewer: [role, affiliation, after C-8]. [TEAM: one-line tools-and-authorship disclosure if the team decides to include it here; the Brief requires citing outside tools either way.]</p>
+  <p class="lead">Built by students for the Conrad Challenge. Meet the <a href="https://github.com/htvarkali/Serein/graphs/contributors">project contributors on GitHub</a>.</p>
 </div></section>
 </main>
 
 <footer><div class="wrap">
-  Serein · 2026-27 Conrad Challenge · Data: NASA, NOAA (HRRR-Smoke, AQM, HMS), U.S. EPA AirNow · Code: <a href="https://github.com/htvarkali/Serein" style="color:inherit">github.com/htvarkali/Serein</a> · Contact: [TEAM: email]<br>
+  Serein · 2026-27 Conrad Challenge · Data: NASA, NOAA (HRRR-Smoke, AQM, HMS), U.S. EPA AirNow · <a href="https://github.com/htvarkali/Serein" style="color:inherit">Project on GitHub</a><br>
   Serein provides forecasts, not medical advice. Follow your child's clinician-approved asthma action plan.
 </div></footer>
 </body>

@@ -17,7 +17,8 @@ STEPS = ["dev", "figures", "impact", "map", "dev_holdout", "abl_full", "abl_no_w
 def script_repo(tmp_path):
     scripts = tmp_path / "scripts"
     scripts.mkdir()
-    for name in ("run_dev_suite.sh", "run_ablations.sh"):
+    for name in ("run_dev_suite.sh", "run_ablations.sh", "run_scale_suite.sh", "sweep_graph.sh",
+                 "sweep_peaks.sh"):
         shutil.copy2(SCRIPTS / name, scripts / name)
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -35,6 +36,10 @@ elif "serein.eval.impact" in args:
     step = "impact"
 elif "map" in args:
     step = "map"
+elif "scripts/compare_runs.py" in args:
+    step = "compare_runs"
+elif "build-table" in args:
+    step = "conus_table_" + args[args.index("--split") + 1]
 else:
     raise SystemExit("unexpected command")
 with open(os.environ["SEREIN_TEST_CALLS"], "a") as handle:
@@ -74,3 +79,23 @@ def test_dev_suite_runs_every_step_before_reporting_success(script_repo):
     assert result.returncode == 0, result.stderr
     assert (repo / "calls.txt").read_text().splitlines() == STEPS
     assert result.stdout.rstrip().endswith("ALLDONE")
+
+
+@pytest.mark.parametrize(("script", "failed_step", "called_steps"), [
+    ("run_scale_suite.sh", "scale_s", ["scale_s"]),
+    ("run_scale_suite.sh", "conus_table_train",
+     ["scale_s", "scale_m", "scale_l", "hist4", "hist7", "conus_table_train"]),
+    ("sweep_graph.sh", "sweep_mask0_reg", ["sweep_mask0_reg"]),
+    ("sweep_peaks.sh", "peaks_w3", ["peaks_w1", "peaks_w3"]),
+])
+def test_research_sweeps_stop_when_a_command_fails(script_repo, script, failed_step, called_steps):
+    repo, env = script_repo
+    env["SEREIN_TEST_FAIL"] = failed_step
+    result = subprocess.run([str(repo / "scripts" / script)], cwd=repo, env=env,
+                            capture_output=True, text=True, check=False, timeout=10)
+
+    assert result.returncode == 7
+    assert "ALLDONE" not in result.stdout
+    assert f"FAILED (exit 7): see outputs/logs/{failed_step}.log" in result.stderr
+    assert (repo / "calls.txt").read_text().splitlines() == called_steps
+    assert "injected failure" in (repo / "outputs/logs" / f"{failed_step}.log").read_text()

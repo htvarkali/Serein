@@ -207,7 +207,7 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
         tab = tab.merge(pd.concat(fire_parts), on=["issue_date", "point_id"], how="left")
 
     tab = tab.merge(points[["point_id", "lat", "lon", "kind"]], on="point_id", how="left")
-    doy = pd.to_datetime(tab["issue_date"]).dt.dayofyear
+    doy = pd.to_datetime(tab["issue_date"]).dt.day_of_year
     tab["doy_sin"] = np.sin(2 * np.pi * doy / 365.25)
     tab["doy_cos"] = np.cos(2 * np.pi * doy / 365.25)
     return tab

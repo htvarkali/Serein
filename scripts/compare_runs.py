@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 from serein.config import REPO_ROOT
+from serein.data.points import load_points
 from serein.eval.metrics import bootstrap_rmse_diff
 
 OUT = REPO_ROOT / "outputs" / "backtest"
@@ -26,7 +27,7 @@ LEADS = [0, 1, 2, 3]
 
 
 def main(tags: list[str]) -> None:
-    west = pd.read_parquet(REPO_ROOT / "data" / "interim" / "west_us" / "points.parquet")
+    west = load_points("west_us")
     west_ids = set(west.loc[west["kind"] == "epa", "point_id"])
     runs = {}
     for t in tags:

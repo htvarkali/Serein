@@ -1,13 +1,17 @@
 """Memory of past days (B-18), live-forecast helpers (D-11), partial AirNow days."""
 
-from datetime import date, timedelta
+import json
+from datetime import UTC, date, datetime, timedelta
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 
 from serein.features.graph import build_knn_graph
 from serein.features.prepare import GraphData, history_from
+from serein.models.conformal import CQR
 from serein.models.gnn import SmokeCastGNN
 from serein.models.train import TrainConfig, Trainer
 
@@ -96,3 +100,46 @@ def test_partial_airnow_day_is_read_but_not_frozen(tmp_path, monkeypatch):
     got = airnow.load_hourly([d])
     assert len(got) == 1  # live forecasts see today's hours so far
     assert not (hourly / f"{d:%Y%m%d}.parquet").exists()  # a later run re-downloads
+
+
+@pytest.mark.parametrize(("start_hour", "made_hour", "force", "on_time"), [
+    (18, 18, True, False),
+    (19, 20, False, True),
+    (19, 25, False, False),
+])
+def test_live_forecast_exports_calibrated_bounds_and_checks_completion_time(
+    tmp_path, monkeypatch, start_hour, made_hour, force, on_time,
+):
+    from serein import live
+
+    day = date(2026, 11, 3)
+    utc_midnight = datetime(2026, 11, 3, tzinfo=UTC)
+    made_at = utc_midnight + timedelta(hours=made_hour)
+    clock = iter([utc_midnight + timedelta(hours=start_hour), made_at])
+    monkeypatch.setattr(live, "datetime", SimpleNamespace(now=lambda tz: next(clock)))
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "fetch_inputs", lambda *args: {"aqm": True, "hrrr": True})
+    monkeypatch.setattr(live, "plot_map", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live, "_git_rev", lambda: "test")
+    monkeypatch.setattr(live, "warn_cutoffs", lambda run_dir: {0: 0.5})
+    tab = pd.DataFrame({"point_id": ["A", "B"], "lat": [37., 38.], "lon": [-122., -121.],
+                        "kind": ["epa", "epa"]})
+    # The first forecast's median is negative. The second interval is shrunk past q25/q75.
+    quantiles = torch.tensor([[[[-1., -.4, -.1, .1, .5]], [[.1, .2, 1., 1.8, 2.]]]])
+    inputs = SimpleNamespace(run=lambda: quantiles, tab=tab, use=tab, leads=[0], prep=None,
+                             cqr=CQR(qhat={(0, -1): -0.5}))
+    monkeypatch.setattr(live, "build_inputs", lambda *args, **kwargs: inputs)
+    monkeypatch.setattr(live, "baselines", lambda *args: {})
+    study = SimpleNamespace(name="test", raw={"issue_hour_utc": 18.5})
+
+    forecast = live.make_forecast(study, day, force=force)
+
+    out = tmp_path / "test" / "forecasts" / "20261103.parquet"
+    pd.testing.assert_frame_equal(pd.read_parquet(out), forecast)
+    values = forecast[["q05", "q25", "q50", "q75", "q95"]].to_numpy()
+    assert (values >= 0).all()
+    assert (np.diff(values, axis=1) >= 0).all()
+    assert forecast["on_time"].tolist() == [on_time, on_time]
+    metadata = json.loads(out.with_suffix(".json").read_text())
+    assert metadata["made_at_utc"] == made_at.isoformat(timespec="seconds")
+    assert metadata["on_time"] is on_time

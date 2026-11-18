@@ -37,6 +37,7 @@ from serein.data.points import load_points
 from serein.eval.backtest import _git_rev, compare_with_epa, prob_exceed
 from serein.features.daily import obs_daily_means
 from serein.models.baselines import baselines
+from serein.models.conformal import calibrate_quantiles
 from serein.models.gnn import QUANTILES
 from serein.models.infer import build_inputs, plot_map
 
@@ -109,8 +110,7 @@ def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool =
     inp = build_inputs(study, d, run_dir, with_grid=True)
     with torch.no_grad():
         q = inp.run()[0].numpy()
-    lo, hi = inp.cqr.apply(q[..., 0], q[..., -1], q[..., 2])
-    q[..., 0], q[..., -1] = np.minimum(lo, q[..., 2]), np.maximum(hi, q[..., 2])
+    q = calibrate_quantiles(q, inp.cqr, QUANTILES)
     base = baselines(inp.tab, inp.prep, inp.leads)
     cuts = warn_cutoffs(run_dir)
     kinds = inp.use.set_index("point_id").loc[inp.tab["point_id"], "kind"].to_numpy()
@@ -129,10 +129,11 @@ def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool =
             **{m: base[m][:, li] for m in MODELS if m in base},
         }))
     fc = pd.concat(rows, ignore_index=True)
-    on_time = now <= issue + timedelta(hours=ON_TIME_HOURS)
+    made_at = datetime.now(UTC)
+    on_time = issue <= made_at <= issue + timedelta(hours=ON_TIME_HOURS)
     fc["on_time"] = on_time
     fc.to_parquet(out, index=False)
-    meta = {"issue_date": str(d), "made_at_utc": now.isoformat(timespec="seconds"),
+    meta = {"issue_date": str(d), "made_at_utc": made_at.isoformat(timespec="seconds"),
             "issue_time_utc": issue.isoformat(), "model_run": run,
             "code_version": _git_rev(), "inputs": status, "on_time": bool(on_time),
             "n_monitors": int((fc["kind"] == "epa").sum() / len(inp.leads))}

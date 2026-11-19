@@ -217,7 +217,8 @@ def run_backtest(study: Study, args) -> dict:
         log("ablation: wind removed from graph edges")
 
     # Leave-sites-out (B-7b): hide some monitors completely. Their targets are removed
-    # from training and their readings/history are hidden everywhere, so the model must
+    # from training, early stopping, interval calibration and warning tuning, and their
+    # readings/history are hidden everywhere, so the model must
     # forecast them from neighbors and NOAA inputs alone, like a neighborhood without
     # a sensor.
     holdout = np.zeros(len(node_ids), bool)
@@ -238,7 +239,9 @@ def run_backtest(study: Study, args) -> dict:
         for gd in gds.values():
             hide_holdout(gd.X)
         gds["train"].Y[:, holdout] = np.nan
+        gds["val"].Y[:, holdout] = np.nan
         log(f"leave-sites-out: {holdout.sum()} of {len(node_ids)} monitors hidden")
+    hidden_conf = conf["point_id"].isin(np.array(node_ids)[holdout]).to_numpy()
 
     # Memory of past days (B-18): each day also gets the inputs of the K-1 days before
     # it, taken from all seasons loaded (inputs only, never targets).
@@ -296,7 +299,8 @@ def run_backtest(study: Study, args) -> dict:
         # Ensemble = average of each quantile across seeds (log space), then calibrate.
         q_conf, q_test = np.mean(qc_list, 0), np.mean(qt_list, 0)
         cfg = first_cfg
-        y_conf = prep.targets(conf)
+        y_conf = prep.targets(conf).copy()
+        y_conf[hidden_conf] = np.nan
         cqr = CQR(alpha=0.10).fit(q_conf[..., 0], q_conf[..., -1], q_conf[..., 2], y_conf)
         q_test = calibrate_quantiles(q_test, cqr, QUANTILES)
         if name == "smokecast":
@@ -358,7 +362,8 @@ def run_backtest(study: Study, args) -> dict:
                     rec["crps"] = float(np.abs(p[smask, li][ok] - obs[smask, li][ok]).mean()) if ok.any() else np.nan
                 rows.append(rec)
     # Warning rule: warn when P(>= 35.5) exceeds a cut-off tuned on calibration days.
-    obs_conf = conf[[f"y_L{lead}" for lead in leads]].to_numpy(dtype=float)
+    obs_conf = conf[[f"y_L{lead}" for lead in leads]].to_numpy(dtype=float, copy=True)
+    obs_conf[hidden_conf] = np.nan
     warn_test = np.zeros_like(obs, dtype=bool)
     cutoffs = {}
     for li, lead in enumerate(leads):

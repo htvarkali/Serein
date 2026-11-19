@@ -106,3 +106,61 @@ def test_backtest_exports_the_evaluated_ensemble_and_forecast(tmp_path, monkeypa
                                          ("q05", f"smokecast_lo_L{lead}"),
                                          ("q95", f"smokecast_hi_L{lead}")):
             np.testing.assert_allclose(live[forecast_col], scored[scored_col], rtol=1e-5)
+
+
+def test_hidden_monitors_never_reach_early_stopping_or_calibration(tmp_path, monkeypatch):
+    points = pd.DataFrame({
+        "point_id": ["A", "B", "C"], "kind": "epa",
+        "lat": [38.0, 38.1, 38.2], "lon": [-121.0, -121.1, -121.2],
+    })
+    cache = tmp_path / "processed"
+    cache.mkdir()
+    _synthetic_table(date(2021, 7, 1), 8, points).to_parquet(
+        cache / "table_train.parquet", index=False)
+    _synthetic_table(date(2023, 7, 1), 21, points).to_parquet(
+        cache / "table_calibrate.parquet", index=False)
+    monkeypatch.setattr(backtest, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(backtest, "processed_dir", lambda study: cache)
+    monkeypatch.setattr(backtest, "load_points", lambda name: points.copy())
+    monkeypatch.setattr(backtest, "load_forecasts", lambda days: pd.DataFrame())
+    seen = {}
+
+    class RecordingTrainer(backtest.Trainer):
+        def fit(self, train, val, log=print):
+            seen["train_y"], seen["val_y"] = train.Y.copy(), val.Y.copy()
+            return super().fit(train, val, log=log)
+
+    real_fit = backtest.CQR.fit
+
+    def recording_fit(self, lo, hi, median, y):
+        seen["cqr_y"] = np.array(y, copy=True)
+        return real_fit(self, lo, hi, median, y)
+
+    real_tune = backtest.tune_warning_threshold
+
+    def recording_tune(p_exceed, obs, *args, **kwargs):
+        seen.setdefault("tune_obs", []).append(np.array(obs, copy=True))
+        return real_tune(p_exceed, obs, *args, **kwargs)
+
+    monkeypatch.setattr(backtest, "Trainer", RecordingTrainer)
+    monkeypatch.setattr(backtest.CQR, "fit", recording_fit)
+    monkeypatch.setattr(backtest, "tune_warning_threshold", recording_tune)
+    study = Study({"name": "synthetic_holdout", "leads": [0, 1],
+                   "graph": {"k_neighbors": 2, "max_km": 300}})
+    args = SimpleNamespace(final=False, tag="holdout", train="train", calibrate="calibrate",
+                           test="test", seed=4, seeds=1, epochs=2, hidden=16, layers=1,
+                           dropout=0.0, smoke_weight=1.0, no_gbm=True, no_ablation=True,
+                           holdout_sites=0.2)
+
+    backtest.run_backtest(study, args)
+
+    # Training already dropped the hidden monitor's targets; that column is how we find it.
+    hidden = np.isnan(seen["train_y"]).all(axis=(0, 2))
+    assert hidden.sum() == 1
+    assert np.isnan(seen["val_y"][:, hidden]).all()
+    assert np.isfinite(seen["val_y"][:, ~hidden]).all()
+    # One of the three monitors is hidden, so a third of the calibration rows are blank.
+    for y in [seen["cqr_y"], *seen["tune_obs"]]:
+        blank = np.isnan(y) if y.ndim == 1 else np.isnan(y).all(axis=1)
+        assert 3 * blank.sum() == len(y)
+        assert np.isfinite(y[~blank]).all()

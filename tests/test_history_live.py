@@ -88,6 +88,22 @@ def test_live_scoreboard_counts_hits_and_false_alarms():
     assert r.rmse_smokecast < r.rmse_noaa_best and r.skill_vs_noaa > 0
 
 
+def test_live_scoreboard_compares_with_noaa_on_the_same_monitor_days():
+    from serein.live import summarize
+
+    nan = float("nan")
+    s = pd.DataFrame({
+        "lead": [3, 3, 3, 3], "issue_date": [date(2026, 11, 3)] * 4,
+        "obs": [50.0, 40.0, 10.0, 8.0], "smokecast": [40.0, 38.0, 12.0, 9.0],
+        "noaa_best": [nan, 36.0, 40.0, 9.0], "aqm_bc": [nan] * 4,
+        "persistence": [nan, 36.0, 40.0, 9.0], "warn": [True, True, False, False]})
+    r = summarize(s).iloc[0]
+    # The first day had no NOAA forecast, so it is left out instead of counted as a NOAA miss.
+    assert (r.monitor_days, r.no_noaa_days) == (3, 1)
+    assert (r.usg_days, r.usg_caught, r.noaa_caught) == (1, 1, 1)
+    assert r.skill_vs_noaa == pytest.approx(1 - r.rmse_smokecast / r.rmse_noaa_best)
+
+
 def test_partial_airnow_day_is_read_but_not_frozen(tmp_path, monkeypatch):
     from serein.data import airnow
 

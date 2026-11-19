@@ -223,14 +223,18 @@ def score(study: Study, log=print) -> pd.DataFrame:
 
 def summarize(s: pd.DataFrame) -> pd.DataFrame:
     rows = []
-    for lead, g in s.groupby("lead"):
-        rec = {"lead": int(lead), "monitor_days": len(g), "issue_days": g["issue_date"].nunique()}
+    for lead, g_all in s.groupby("lead"):
+        # Protocol 7b: SmokeCast and NOAA are compared on the same monitor-days. A day
+        # with no NOAA forecast is left out, not counted as NOAA missing the smoke.
+        both = g_all["smokecast"].notna() & g_all["noaa_best"].notna()
+        g = g_all[both]
+        rec = {"lead": int(lead), "monitor_days": len(g), "no_noaa_days": int((~both).sum()),
+               "issue_days": g["issue_date"].nunique()}
         for m in MODELS:
             ok = g[m].notna()
             rec[f"rmse_{m}"] = float(np.sqrt(((g.loc[ok, m] - g.loc[ok, "obs"]) ** 2).mean()))
-        both = g["noaa_best"].notna()
-        e_s = ((g.loc[both, "smokecast"] - g.loc[both, "obs"]) ** 2).mean()
-        e_n = ((g.loc[both, "noaa_best"] - g.loc[both, "obs"]) ** 2).mean()
+        e_s = ((g["smokecast"] - g["obs"]) ** 2).mean()
+        e_n = ((g["noaa_best"] - g["obs"]) ** 2).mean()
         rec["skill_vs_noaa"] = float(1 - np.sqrt(e_s / e_n)) if e_n > 0 else np.nan
         usg = g["obs"] >= 35.5
         rec["usg_days"] = int(usg.sum())
@@ -251,7 +255,8 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
     else:
         t = summarize(s)
         t.to_csv(LIVE / study.name / "scoreboard.csv", index=False)
-        lines += ["Error (RMSE, µg/m³, lower is better) on every monitor-day observed so far.",
+        lines += [("Error (RMSE, µg/m³, lower is better) on every monitor-day observed so far "
+                   "that has both a SmokeCast and a NOAA forecast."),
                   "skill = how much smaller SmokeCast's error is than NOAA's best forecast.", "",
                   "| lead | monitor-days | SmokeCast | NOAA best | NOAA AQM | yesterday's value | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
                   "|---|---|---|---|---|---|---|---|---|---|"]
@@ -260,6 +265,9 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                          f"{r.rmse_noaa_best:.2f} | {r.rmse_aqm_bc:.2f} | {r.rmse_persistence:.2f} | "
                          f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
                          f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
+        if t["no_noaa_days"].sum():
+            lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
+                      + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
         if len(epa):
             lines += ["", "Official EPA AQI forecasts, same reporting areas and days:", "",
                       "```", epa.round(3).to_string(index=False), "```"]

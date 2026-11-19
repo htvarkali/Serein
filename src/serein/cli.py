@@ -341,7 +341,8 @@ def main(argv=None):
     sp.add_argument("--config", default=DEFAULT_CONFIG)
     sp.add_argument("--date", help="issue day (default: today)")
     sp.add_argument("--run", default="west_us_dev", help="folder in outputs/backtest/")
-    sp.add_argument("--force", action="store_true", help="overwrite / run before issue time")
+    sp.add_argument("--force", action="store_true",
+                    help="save an unscored re-run / run before issue time")
     sp.add_argument("--allow-missing", action="store_true", help="run even if AQM/HRRR missing")
     sp.add_argument("--score-only", action="store_true")
     sp.set_defaults(fn=cmd_live)

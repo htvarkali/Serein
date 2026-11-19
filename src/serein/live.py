@@ -93,10 +93,17 @@ def fetch_inputs(study: Study, d: date, log=print) -> dict:
 # ---------------------------------------------------------------------- forecast
 def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool = False,
                   allow_missing: bool = False, log=print):
-    out = live_dir(study, "forecasts") / f"{d:%Y%m%d}.parquet"
-    if out.exists() and not force:
-        log(f"forecast for {d} already exists ({out}); not overwriting")
-        return None
+    fdir = live_dir(study, "forecasts")
+    out = fdir / f"{d:%Y%m%d}.parquet"
+    if out.exists():
+        if not force:
+            log(f"forecast for {d} already exists ({out}); not overwriting")
+            return None
+        # A forced re-run is saved next to the first version, which stays the scored one.
+        n = 2
+        while (fdir / f"{d:%Y%m%d}.v{n}.parquet").exists():
+            n += 1
+        out = fdir / f"{d:%Y%m%d}.v{n}.parquet"
     now = datetime.now(UTC)
     issue = Availability.from_study(study.raw).issue_time(d).replace(tzinfo=UTC)
     if now < issue and not force:
@@ -143,7 +150,7 @@ def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool =
     digest = hashlib.sha256(out.read_bytes()).hexdigest()
     with open(LIVE / study.name / "forecast_hashes.txt", "a", encoding="utf-8") as fh:
         fh.write(f"{d:%Y-%m-%d}  made {meta['made_at_utc']}  sha256 {digest}  {out.name}\n")
-    png = live_dir(study, "maps") / f"map_{d:%Y%m%d}.png"
+    png = live_dir(study, "maps") / f"map_{out.stem}.png"
     plot_map(fc, png, title=f"SmokeCast live forecast issued {d} 18:30 UTC "
                             "(squares = map grid, dots = monitors)")
     log(f"wrote {out} and {png}")
@@ -168,7 +175,10 @@ def _observed(study: Study, valid_days: list[date], pts: pd.DataFrame) -> pd.Dat
 
 def score(study: Study, log=print) -> pd.DataFrame:
     """Score every saved forecast whose days have been observed. Writes the scoreboard."""
-    files = sorted(live_dir(study, "forecasts").glob("*.parquet"))
+    saved = sorted(live_dir(study, "forecasts").glob("*.parquet"))
+    files = [f for f in saved if f.stem.isdigit()]
+    if len(saved) > len(files):
+        log(f"({len(saved) - len(files)} forced re-runs are kept but not counted)")
     if not files:
         log("no live forecasts yet")
         return pd.DataFrame()

@@ -143,3 +143,51 @@ def test_live_forecast_exports_calibrated_bounds_and_checks_completion_time(
     metadata = json.loads(out.with_suffix(".json").read_text())
     assert metadata["made_at_utc"] == made_at.isoformat(timespec="seconds")
     assert metadata["on_time"] is on_time
+
+
+def test_forced_live_rerun_keeps_the_first_forecast_and_scores_only_it(tmp_path, monkeypatch):
+    from serein import live
+
+    day = date(2026, 11, 3)
+    clock = [datetime(2026, 11, 3, 19, tzinfo=UTC)]
+    monkeypatch.setattr(live, "datetime", SimpleNamespace(now=lambda tz=None: clock[0]))
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "fetch_inputs", lambda *args: {"aqm": True, "hrrr": True})
+    monkeypatch.setattr(live, "plot_map", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live, "_git_rev", lambda: "test")
+    monkeypatch.setattr(live, "warn_cutoffs", lambda run_dir: {0: 0.5})
+    tab = pd.DataFrame({"point_id": ["A", "B"], "lat": [37., 38.], "lon": [-122., -121.],
+                        "kind": ["epa", "epa"]})
+    runs = [torch.tensor([[[[1., 2., 3., 4., 5.]], [[1., 2., 3., 4., 5.]]]]),
+            torch.tensor([[[[0., .5, 1., 1.5, 2.]], [[0., .5, 1., 1.5, 2.]]]])]
+
+    def inputs(*args, **kwargs):
+        q = runs.pop(0)
+        return SimpleNamespace(run=lambda: q, tab=tab, use=tab, leads=[0], prep=None,
+                               cqr=CQR(qhat={}))
+
+    monkeypatch.setattr(live, "build_inputs", inputs)
+    monkeypatch.setattr(live, "baselines", lambda *args: {
+        m: np.array([[5.], [6.]]) for m in ("noaa_best", "aqm_bc", "persistence")})
+    study = SimpleNamespace(name="test", raw={"issue_hour_utc": 18.5})
+
+    first = live.make_forecast(study, day)
+    assert live.make_forecast(study, day) is None
+    clock[0] = datetime(2026, 11, 3, 20, tzinfo=UTC)  # still inside the on-time window
+    rerun = live.make_forecast(study, day, force=True)
+
+    saved = tmp_path / "test" / "forecasts"
+    pd.testing.assert_frame_equal(pd.read_parquet(saved / "20261103.parquet"), first)
+    pd.testing.assert_frame_equal(pd.read_parquet(saved / "20261103.v2.parquet"), rerun)
+    assert rerun["on_time"].all() and not rerun["smokecast"].equals(first["smokecast"])
+    hashes = (tmp_path / "test" / "forecast_hashes.txt").read_text().splitlines()
+    assert [h.split()[-1] for h in hashes] == ["20261103.parquet", "20261103.v2.parquet"]
+
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A", "B"]}))
+    monkeypatch.setattr(live, "_observed", lambda *args: pd.DataFrame(
+        {"point_id": ["A", "B"], "valid_date": [day, day], "obs": [10., 20.]}))
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live, "compare_with_epa", lambda *args: pd.DataFrame())
+    clock[0] = datetime(2026, 11, 6, tzinfo=UTC)
+    scored = live.score(study)
+    assert scored["smokecast"].tolist() == first["smokecast"].tolist()

@@ -257,33 +257,47 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
     if s.empty:
         lines.append("Nothing to score yet: the first forecast days have not finished.")
     else:
-        t = summarize(s)
-        t.to_csv(LIVE / study.name / "scoreboard.csv", index=False)
         lines += [("Error (RMSE, µg/m³, lower is better) on every monitor-day observed so far "
                    "that has both a SmokeCast and a NOAA forecast."),
-                  "skill = how much smaller SmokeCast's error is than NOAA's best forecast.", "",
-                  "| lead | monitor-days | SmokeCast | NOAA best | NOAA AQM | yesterday's value | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
-                  "|---|---|---|---|---|---|---|---|---|---|"]
-        for r in t.itertuples():
-            lines.append(f"| {r.lead} | {r.monitor_days} | {r.rmse_smokecast:.2f} | "
-                         f"{r.rmse_noaa_best:.2f} | {r.rmse_aqm_bc:.2f} | {r.rmse_persistence:.2f} | "
-                         f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
-                         f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
-        lines += ["", ("Primary test (protocol section 6): SmokeCast's RMSE minus NOAA best's, "
-                       "with a 95% interval from 1000 resamples of whole issue days. It passes "
-                       "when the interval is entirely below 0 at leads 1 and 2 in the "
-                       "June-October fire season."), ""]
-        for r in t.itertuples():
-            if np.isnan(r.ci_lo_vs_noaa):
-                lines.append(f"- lead {r.lead}: needs 5 scored issue days (has {r.issue_days})")
-            else:
-                lines.append(f"- lead {r.lead}: {r.rmse_smokecast - r.rmse_noaa_best:+.2f} "
-                             f"({r.ci_lo_vs_noaa:+.2f} to {r.ci_hi_vs_noaa:+.2f})")
-        if t["no_noaa_days"].sum():
-            lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
-                      + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
+                  "skill = how much smaller SmokeCast's error is than NOAA's best forecast.",
+                  ("Primary test (protocol section 6): SmokeCast's RMSE minus NOAA best's, "
+                   "with a 95% interval from 1000 resamples of whole issue days. It passes "
+                   "when the interval is entirely below 0 at leads 1 and 2 in the fire season."),
+                  ("Days are split by the day forecast (protocol 7b): June-October is the fire "
+                   "season and the main live test; November-May is the off-season, reported "
+                   "separately.")]
+        fire = pd.to_datetime(s["valid_date"]).dt.month.between(6, 10)
+        tables = []
+        for season, title, part in [("fire", "Fire season (June-October)", s[fire]),
+                                    ("off", "Off-season (November-May)", s[~fire])]:
+            if part.empty:
+                continue
+            t = summarize(part)
+            tables.append(t.assign(season=season))
+            lines += ["", f"## {title}", "",
+                      "| lead | monitor-days | SmokeCast | NOAA best | NOAA AQM | yesterday's value | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
+                      "|---|---|---|---|---|---|---|---|---|---|"]
+            for r in t.itertuples():
+                lines.append(f"| {r.lead} | {r.monitor_days} | {r.rmse_smokecast:.2f} | "
+                             f"{r.rmse_noaa_best:.2f} | {r.rmse_aqm_bc:.2f} | {r.rmse_persistence:.2f} | "
+                             f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
+                             f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
+            lines += ["", "SmokeCast's RMSE minus NOAA best's (95% interval):", ""]
+            for r in t.itertuples():
+                if np.isnan(r.ci_lo_vs_noaa):
+                    lines.append(f"- lead {r.lead}: needs 5 scored issue days (has {r.issue_days})")
+                else:
+                    lines.append(f"- lead {r.lead}: {r.rmse_smokecast - r.rmse_noaa_best:+.2f} "
+                                 f"({r.ci_lo_vs_noaa:+.2f} to {r.ci_hi_vs_noaa:+.2f})")
+            if t["no_noaa_days"].sum():
+                lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
+                          + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
+        board = pd.concat(tables, ignore_index=True)
+        board.insert(0, "season", board.pop("season"))
+        board.to_csv(LIVE / study.name / "scoreboard.csv", index=False)
         if len(epa):
-            lines += ["", "Official EPA AQI forecasts, same reporting areas and days:", "",
+            lines += ["", ("Official EPA AQI forecasts, same reporting areas and days (both "
+                           "seasons together):"), "",
                       "```", epa.round(3).to_string(index=False), "```"]
         lines += ["", ("Caveat: the model was trained on June-October fire seasons only. "
                        "Winter days (wood smoke, inversions) are outside what it learned.")]

@@ -123,6 +123,30 @@ def test_live_scoreboard_reports_the_day_bootstrap_interval_vs_noaa():
     assert r4.issue_days == 4 and np.isnan(r4.ci_lo_vs_noaa) and np.isnan(r4.ci_hi_vs_noaa)
 
 
+def test_live_scoreboard_reports_fire_season_and_off_season_apart(tmp_path, monkeypatch):
+    from serein import live
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    (tmp_path / "test").mkdir()
+    study = SimpleNamespace(name="test")
+    s = pd.DataFrame({
+        "lead": 1, "issue_date": [date(2027, 7, 1), date(2027, 7, 1), date(2026, 11, 3)],
+        "valid_date": [date(2027, 7, 2), date(2027, 7, 2), date(2026, 11, 4)],
+        "obs": [40.0, 20.0, 8.0], "smokecast": [38.0, 21.0, 9.0],
+        "noaa_best": [30.0, 25.0, 12.0], "aqm_bc": np.nan, "persistence": np.nan,
+        "warn": [True, False, False]})
+    live._write_board(study, s, pd.DataFrame(), 2)
+    board = pd.read_csv(tmp_path / "test" / "scoreboard.csv")
+    assert board.columns[0] == "season"
+    assert board.set_index("season")["monitor_days"].to_dict() == {"fire": 2, "off": 1}
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert text.index("## Fire season") < text.index("## Off-season")
+
+    live._write_board(study, s.iloc[2:], pd.DataFrame(), 1)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Off-season" in text and "## Fire season" not in text
+
+
 def test_partial_airnow_day_is_read_but_not_frozen(tmp_path, monkeypatch):
     from serein.data import airnow
 

@@ -226,7 +226,8 @@ def score(study: Study, log=print) -> pd.DataFrame:
                           values=["smokecast", "warn"], aggfunc="first").reset_index()
     leads = sorted(fc["lead"].unique())
     try:
-        epa = compare_with_epa(study, wide[["issue_date", "point_id"]],
+        # pivot_table leaves two column levels; the merges inside need one.
+        epa = compare_with_epa(study, wide[["issue_date", "point_id"]].droplevel(1, axis=1),
                                wide["smokecast"][leads].to_numpy(float),
                                leads, pts.set_index("point_id"),
                                wide["warn"][leads].fillna(False).to_numpy(bool))

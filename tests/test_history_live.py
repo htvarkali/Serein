@@ -302,3 +302,48 @@ def test_forced_live_rerun_keeps_the_first_forecast_and_scores_only_it(tmp_path,
     clock[0] = datetime(2026, 11, 6, tzinfo=UTC)
     scored = live.score(study)
     assert scored["smokecast"].tolist() == first["smokecast"].tolist()
+
+
+def test_live_score_compares_with_the_official_epa_forecast(tmp_path, monkeypatch):
+    from serein import live
+    from serein.config import Region
+    from serein.eval import backtest
+
+    issued, valid = date(2026, 11, 3), date(2026, 11, 4)
+    areas = {"reporting_area": ["Sacramento", "Eugene"], "state": ["CA", "OR"]}
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 7, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+    pd.DataFrame({
+        "issue_date": issued, "valid_date": valid, "lead": 1, "point_id": ["A", "B"],
+        "kind": "epa", "on_time": True, "smokecast": [40.0, 6.0], "warn": [True, False],
+        "noaa_best": [20.0, 6.0], "aqm_bc": [20.0, 6.0], "persistence": [10.0, 6.0],
+    }).to_parquet(saved / "20261103.parquet", index=False)
+    monkeypatch.setattr(live, "load_points",
+                        lambda name: pd.DataFrame({"point_id": ["A", "B"], **areas}))
+    monkeypatch.setattr(live, "_observed", lambda *args: pd.DataFrame(
+        {"point_id": ["A", "B"], "valid_date": valid, "obs": [45.0, 5.0]}))
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day", lambda *args, **kwargs: None)
+    # EPA forecast Moderate for Sacramento, and the observed day was orange (USG).
+    monkeypatch.setattr(backtest, "load_forecasts", lambda days: pd.DataFrame({
+        "as_of": issued, "valid_date": valid, "lead": 1, "issue_date": issued, **areas,
+        "lat": [38.6, 44.1], "lon": [-121.5, -123.1], "category_idx": [1.0, 0.0]}))
+    monkeypatch.setattr(backtest, "load_observed_area_aqi", lambda days: pd.DataFrame(
+        {"valid_date": valid, **areas, "category_idx": [2.0, 0.0]}))
+    real_board, boards = live._write_board, []
+    monkeypatch.setattr(live, "_write_board",
+                        lambda *args: (boards.append(args[2]), real_board(*args)))
+    study = SimpleNamespace(
+        name="test", region=Region(lat_min=30, lat_max=50, lon_min=-125, lon_max=-110))
+    logs = []
+
+    live.score(study, log=logs.append)
+
+    assert not [line for line in logs if "EPA comparison skipped" in line]
+    epa = boards[0].set_index("who")
+    assert epa.loc["smokecast", "n_area_days"] == 2
+    assert (epa.loc["smokecast", "usg_pod"], epa.loc["epa_forecast", "usg_pod"]) == (1, 0)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "Official EPA AQI forecasts" in text

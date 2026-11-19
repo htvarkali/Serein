@@ -147,6 +147,21 @@ def test_live_scoreboard_reports_fire_season_and_off_season_apart(tmp_path, monk
     assert "## Off-season" in text and "## Fire season" not in text
 
 
+def test_model_fingerprint_changes_when_the_run_is_retrained_in_place(tmp_path):
+    from serein.live import model_fingerprint
+
+    for name in ("model.json", "smokecast.pt", "artifacts.pkl"):
+        (tmp_path / name).write_bytes(name.encode())
+    (tmp_path / "warn_cutoffs.json").write_text('{"0": 0.5}')
+    first = model_fingerprint(tmp_path)
+    assert model_fingerprint(tmp_path) == first
+    (tmp_path / "smokecast.pt").write_bytes(b"retrained weights")
+    second = model_fingerprint(tmp_path)
+    assert second != first
+    (tmp_path / "warn_cutoffs.json").write_text('{"0": 0.6}')
+    assert model_fingerprint(tmp_path) not in (first, second)
+
+
 def test_partial_airnow_day_is_read_but_not_frozen(tmp_path, monkeypatch):
     from serein.data import airnow
 
@@ -181,6 +196,7 @@ def test_live_forecast_exports_calibrated_bounds_and_checks_completion_time(
     monkeypatch.setattr(live, "plot_map", lambda *args, **kwargs: None)
     monkeypatch.setattr(live, "_git_rev", lambda: "test")
     monkeypatch.setattr(live, "warn_cutoffs", lambda run_dir: {0: 0.5})
+    monkeypatch.setattr(live, "model_fingerprint", lambda run_dir: "test-model")
     tab = pd.DataFrame({"point_id": ["A", "B"], "lat": [37., 38.], "lon": [-122., -121.],
                         "kind": ["epa", "epa"]})
     # The first forecast's median is negative. The second interval is shrunk past q25/q75.
@@ -215,6 +231,7 @@ def test_forced_live_rerun_keeps_the_first_forecast_and_scores_only_it(tmp_path,
     monkeypatch.setattr(live, "plot_map", lambda *args, **kwargs: None)
     monkeypatch.setattr(live, "_git_rev", lambda: "test")
     monkeypatch.setattr(live, "warn_cutoffs", lambda run_dir: {0: 0.5})
+    monkeypatch.setattr(live, "model_fingerprint", lambda run_dir: "test-model")
     tab = pd.DataFrame({"point_id": ["A", "B"], "lat": [37., 38.], "lon": [-122., -121.],
                         "kind": ["epa", "epa"]})
     runs = [torch.tensor([[[[1., 2., 3., 4., 5.]], [[1., 2., 3., 4., 5.]]]]),
@@ -238,6 +255,8 @@ def test_forced_live_rerun_keeps_the_first_forecast_and_scores_only_it(tmp_path,
     saved = tmp_path / "test" / "forecasts"
     pd.testing.assert_frame_equal(pd.read_parquet(saved / "20261103.parquet"), first)
     pd.testing.assert_frame_equal(pd.read_parquet(saved / "20261103.v2.parquet"), rerun)
+    assert set(first["model_sha256"]) == {"test-model"}
+    assert json.loads((saved / "20261103.json").read_text())["model_sha256"] == "test-model"
     assert rerun["on_time"].all() and not rerun["smokecast"].equals(first["smokecast"])
     hashes = (tmp_path / "test" / "forecast_hashes.txt").read_text().splitlines()
     assert [h.split()[-1] for h in hashes] == ["20261103.parquet", "20261103.v2.parquet"]

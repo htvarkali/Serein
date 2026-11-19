@@ -66,6 +66,17 @@ def warn_cutoffs(run_dir) -> dict[int, float]:
     return {int(k): float(v) for k, v in re.findall(r"(\d+): ([0-9.]+)", m.group(1))}
 
 
+def model_fingerprint(run_dir) -> str:
+    """SHA-256 of what a live forecast loads from the trained run. It changes when the
+    model is retrained under the same run name, which the run name alone would hide."""
+    h = hashlib.sha256()
+    for name in ("model.json", "smokecast.pt", "artifacts.pkl"):
+        with open(run_dir / name, "rb") as f:
+            h.update(hashlib.file_digest(f, "sha256").digest())
+    h.update(json.dumps(warn_cutoffs(run_dir), sort_keys=True).encode())
+    return h.hexdigest()
+
+
 # ------------------------------------------------------------------------ inputs
 def fetch_inputs(study: Study, d: date, log=print) -> dict:
     """Download everything the issue-time rules allow for issue day d."""
@@ -121,6 +132,7 @@ def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool =
     q = calibrate_quantiles(q, inp.cqr, QUANTILES)
     base = baselines(inp.tab, inp.prep, inp.leads)
     cuts = warn_cutoffs(run_dir)
+    model_sha = model_fingerprint(run_dir)
     kinds = inp.use.set_index("point_id").loc[inp.tab["point_id"], "kind"].to_numpy()
     rows = []
     for li, lead in enumerate(inp.leads):
@@ -140,9 +152,10 @@ def make_forecast(study: Study, d: date, run: str = "west_us_dev", force: bool =
     made_at = datetime.now(UTC)
     on_time = issue <= made_at <= issue + timedelta(hours=ON_TIME_HOURS)
     fc["on_time"] = on_time
+    fc["model_sha256"] = model_sha
     fc.to_parquet(out, index=False)
     meta = {"issue_date": str(d), "made_at_utc": made_at.isoformat(timespec="seconds"),
-            "issue_time_utc": issue.isoformat(), "model_run": run,
+            "issue_time_utc": issue.isoformat(), "model_run": run, "model_sha256": model_sha,
             "code_version": _git_rev(), "inputs": status, "on_time": bool(on_time),
             "n_monitors": int((fc["kind"] == "epa").sum() / len(inp.leads))}
     out.with_suffix(".json").write_text(json.dumps(meta, indent=1))

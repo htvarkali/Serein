@@ -226,15 +226,36 @@ def score(study: Study, log=print) -> pd.DataFrame:
                           values=["smokecast", "warn"], aggfunc="first").reset_index()
     leads = sorted(fc["lead"].unique())
     try:
-        # pivot_table leaves two column levels; the merges inside need one.
-        epa = compare_with_epa(study, wide[["issue_date", "point_id"]].droplevel(1, axis=1),
-                               wide["smokecast"][leads].to_numpy(float),
-                               leads, pts.set_index("point_id"),
-                               wide["warn"][leads].fillna(False).to_numpy(bool))
+        epa = _epa_by_season(study, wide, leads, pts.set_index("point_id"))
     except Exception as e:  # noqa: BLE001 - the scoreboard still works without it
         log(f"EPA comparison skipped: {e}")
     _write_board(study, s, epa, len(files))
     return s
+
+
+def _is_fire_season(days) -> np.ndarray:
+    return pd.to_datetime(pd.Series(days)).dt.month.between(6, 10).to_numpy()
+
+
+def _epa_by_season(study: Study, wide: pd.DataFrame, leads: list,
+                   pts: pd.DataFrame) -> pd.DataFrame:
+    """compare_with_epa once per season, split by the day forecast like the scoreboard."""
+    # pivot_table leaves two column levels; the merges inside need one.
+    keys = wide[["issue_date", "point_id"]].droplevel(1, axis=1)
+    pm = wide["smokecast"][leads].to_numpy(float)
+    warn = wide["warn"][leads].fillna(False).to_numpy(bool)
+    issued = pd.to_datetime(keys["issue_date"])
+    fire = np.stack([_is_fire_season(issued + pd.Timedelta(days=int(lead))) for lead in leads], 1)
+    parts = []
+    for season, keep in (("fire", fire), ("off", ~fire)):
+        rows = keep.any(axis=1)
+        if rows.any():
+            # A lead forecasting the other season gets no SmokeCast value, so it drops out.
+            e = compare_with_epa(study, keys[rows].reset_index(drop=True),
+                                 np.where(keep, pm, np.nan)[rows], leads, pts,
+                                 (warn & keep)[rows])
+            parts.append(e.assign(season=season))
+    return pd.concat(parts, ignore_index=True) if parts else pd.DataFrame()
 
 
 def _rmse(pred: pd.Series, obs: pd.Series) -> float:
@@ -297,7 +318,7 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                   ("Days are split by the day forecast (protocol 7b): June-October is the fire "
                    "season and the main live test; November-May is the off-season, reported "
                    "separately.")]
-        fire = pd.to_datetime(s["valid_date"]).dt.month.between(6, 10)
+        fire = _is_fire_season(s["valid_date"])
         tables = []
         for season, title, part in [("fire", "Fire season (June-October)", s[fire]),
                                     ("off", "Off-season (November-May)", s[~fire])]:
@@ -334,13 +355,13 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                         f"{_fmt(getattr(r, f'rmse_smokecast_vs_{m}'), '.2f')} | "
                         f"{_fmt(getattr(r, f'rmse_{m}'), '.2f')} | "
                         f"{_fmt(getattr(r, f'skill_vs_{m}'), '+.0%')} |")
+            e = epa[epa["season"] == season].drop(columns="season") if len(epa) else epa
+            if len(e):
+                lines += ["", "Official EPA AQI forecasts, same reporting areas and days:", "",
+                          "```", e.round(3).to_string(index=False), "```"]
         board = pd.concat(tables, ignore_index=True)
         board.insert(0, "season", board.pop("season"))
         board.to_csv(LIVE / study.name / "scoreboard.csv", index=False)
-        if len(epa):
-            lines += ["", ("Official EPA AQI forecasts, same reporting areas and days (both "
-                           "seasons together):"), "",
-                      "```", epa.round(3).to_string(index=False), "```"]
         lines += ["", ("Caveat: the model was trained on June-October fire seasons only. "
                        "Winter days (wood smoke, inversions) are outside what it learned.")]
     (LIVE / study.name / "SCOREBOARD.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

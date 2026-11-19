@@ -347,3 +347,42 @@ def test_live_score_compares_with_the_official_epa_forecast(tmp_path, monkeypatc
     assert (epa.loc["smokecast", "usg_pod"], epa.loc["epa_forecast", "usg_pod"]) == (1, 0)
     text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
     assert "Official EPA AQI forecasts" in text
+
+
+def test_live_epa_comparison_is_split_by_the_day_forecast(tmp_path, monkeypatch):
+    from serein import live
+
+    # Issued Oct 31: today is fire season, tomorrow (Nov 1) is off-season.
+    fc = pd.DataFrame({"issue_date": date(2026, 10, 31), "point_id": ["A", "A", "B", "B"],
+                       "lead": [0, 1, 0, 1], "smokecast": [40.0, 41.0, 6.0, 7.0],
+                       "warn": [True, True, False, False]})
+    wide = fc.pivot_table(index=["issue_date", "point_id"], columns="lead",
+                          values=["smokecast", "warn"], aggfunc="first").reset_index()
+    calls = {}
+
+    def fake_compare(study, test, pm, leads, pts, warn):
+        season = "fire" if np.isfinite(pm[:, 0]).all() else "off"
+        calls[season] = (pm, warn)
+        return pd.DataFrame({"lead": leads, "who": "smokecast", "n_area_days": 1})
+
+    monkeypatch.setattr(live, "compare_with_epa", fake_compare)
+    epa = live._epa_by_season(None, wide, [0, 1], None)
+
+    assert np.isnan(calls["fire"][0][:, 1]).all() and not calls["fire"][1][:, 1].any()
+    assert np.isnan(calls["off"][0][:, 0]).all() and np.isfinite(calls["off"][0][:, 1]).all()
+    assert calls["off"][1][:, 1].tolist() == [True, False]
+    assert sorted(epa["season"].unique()) == ["fire", "off"]
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    (tmp_path / "test").mkdir()
+    s = pd.DataFrame({
+        "lead": [0, 1], "issue_date": date(2026, 10, 31),
+        "valid_date": [date(2026, 10, 31), date(2026, 11, 1)], "obs": [40.0, 8.0],
+        "smokecast": [38.0, 9.0], "noaa_best": [30.0, 12.0], "aqm_bc": np.nan,
+        "persistence": np.nan, "warn": [True, False]})
+    live._write_board(SimpleNamespace(name="test"), s, epa, 1)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    fire, off = text.index("## Fire season"), text.index("## Off-season")
+    epa_tables = [i for i in range(len(text)) if text.startswith("Official EPA", i)]
+    assert len(epa_tables) == 2 and fire < epa_tables[0] < off < epa_tables[1]
+    assert "both seasons together" not in text

@@ -35,6 +35,7 @@ from serein.data import airnow, aqm, hms, hrrr
 from serein.data.availability import Availability
 from serein.data.points import load_points
 from serein.eval.backtest import _git_rev, compare_with_epa, prob_exceed
+from serein.eval.metrics import bootstrap_rmse_diff
 from serein.features.daily import obs_daily_means
 from serein.models.baselines import baselines
 from serein.models.conformal import calibrate_quantiles
@@ -236,6 +237,9 @@ def summarize(s: pd.DataFrame) -> pd.DataFrame:
         e_s = ((g["smokecast"] - g["obs"]) ** 2).mean()
         e_n = ((g["noaa_best"] - g["obs"]) ** 2).mean()
         rec["skill_vs_noaa"] = float(1 - np.sqrt(e_s / e_n)) if e_n > 0 else np.nan
+        ci = bootstrap_rmse_diff(g["smokecast"], g["noaa_best"], g["obs"], g["issue_date"])
+        rec["ci_lo_vs_noaa"] = ci.get("ci_lo", np.nan)
+        rec["ci_hi_vs_noaa"] = ci.get("ci_hi", np.nan)
         usg = g["obs"] >= 35.5
         rec["usg_days"] = int(usg.sum())
         rec["usg_caught"] = int((usg & g["warn"]).sum())
@@ -265,6 +269,16 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                          f"{r.rmse_noaa_best:.2f} | {r.rmse_aqm_bc:.2f} | {r.rmse_persistence:.2f} | "
                          f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
                          f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
+        lines += ["", ("Primary test (protocol section 6): SmokeCast's RMSE minus NOAA best's, "
+                       "with a 95% interval from 1000 resamples of whole issue days. It passes "
+                       "when the interval is entirely below 0 at leads 1 and 2 in the "
+                       "June-October fire season."), ""]
+        for r in t.itertuples():
+            if np.isnan(r.ci_lo_vs_noaa):
+                lines.append(f"- lead {r.lead}: needs 5 scored issue days (has {r.issue_days})")
+            else:
+                lines.append(f"- lead {r.lead}: {r.rmse_smokecast - r.rmse_noaa_best:+.2f} "
+                             f"({r.ci_lo_vs_noaa:+.2f} to {r.ci_hi_vs_noaa:+.2f})")
         if t["no_noaa_days"].sum():
             lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
                       + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]

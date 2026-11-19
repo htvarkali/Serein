@@ -104,6 +104,25 @@ def test_live_scoreboard_compares_with_noaa_on_the_same_monitor_days():
     assert r.skill_vs_noaa == pytest.approx(1 - r.rmse_smokecast / r.rmse_noaa_best)
 
 
+def test_live_scoreboard_reports_the_day_bootstrap_interval_vs_noaa():
+    from serein.live import summarize
+
+    rng = np.random.default_rng(0)
+    days = [date(2026, 11, 3) + timedelta(days=k) for k in range(6)]
+    obs = rng.uniform(5, 60, 6 * 4)
+    s = pd.DataFrame({
+        "lead": 1, "issue_date": np.repeat(days, 4), "obs": obs,
+        "smokecast": obs + rng.normal(0, 2, obs.size),
+        "noaa_best": obs + rng.normal(0, 10, obs.size), "aqm_bc": np.nan,
+        "persistence": np.nan, "warn": False})
+    r = summarize(s).iloc[0]
+    diff = r.rmse_smokecast - r.rmse_noaa_best
+    assert r.ci_lo_vs_noaa <= diff <= r.ci_hi_vs_noaa < 0
+    # Fewer than 5 issue days is too few to resample, so no interval is shown.
+    r4 = summarize(s[s["issue_date"] < days[4]]).iloc[0]
+    assert r4.issue_days == 4 and np.isnan(r4.ci_lo_vs_noaa) and np.isnan(r4.ci_hi_vs_noaa)
+
+
 def test_partial_airnow_day_is_read_but_not_frozen(tmp_path, monkeypatch):
     from serein.data import airnow
 

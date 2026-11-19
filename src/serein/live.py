@@ -46,6 +46,7 @@ from serein.models.infer import build_inputs, plot_map
 LIVE = Path(os.environ.get("SEREIN_LIVE", REPO_ROOT / "outputs" / "live"))
 ON_TIME_HOURS = 6  # a forecast made more than 6 h after issue time is not counted
 MODELS = ["smokecast", "noaa_best", "aqm_bc", "persistence"]
+OTHER_COMPETITORS = {"aqm_bc": "NOAA AQM", "persistence": "yesterday's value"}
 
 
 def live_dir(study: Study, sub: str):
@@ -235,6 +236,14 @@ def score(study: Study, log=print) -> pd.DataFrame:
     return s
 
 
+def _rmse(pred: pd.Series, obs: pd.Series) -> float:
+    return float(np.sqrt(((pred - obs) ** 2).mean()))
+
+
+def _fmt(x: float, spec: str) -> str:
+    return format(x, spec) if np.isfinite(x) else "n/a"
+
+
 def summarize(s: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for lead, g_all in s.groupby("lead"):
@@ -244,9 +253,17 @@ def summarize(s: pd.DataFrame) -> pd.DataFrame:
         g = g_all[both]
         rec = {"lead": int(lead), "monitor_days": len(g), "no_noaa_days": int((~both).sum()),
                "issue_days": g["issue_date"].nunique()}
-        for m in MODELS:
-            ok = g[m].notna()
-            rec[f"rmse_{m}"] = float(np.sqrt(((g.loc[ok, m] - g.loc[ok, "obs"]) ** 2).mean()))
+        for m in ("smokecast", "noaa_best"):
+            rec[f"rmse_{m}"] = _rmse(g[m], g["obs"])
+        # AQM and yesterday's value are each scored with SmokeCast on the monitor-days
+        # where both have a forecast (same rows, as in the backtest's head-to-head).
+        for m in OTHER_COMPETITORS:
+            p = g_all[g_all["smokecast"].notna() & g_all[m].notna()]
+            rec[f"monitor_days_vs_{m}"] = len(p)
+            rec[f"rmse_smokecast_vs_{m}"] = _rmse(p["smokecast"], p["obs"])
+            rec[f"rmse_{m}"] = _rmse(p[m], p["obs"])
+            rec[f"skill_vs_{m}"] = (1 - rec[f"rmse_smokecast_vs_{m}"] / rec[f"rmse_{m}"]
+                                    if rec[f"rmse_{m}"] > 0 else np.nan)
         e_s = ((g["smokecast"] - g["obs"]) ** 2).mean()
         e_n = ((g["noaa_best"] - g["obs"]) ** 2).mean()
         rec["skill_vs_noaa"] = float(1 - np.sqrt(e_s / e_n)) if e_n > 0 else np.nan
@@ -288,11 +305,11 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
             t = summarize(part)
             tables.append(t.assign(season=season))
             lines += ["", f"## {title}", "",
-                      "| lead | monitor-days | SmokeCast | NOAA best | NOAA AQM | yesterday's value | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
-                      "|---|---|---|---|---|---|---|---|---|---|"]
+                      "| lead | monitor-days | SmokeCast | NOAA best | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
+                      "|---|---|---|---|---|---|---|---|"]
             for r in t.itertuples():
                 lines.append(f"| {r.lead} | {r.monitor_days} | {r.rmse_smokecast:.2f} | "
-                             f"{r.rmse_noaa_best:.2f} | {r.rmse_aqm_bc:.2f} | {r.rmse_persistence:.2f} | "
+                             f"{r.rmse_noaa_best:.2f} | "
                              f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
                              f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
             lines += ["", "SmokeCast's RMSE minus NOAA best's (95% interval):", ""]
@@ -305,6 +322,17 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
             if t["no_noaa_days"].sum():
                 lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
                           + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
+            lines += ["", ("Other competitors, each scored with SmokeCast on the monitor-days "
+                           "where both have a forecast:"), "",
+                      "| lead | competitor | monitor-days | SmokeCast | competitor | skill |",
+                      "|---|---|---|---|---|---|"]
+            for r in t.itertuples():
+                for m, name in OTHER_COMPETITORS.items():
+                    lines.append(
+                        f"| {r.lead} | {name} | {getattr(r, f'monitor_days_vs_{m}')} | "
+                        f"{_fmt(getattr(r, f'rmse_smokecast_vs_{m}'), '.2f')} | "
+                        f"{_fmt(getattr(r, f'rmse_{m}'), '.2f')} | "
+                        f"{_fmt(getattr(r, f'skill_vs_{m}'), '+.0%')} |")
         board = pd.concat(tables, ignore_index=True)
         board.insert(0, "season", board.pop("season"))
         board.to_csv(LIVE / study.name / "scoreboard.csv", index=False)

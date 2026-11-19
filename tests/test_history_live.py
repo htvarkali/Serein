@@ -104,6 +104,39 @@ def test_live_scoreboard_compares_with_noaa_on_the_same_monitor_days():
     assert r.skill_vs_noaa == pytest.approx(1 - r.rmse_smokecast / r.rmse_noaa_best)
 
 
+
+def test_live_scoreboard_pairs_aqm_and_persistence_with_smokecast_on_shared_days(
+        tmp_path, monkeypatch):
+    from serein import live
+
+    nan = float("nan")
+    # AQM is missing on the hardest monitor-day and yesterday's value on another.
+    s = pd.DataFrame({
+        "lead": 1, "issue_date": date(2026, 11, 3), "valid_date": date(2026, 11, 4),
+        "obs": [50.0, 40.0, 10.0, 8.0], "smokecast": [30.0, 38.0, 12.0, 9.0],
+        "noaa_best": [45.0, 30.0, 14.0, 9.0], "aqm_bc": [nan, 30.0, 14.0, 9.0],
+        "persistence": [48.0, nan, 10.0, 8.0], "warn": False})
+    r = live.summarize(s).iloc[0]
+    # On its own days AQM's RMSE (6.2) is below SmokeCast's over all days (10.1), but on
+    # the days AQM forecast, SmokeCast's RMSE is 1.7.
+    assert r.monitor_days_vs_aqm_bc == 3
+    assert r.rmse_aqm_bc == pytest.approx(np.sqrt(39))
+    assert r.rmse_smokecast_vs_aqm_bc == pytest.approx(np.sqrt(3))
+    assert r.skill_vs_aqm_bc == pytest.approx(1 - np.sqrt(3) / np.sqrt(39))
+    assert r.monitor_days_vs_persistence == 3
+    assert r.rmse_persistence == pytest.approx(np.sqrt(4 / 3))
+    assert r.rmse_smokecast_vs_persistence == pytest.approx(np.sqrt(135))
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    (tmp_path / "test").mkdir()
+    live._write_board(SimpleNamespace(name="test"), s, pd.DataFrame(), 1)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "| 1 | NOAA AQM | 3 | 1.73 | 6.24 | +72% |" in text
+    assert "| 1 | yesterday's value | 3 | 11.62 | 1.15 | -906% |" in text
+    # The main table no longer puts AQM's own-days RMSE beside SmokeCast's all-days RMSE.
+    assert "6.24 | 1.15" not in text and "NOAA AQM | yesterday's value | skill" not in text
+
+
 def test_live_scoreboard_reports_the_day_bootstrap_interval_vs_noaa():
     from serein.live import summarize
 

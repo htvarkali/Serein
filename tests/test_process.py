@@ -146,7 +146,8 @@ def test_windows_handle_count_is_stable_across_repeated_commands(tmp_path):
     before = count()
     for _ in range(12):
         assert run_python(tmp_path, "pass").returncode == 0
-    assert count() == before
+    # Other code in the test process can close handles during the loop; only growth is a leak.
+    assert count() <= before
 
 
 @pytest.mark.skipif(os.name != "nt", reason="native Windows handle inheritance")

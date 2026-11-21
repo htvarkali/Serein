@@ -218,10 +218,10 @@ def score(study: Study, log=print) -> pd.DataFrame:
 
     # Official EPA category forecasts, on the same reporting areas and days.
     epa = pd.DataFrame()
-    days = sorted(s["issue_date"].unique())
+    # compare_with_epa scores every complete forecast, with or without a monitor reading.
     # Forecasts come from the issue day's file; the observed AQI of day v is in v's next file.
-    want = dict.fromkeys(days, True)
-    for v in s["valid_date"].unique():
+    want = dict.fromkeys(sorted(fc["issue_date"].unique()), True)
+    for v in fc["valid_date"].unique():
         f = v + timedelta(days=1)
         want[f] = want.get(f, False) or v >= last_ok - timedelta(days=4)
     for f, overwrite in sorted(want.items()):

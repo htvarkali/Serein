@@ -393,7 +393,9 @@ def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatc
 
     # The observed area AQI for day v is in the file for v + 1, so a lead-2 forecast
     # issued Nov 3 needs the Nov 6 file even when no forecast was issued Nov 4 or 5.
-    rows = [(date(2026, 10, 20), 1), (date(2026, 11, 3), 1), (date(2026, 11, 3), 2)]
+    # The Oct 22 file is both an old observation file and an issue-day file.
+    rows = [(date(2026, 10, 20), 1), (date(2026, 10, 22), 1), (date(2026, 11, 3), 1),
+            (date(2026, 11, 3), 2)]
     fc = pd.DataFrame({
         "issue_date": [d for d, _ in rows], "lead": [lead for _, lead in rows],
         "valid_date": [d + timedelta(days=lead) for d, lead in rows], "point_id": "A",
@@ -406,8 +408,10 @@ def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatc
     saved.mkdir(parents=True)
     fc.to_parquet(saved / "20261103.parquet", index=False)
     monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    # No monitor reading on Nov 4: the EPA comparison still scores that day's area AQI.
     monkeypatch.setattr(live, "_observed", lambda *args: fc[["point_id", "valid_date"]].assign(
-        valid_date=lambda f: pd.to_datetime(f["valid_date"]).dt.date, obs=10.0))
+        valid_date=lambda f: pd.to_datetime(f["valid_date"]).dt.date, obs=10.0)
+        .query("valid_date != @date(2026, 11, 4)"))
     calls = []
     monkeypatch.setattr(live.airnow, "download_reportingarea_day",
                         lambda d, overwrite=False: calls.append((d, overwrite)))
@@ -416,6 +420,7 @@ def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatc
     live.score(SimpleNamespace(name="test"), log=lambda *args: None)
 
     # Issue-day files are refreshed; observation files only within 4 days of the newest day.
-    assert calls == [(date(2026, 10, 20), True), (date(2026, 10, 22), False),
-                     (date(2026, 11, 3), True), (date(2026, 11, 5), True),
+    assert calls == [(date(2026, 10, 20), True), (date(2026, 10, 22), True),
+                     (date(2026, 10, 24), False), (date(2026, 11, 3), True),
+                     (date(2026, 11, 5), True),
                      (date(2026, 11, 6), True)]

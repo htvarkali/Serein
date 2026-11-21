@@ -219,9 +219,13 @@ def score(study: Study, log=print) -> pd.DataFrame:
     # Official EPA category forecasts, on the same reporting areas and days.
     epa = pd.DataFrame()
     days = sorted(s["issue_date"].unique())
-    for d in days:
-        airnow.download_reportingarea_day(d, overwrite=True)
-        airnow.download_reportingarea_day(d + timedelta(days=1), overwrite=d >= last_ok - timedelta(days=4))
+    # Forecasts come from the issue day's file; the observed AQI of day v is in v's next file.
+    want = dict.fromkeys(days, True)
+    for v in s["valid_date"].unique():
+        f = v + timedelta(days=1)
+        want[f] = want.get(f, False) or v >= last_ok - timedelta(days=4)
+    for f, overwrite in sorted(want.items()):
+        airnow.download_reportingarea_day(f, overwrite=overwrite)
     wide = fc.pivot_table(index=["issue_date", "point_id"], columns="lead",
                           values=["smokecast", "warn"], aggfunc="first").reset_index()
     leads = sorted(fc["lead"].unique())

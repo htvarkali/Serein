@@ -386,3 +386,36 @@ def test_live_epa_comparison_is_split_by_the_day_forecast(tmp_path, monkeypatch)
     epa_tables = [i for i in range(len(text)) if text.startswith("Official EPA", i)]
     assert len(epa_tables) == 2 and fire < epa_tables[0] < off < epa_tables[1]
     assert "both seasons together" not in text
+
+
+def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatch):
+    from serein import live
+
+    # The observed area AQI for day v is in the file for v + 1, so a lead-2 forecast
+    # issued Nov 3 needs the Nov 6 file even when no forecast was issued Nov 4 or 5.
+    rows = [(date(2026, 10, 20), 1), (date(2026, 11, 3), 1), (date(2026, 11, 3), 2)]
+    fc = pd.DataFrame({
+        "issue_date": [d for d, _ in rows], "lead": [lead for _, lead in rows],
+        "valid_date": [d + timedelta(days=lead) for d, lead in rows], "point_id": "A",
+        "kind": "epa", "on_time": True, "smokecast": 10.0, "warn": False,
+        "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0})
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 7, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+    fc.to_parquet(saved / "20261103.parquet", index=False)
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    monkeypatch.setattr(live, "_observed", lambda *args: fc[["point_id", "valid_date"]].assign(
+        valid_date=lambda f: pd.to_datetime(f["valid_date"]).dt.date, obs=10.0))
+    calls = []
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day",
+                        lambda d, overwrite=False: calls.append((d, overwrite)))
+    monkeypatch.setattr(live, "compare_with_epa", lambda *args: pd.DataFrame())
+
+    live.score(SimpleNamespace(name="test"), log=lambda *args: None)
+
+    # Issue-day files are refreshed; observation files only within 4 days of the newest day.
+    assert calls == [(date(2026, 10, 20), True), (date(2026, 10, 22), False),
+                     (date(2026, 11, 3), True), (date(2026, 11, 5), True),
+                     (date(2026, 11, 6), True)]

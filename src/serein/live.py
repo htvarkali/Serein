@@ -334,9 +334,9 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                       "| lead | monitor-days | SmokeCast | NOAA best | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
                       "|---|---|---|---|---|---|---|---|"]
             for r in t.itertuples():
-                lines.append(f"| {r.lead} | {r.monitor_days} | {r.rmse_smokecast:.2f} | "
-                             f"{r.rmse_noaa_best:.2f} | "
-                             f"{100 * r.skill_vs_noaa:+.0f}% | {r.usg_days} | "
+                lines.append(f"| {r.lead} | {r.monitor_days} | {_fmt(r.rmse_smokecast, '.2f')} | "
+                             f"{_fmt(r.rmse_noaa_best, '.2f')} | "
+                             f"{_fmt(r.skill_vs_noaa, '+.0%')} | {r.usg_days} | "
                              f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
             lines += ["", "SmokeCast's RMSE minus NOAA best's (95% interval):", ""]
             for r in t.itertuples():

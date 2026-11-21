@@ -180,6 +180,25 @@ def test_live_scoreboard_reports_fire_season_and_off_season_apart(tmp_path, monk
     assert "## Off-season" in text and "## Fire season" not in text
 
 
+def test_live_scoreboard_shows_n_a_for_a_lead_with_no_noaa_forecast(tmp_path, monkeypatch):
+    from serein import live
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    (tmp_path / "test").mkdir()
+    # Lead 2's only monitor-day has no NOAA forecast (that day's download failed).
+    s = pd.DataFrame({
+        "lead": [1, 1, 2], "issue_date": date(2026, 11, 3),
+        "valid_date": [date(2026, 11, 4), date(2026, 11, 4), date(2026, 11, 5)],
+        "obs": [40.0, 20.0, 8.0], "smokecast": [38.0, 21.0, 9.0],
+        "noaa_best": [30.0, 25.0, np.nan], "aqm_bc": np.nan, "persistence": np.nan,
+        "warn": False})
+    live._write_board(SimpleNamespace(name="test"), s, pd.DataFrame(), 1)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "| 1 | 2 | 1.58 | 7.91 | +80% | 1 | 0 / 0 | 0 / 0 |" in text
+    assert "| 2 | 0 | n/a | n/a | n/a | 0 | 0 / 0 | 0 / 0 |" in text
+    assert "nan" not in text
+
+
 def test_model_fingerprint_changes_when_the_run_is_retrained_in_place(tmp_path):
     from serein.live import model_fingerprint
 

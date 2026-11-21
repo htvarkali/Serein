@@ -224,12 +224,12 @@ def score(study: Study, log=print) -> pd.DataFrame:
     for v in fc["valid_date"].unique():
         f = v + timedelta(days=1)
         want[f] = want.get(f, False) or v >= last_ok - timedelta(days=4)
-    for f, overwrite in sorted(want.items()):
-        airnow.download_reportingarea_day(f, overwrite=overwrite)
     wide = fc.pivot_table(index=["issue_date", "point_id"], columns="lead",
                           values=["smokecast", "warn"], aggfunc="first").reset_index()
     leads = sorted(fc["lead"].unique())
     try:
+        for f, overwrite in sorted(want.items()):
+            airnow.download_reportingarea_day(f, overwrite=overwrite)
         epa = _epa_by_season(study, wide, leads, pts.set_index("point_id"))
     except Exception as e:  # noqa: BLE001 - the scoreboard still works without it
         log(f"EPA comparison skipped: {e}")

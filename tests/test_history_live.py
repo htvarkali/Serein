@@ -424,3 +424,35 @@ def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatc
                      (date(2026, 10, 24), False), (date(2026, 11, 3), True),
                      (date(2026, 11, 5), True),
                      (date(2026, 11, 6), True)]
+
+
+def test_live_score_writes_the_board_when_an_epa_download_fails(tmp_path, monkeypatch):
+    import requests
+
+    from serein import live
+
+    fc = pd.DataFrame({
+        "issue_date": [date(2026, 11, 3)], "lead": [1], "valid_date": [date(2026, 11, 4)],
+        "point_id": "A", "kind": "epa", "on_time": True, "smokecast": 10.0, "warn": False,
+        "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0})
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 7, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+    fc.to_parquet(saved / "20261103.parquet", index=False)
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    monkeypatch.setattr(live, "_observed", lambda *args: pd.DataFrame(
+        {"point_id": ["A"], "valid_date": [date(2026, 11, 4)], "obs": [12.0]}))
+
+    def unavailable(d, overwrite=False):
+        raise requests.HTTPError("503 Server Error")
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day", unavailable)
+    lines = []
+
+    scored = live.score(SimpleNamespace(name="test"), log=lambda *args: lines.append(" ".join(map(str, args))))
+
+    # The EPA comparison is optional, so a failed AirNow download only skips it.
+    assert len(scored) == 1
+    assert (tmp_path / "test" / "SCOREBOARD.md").exists()
+    assert any(line.startswith("EPA comparison skipped") for line in lines)

@@ -453,7 +453,7 @@ Both workflows are development diagnostics.
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
 | S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). The public page links to the repository and draft pilot protocol. Team bios and a dedicated contact address are still pending. | In progress | AbhinavGGarg | 2026-11-18 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
-| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)) | In progress | AbhinavGGarg | 2026-11-08 |
+| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)). Draft 3 (2026-11-23): all 61 references checked, titles, DOIs and dead links fixed; the [TEAM] items and the 2 attachments (best after the final test) are left | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |
 
 ### Q: Code quality

@@ -164,7 +164,7 @@ To reach the Summit and run one pilot season we need about $3,000 to $5,000: the
 
 [TEAM: copy the full citations from docs/METHODS.md (priors table) and docs/DATA.md (data sources). At minimum:]
 - CDC (2023). Most recent national asthma data, children under 18.
-- Sugrue et al. (2026). GeoHealth 10(2):e2025GH001530. Wildfire PM2.5 and pediatric asthma hospital encounters.
+- Sugrue et al. (2026). Wildfire-Specific PM2.5 Asthma Risk Across a Disproportionately Burdened Pediatric Population in Northern California. GeoHealth 10(2):e2025GH001530. https://doi.org/10.1029/2025GH001530
 - Khetsuriani et al. (2007). Viral infections and asthma exacerbations in children.
 - Williams et al. (2011). J Allergy Clin Immunol 128:1185. Inhaled corticosteroid adherence and asthma exacerbations.
 - Barkjohn, Gantt and Clements (2021). U.S.-wide correction for PurpleAir PM2.5 sensors.

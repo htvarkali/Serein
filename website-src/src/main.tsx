@@ -1,6 +1,8 @@
 import { createRoot } from "react-dom/client"
 import { PanelTabs, type Panel } from "./islands/PanelTabs"
 import type { Horizon } from "./islands/RmseBars"
+import { FigureViewer } from "./islands/FigureViewer"
+import { setupCountUp } from "./countUp"
 import "./islands.css"
 
 function readNumber(panel: Element, label: RegExp) {
@@ -48,3 +50,23 @@ for (const group of document.querySelectorAll<HTMLElement>("[data-switcher]")) {
     <PanelTabs panels={panels} initial={initial} ariaLabel={ariaLabel} tone={tone} onMounted={() => group.remove()} />
   )
 }
+
+// Charts mount into [data-island] slots. The slot keeps its static figure
+// until React replaces it, so the image stays if this script fails.
+// Chart code loads only on pages that have a chart.
+const islands = {
+  "forecast-explorer": () => import("./islands/ForecastExplorer").then(m => m.ForecastExplorer),
+  "checkin-explorer": () => import("./islands/CheckinExplorer").then(m => m.CheckinExplorer),
+}
+for (const slot of document.querySelectorAll<HTMLElement>("[data-island]")) {
+  const load = islands[slot.dataset.island as keyof typeof islands]
+  if (load) load().then(Island => createRoot(slot).render(<Island />))
+}
+
+const figureLinks = [...document.querySelectorAll<HTMLAnchorElement>('.figure-frame > a[href$=".png"]')]
+if (figureLinks.length) {
+  const host = document.body.appendChild(document.createElement("div"))
+  createRoot(host).render(<FigureViewer links={figureLinks} />)
+}
+
+setupCountUp()

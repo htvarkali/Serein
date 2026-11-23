@@ -101,29 +101,44 @@ function setupChapters() {
   update();
 }
 
-// Photos stay in place; looping clips fade in over them only when motion is
-// allowed and they are on screen. Nothing downloads under reduced motion.
+// Photos stay in place and looping clips fade in over them while on screen.
+// Every clip has a pause button (WCAG 2.2.2), and pausing is remembered.
 function setupMotionVideos() {
   const videos = document.querySelectorAll("video[data-motion]");
   if (!videos.length || !("IntersectionObserver" in window)) return;
-  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const key = "serein-motion";
+  const stored = () => { try { return localStorage.getItem(key); } catch { return null; } };
+  const store = value => { try { localStorage.setItem(key, value); } catch { /* private mode */ } };
+  const buttons = [];
 
   for (const video of videos) {
     let visible = false;
+    video.playbackRate = .8;
+    video.addEventListener("loadedmetadata", () => { video.playbackRate = .8; });
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "motion-toggle";
+    video.parentElement.append(button);
+    buttons.push(button);
+
     function sync() {
-      if (visible && !document.hidden && !motion.matches) {
-        video.play().catch(() => {});
-      } else {
-        video.pause();
-      }
-      if (motion.matches) video.classList.remove("is-playing");
+      const paused = stored() === "paused";
+      button.setAttribute("aria-label", paused ? "Play background video" : "Pause background video");
+      button.dataset.state = paused ? "paused" : "playing";
+      if (visible && !document.hidden && !paused) video.play().catch(() => {});
+      else video.pause();
     }
+    video.sync = sync;
+    button.addEventListener("click", () => {
+      store(stored() === "paused" ? "playing" : "paused");
+      for (const other of videos) other.sync();
+    });
     video.addEventListener("playing", () => video.classList.add("is-playing"));
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       sync();
     }).observe(video);
-    motion.addEventListener("change", sync);
     document.addEventListener("visibilitychange", sync);
   }
 }

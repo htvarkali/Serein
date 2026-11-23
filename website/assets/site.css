@@ -143,6 +143,15 @@ section[id] { scroll-margin-top: 1.25rem; }
 /* Motion clips start on the exact photo frame, so fading in over the photo is seamless. */
 .motion-video { display: block; opacity: 0; transition: opacity .9s ease; }
 .motion-video.is-playing { opacity: 1; }
+.motion-toggle {
+  position: absolute; z-index: 2; right: .75rem; bottom: .75rem; display: grid; place-items: center;
+  width: 2.5rem; height: 2.5rem; padding: 0; border: 1px solid #f8f8f059; border-radius: 50%;
+  background: #091615a6; color: var(--paper); cursor: pointer; backdrop-filter: blur(6px); transition: background .2s, border-color .2s;
+}
+.motion-toggle:hover { background: #091615e0; border-color: var(--sage); }
+.motion-toggle::before { content: ""; width: .7rem; height: .8rem; border-inline: .22rem solid currentColor; box-sizing: border-box; }
+.motion-toggle[data-state="paused"]::before { width: 0; height: 0; border-block: .42rem solid transparent; border-inline: .7rem solid currentColor; border-right: 0; margin-left: .2rem; }
+.home-hero > .motion-toggle { top: 6.5rem; bottom: auto; right: var(--gutter); }
 .hero-content { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, .85fr); gap: clamp(1.6rem, 4vw, 4.5rem); align-items: end; padding-block: 3rem 2.7rem; }
 .hero-heading h1 { font-size: clamp(4.1rem, 8.9vw, 8.7rem); margin-top: .7rem; line-height: .89; }
 .hero-heading h1 em { color: var(--sage); font-weight: 400; }
@@ -153,7 +162,9 @@ section[id] { scroll-margin-top: 1.25rem; }
 .hero-meta a:hover { text-decoration: underline; }
 .problem-split { align-items: center; }
 .problem-split > div p:last-child:not(.eyebrow) { max-width: 52ch; }
-.field-photo img { width: 100%; aspect-ratio: 5/4; object-fit: cover; object-position: 76% center; border-radius: .3rem; }
+.field-photo { position: relative; }
+.figure-frame.field-photo :is(img, video) { width: 100%; aspect-ratio: 5/4; object-fit: cover; object-position: 76% center; border-radius: .3rem; }
+.field-photo video { position: absolute; inset: 0 0 auto; }
 .project-section { padding-top: 0; }
 .project-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.1rem, 3.2vw, 3rem); margin-top: 2rem; }
 .project-card { display: grid; grid-template-rows: auto 1fr; text-decoration: none; border: 1px solid var(--border); background: var(--paper); border-radius: .35rem; overflow: hidden; }
@@ -207,6 +218,8 @@ section[id] { scroll-margin-top: 1.25rem; }
 .figure-frame img { border-radius: .3rem; object-fit: contain; }
 .figure-frame > a:hover img { outline: 2px solid currentColor; outline-offset: 3px; }
 .chart-grid { margin-top: clamp(2rem, 6vw, 5rem); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.15rem, 3vw, 2.5rem); align-items: start; }
+.explorer-slot { margin-top: clamp(2rem, 6vw, 5rem); }
+.chart-grid-single { grid-template-columns: minmax(0, 1fr); }
 .chart-grid img { width: 100%; aspect-ratio: 2/1; object-fit: contain; padding: .45rem; background: #fff; }
 #evaluation .figure-frame img { max-height: 36rem; width: 100%; }
 #main > .section + .section.light:not(.project-section) { border-top: 1px solid var(--border); }

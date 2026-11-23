@@ -9,7 +9,9 @@
   <link rel="icon" href="assets/favicon.png" type="image/png">
   <link rel="stylesheet" href="assets/site.css">
   <link rel="preload" href="assets/fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/islands/islands.css">
   <script src="assets/site.js" defer></script>
+  <script type="module" src="assets/islands/islands.js"></script>
 </head>
 <body class="home-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -69,6 +71,7 @@
         </div>
         <figure class="figure-frame field-photo">
           <img src="assets/photo-research.webp" alt="Smoke from the Hayes Fire rises above an evergreen valley in Olympic National Park" width="1440" height="1080" loading="lazy">
+          <video class="motion-video" muted loop playsinline preload="none" aria-hidden="true" data-motion><source src="assets/motion/hayes-fire.mp4" type="video/mp4"></video>
           <figcaption>Hayes Fire, Olympic National Park. <a href="https://npgallery.nps.gov/AssetDetail/b58cb24b-4938-4997-a887-32ed73561691">Courtesy U.S. National Parks</a>.</figcaption>
         </figure>
       </div>
@@ -115,8 +118,8 @@
         </div>
         <div>
           <dl class="comparison">
-            <div><dt>SmokeCast</dt><dd>7.9</dd></div>
-            <div><dt>AQM-first fallback</dt><dd>11.0</dd></div>
+            <div><dt>SmokeCast</dt><dd data-count-up>7.9</dd></div>
+            <div><dt>AQM-first fallback</dt><dd data-count-up>11.0</dd></div>
           </dl>
           <p class="caption">Next-day RMSE in µg/m³. Lower is better.</p>
         </div>

@@ -99,11 +99,14 @@
 
         <p class="caption">The fallback uses NOAA AQM first, then HRRR, then the previous day's measurement. The day-three comparison uses the previous day's measurement. <a href="https://github.com/htvarkali/Serein/blob/main/docs/results/head_to_head.csv">See the paired results</a>.</p>
 
-        <div class="chart-grid">
+        <div class="explorer-slot" data-island="forecast-explorer">
           <figure class="figure-frame">
             <a href="assets/fig_rmse_by_lead_all.png" aria-label="Open the historical forecast error chart at full size"><img src="assets/fig_rmse_by_lead_all.png" width="1156" height="680" loading="lazy" alt="Historical chart of forecast error by lead time for SmokeCast and several baselines."></a>
             <figcaption>Forecast error by lead time across available site-days.</figcaption>
           </figure>
+        </div>
+
+        <div class="chart-grid chart-grid-single">
           <figure class="figure-frame">
             <a href="assets/fig_case_530630047_L1.png" aria-label="Open the Spokane historical case study at full size"><img src="assets/fig_case_530630047_L1.png" width="1530" height="646" loading="lazy" alt="Spokane case study comparing measured pollution to the next-day SmokeCast forecast, its uncertainty interval, and a baseline."></a>
             <figcaption>Spokane, Washington, August 2023. SmokeCast's estimate rose during the event, but underestimated the peak.</figcaption>

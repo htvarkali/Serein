@@ -383,7 +383,8 @@ def run_backtest(study: Study, args) -> dict:
     # Head-to-head on IDENTICAL rows, with day-block bootstrap CIs.
     h2h = []
     for li, lead in enumerate(leads):
-        for b in ["noaa_best", "aqm_bc", "hrrr_smoke", "persistence", "gbm", "smokecast_nograph"]:
+        for b in ["noaa_best", "aqm_bc", "hrrr_smoke", "persistence", "persistence_morning",
+                  "gbm", "smokecast_nograph"]:
             if b not in allp:
                 continue
             ci = bootstrap_rmse_diff(allp["smokecast"][:, li], allp[b][:, li], obs[:, li], dates)

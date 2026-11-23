@@ -95,7 +95,11 @@ def test_dev_suite_runs_every_step_before_reporting_success(script_repo):
 def test_research_sweeps_stop_when_a_command_fails(script_repo, script, failed_step, called_steps):
     repo, env = script_repo
     env["SEREIN_TEST_FAIL"] = failed_step
-    result = subprocess.run([str(repo / "scripts" / script)], cwd=repo, env=env,
+    # Linux runs the script directly, which also checks its executable bit and shebang;
+    # Windows cannot execute a shell script directly, so it goes through bash there.
+    path = str(repo / "scripts" / script)
+    command = ["bash", path] if os.name == "nt" else [path]
+    result = subprocess.run(command, cwd=repo, env=env,
                             capture_output=True, text=True, check=False, timeout=10)
 
     assert result.returncode == 7

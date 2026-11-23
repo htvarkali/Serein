@@ -1,4 +1,6 @@
-# Reference list for the Innovation Brief attachment (task S-10), draft 2
+# Reference list for the Innovation Brief attachment (task S-10), draft 3
+
+Draft 3 (2026-11-23): every entry checked against Crossref, PubMed or the source page; titles, DOIs, pages and dead links corrected, duplicates marked. Items still marked [TEAM] need a person.
 
 Format: author/organization, year, title, venue, URL. Sections A and B are the
 model's own citations (from `docs/METHODS.md` and `docs/DATA.md`); sections C to F
@@ -8,13 +10,13 @@ known it is given; where only a journal citation exists, add the DOI before subm
 
 ## A. Model priors and clinical evidence (Q4, Q5; from METHODS.md)
 
-A1. Sugrue, R., et al. 2026. Wildfire-specific PM2.5 and pediatric asthma hospital encounters. GeoHealth 10(2): e2025GH001530. [TEAM: add DOI]
-A2. Khetsuriani, N., et al. 2007. Prevalence of viral respiratory tract infections in children with asthma. Journal of Allergy and Clinical Immunology 119(2): 314-321.
-A3. Williams, L. K., et al. 2011. Quantifying the proportion of severe asthma exacerbations attributable to inhaled corticosteroid nonadherence. Journal of Allergy and Clinical Immunology 128(6): 1185-1191.
-A4. Strickland, M. J., et al. 2010. Short-term associations between ambient air pollutants and pediatric asthma emergency department visits. American Journal of Respiratory and Critical Care Medicine 182(3): 307-316.
-A5. Gent, J. F., et al. 2009. Symptoms and medication use in children with asthma and traffic-related sources of fine particle pollution. Environmental Health Perspectives 117(7): 1168-1174. (Evidence considered and not used; cite only if Q4 mentions it.)
-A6. CDC. Asthma Call-back Survey (ACBS): definition of "not well controlled" asthma. https://www.cdc.gov/asthma/acbs/
-A7. US EPA. 2024. Final reconsideration of the PM NAAQS: updated AQI breakpoints for PM2.5. https://www.epa.gov/pm-pollution/final-reconsideration-national-ambient-air-quality-standards-particulate-matter-pm
+A1. Sugrue, R., et al. 2026. Wildfire-Specific PM2.5 Asthma Risk Across a Disproportionately Burdened Pediatric Population in Northern California. GeoHealth 10(2): e2025GH001530. https://doi.org/10.1029/2025GH001530
+A2. Khetsuriani, N., et al. 2007. Prevalence of viral respiratory tract infections in children with asthma. Journal of Allergy and Clinical Immunology 119(2): 314-321. https://doi.org/10.1016/j.jaci.2006.08.041
+A3. Williams, L. K., et al. 2011. Quantifying the proportion of severe asthma exacerbations attributable to inhaled corticosteroid nonadherence. Journal of Allergy and Clinical Immunology 128(6): 1185-1191.e2. https://doi.org/10.1016/j.jaci.2011.09.011
+A4. Strickland, M. J., et al. 2010. Short-term associations between ambient air pollutants and pediatric asthma emergency department visits. American Journal of Respiratory and Critical Care Medicine 182(3): 307-316. https://doi.org/10.1164/rccm.200908-1201OC
+A5. Gent, J. F., et al. 2009. Symptoms and medication use in children with asthma and traffic-related sources of fine particle pollution. Environmental Health Perspectives 117(7): 1168-1174. https://doi.org/10.1289/ehp.0800335 (Evidence considered and not used; cite only if Q4 mentions it.)
+A6. CDC. Asthma Call-back Survey (ACBS). https://www.cdc.gov/asthma/acbs/ [TEAM: this overview page does not itself define "not well controlled"; link the ACBS methodology or control-status page that does before citing that definition]
+A7. US EPA. 2024. Final Reconsideration of the National Ambient Air Quality Standards for Particulate Matter (PM) (final rule of Feb 7, 2024, which also revises the PM2.5 AQI). https://www.epa.gov/pm-pollution/final-reconsideration-national-ambient-air-quality-standards-particulate-matter-pm
 A8. Barkjohn, K. K., Gantt, B., Clements, A. L. 2021. Development and application of a United States-wide correction for PM2.5 data collected with the PurpleAir sensor. Atmospheric Measurement Techniques 14: 4617-4637. https://doi.org/10.5194/amt-14-4617-2021
 
 ## B. Data sources (Q4, Q5; from DATA.md and README)
@@ -25,20 +27,20 @@ B3. NASA FIRMS. Fire Information for Resource Management System. https://firms.m
 B4. NOAA GSL. HRRR-Smoke (High-Resolution Rapid Refresh with smoke). https://rapidrefresh.noaa.gov/hrrr/HRRRsmoke/ ; AWS Open Data: https://registry.opendata.aws/noaa-hrrr-pds/
 B5. NOAA NWS. National Air Quality Forecast Capability (AQM/NAQFC). AWS Open Data: https://registry.opendata.aws/noaa-nws-naqfc-pds/
 B6. PurpleAir. API documentation and pricing. https://develop.purpleair.com/ ; https://community.purpleair.com/t/api-pricing/4523
-B7. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. Evaluating PM2.5 forecasts for individual decisions. Bulletin of the American Meteorological Society 107(3). https://journals.ametsoc.org/view/journals/bams/107/3/BAMS-D-24-0291.1.xml (motivates the persistence baseline)
+B7. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision-Making in the Face of Increasing Wildfire Smoke. Bulletin of the American Meteorological Society 107(3): E598-E614. https://doi.org/10.1175/BAMS-D-24-0291.1 (motivates the persistence baseline)
 
 ## C. Health burden and smoke effects (Q3, Q6)
 
-1. CDC. 2026 (2023 data). Most Recent National Asthma Data. https://www.cdc.gov/asthma-data/about/most-recent-asthma-data.html
-2. Sugrue, R., et al. 2026. Wildfire PM2.5 and pediatric asthma hospital encounters. GeoHealth 10(2): e2025GH001530. [TEAM: full citation from METHODS.md]
-3. Aguilera, R., Corringham, T., Gershunov, A., Leibel, S., Benmarhnia, T. 2021. Fine Particles in Wildfire Smoke and Pediatric Respiratory Health in California. Pediatrics 147(4). https://pubmed.ncbi.nlm.nih.gov/33757996/
-4. Heft-Neal, S., et al. 2023. Emergency department visits respond nonlinearly to wildfire smoke. PNAS. https://stanford.edu/~samhn/papers/Heft-Neal%20et%20al%202023%20-%20PNAS.pdf
-5. Washington State Office of Financial Management. Wildfire smoke exposure and asthma: All-Payer Claims Database analysis, 2014-2018. https://ofm.wa.gov/sites/default/files/public/dataresearch/healthcare/pdf/smoke_exposure_extract.pdf
+1. CDC. 2026. Most Recent National Asthma Data (most figures are 2024 data; emergency and hospital figures are 2023; page reviewed Oct 6, 2026). https://www.cdc.gov/asthma-data/about/most-recent-asthma-data.html
+2. Same paper as A1; cite it once. Sugrue, R., et al. 2026. Wildfire-Specific PM2.5 Asthma Risk Across a Disproportionately Burdened Pediatric Population in Northern California. GeoHealth 10(2): e2025GH001530. https://doi.org/10.1029/2025GH001530
+3. Aguilera, R., Corringham, T., Gershunov, A., Leibel, S., Benmarhnia, T. 2021. Fine Particles in Wildfire Smoke and Pediatric Respiratory Health in California. Pediatrics 147(4): e2020027128. https://doi.org/10.1542/peds.2020-027128
+4. Heft-Neal, S., Gould, C. F., Childs, M. L., Kiang, M. V., Nadeau, K. C., Duggan, M., Bendavid, E., Burke, M. 2023. Emergency department visits respond nonlinearly to wildfire smoke. PNAS 120(39): e2302409120. https://doi.org/10.1073/pnas.2302409120
+5. Washington State Office of Financial Management. 2022 (August). Increased medical and emergency department claims for asthma after wildfire smoke exposure in Washington, 2014-2018. https://ofm.wa.gov/sites/default/files/public/dataresearch/healthcare/pdf/smoke_exposure_extract.pdf (now redirects to a /wp-content/uploads/ address; recheck before submitting)
 6. Oregon Health Authority. 2025. OHA data show poor air quality linked to more emergency visits. https://www.oregon.gov/oha/erd/pages/oha-data-show-poor-air-quality-linked-to-more-emergency-visits.aspx
-7. Gabbay, J., et al. 2025. Pediatric asthma hospitalizations in the United States, 2022 KID. Annals of the American Thoracic Society 22(10): 1611. https://academic.oup.com/annalsats/article/22/10/1611/8444111
-8. Pearson, W. S., et al. 2014. State-based Medicaid costs for pediatric asthma emergency department visits. Preventing Chronic Disease 11: 140139. https://cdc.gov/pcd/issues/2014/14_0139.htm
-9. AHRQ HCUP. 2024. Statistical Brief 311: Costs of emergency department visits, 2021. https://hcup-us.ahrq.gov/reports/statbriefs/sb311-ED-visit-costs-2021.pdf
-10. Nurmagambetov, T., Kuwahara, R., Garbe, P. 2018. The Economic Burden of Asthma in the United States, 2008-2013. Annals ATS 15(3). (cited via AAFA Asthma Facts and Figures, 2026: https://aafa.org/wp-content/uploads/2025/04/aafa-asthma-facts-and-figures.pdf)
+7. Gabbay, J. M., et al. 2025. National Economic Burden of Pediatric Asthma Hospitalizations. Annals of the American Thoracic Society 22(10): 1611-1614. https://doi.org/10.1513/AnnalsATS.202501-128RL [TEAM: the 2022 KID data source is not confirmed; full text not read]
+8. Pearson, W. S., Goates, S. A., Harrykissoon, S. D., Miller, S. A. 2014. State-based Medicaid costs for pediatric asthma emergency department visits. Preventing Chronic Disease 11: 140139. https://doi.org/10.5888/pcd11.140139
+9. Roemer, M. 2024 (September). Costs of Treat-and-Release Emergency Department Visits in the United States, 2021. HCUP Statistical Brief #311. AHRQ. https://hcup-us.ahrq.gov/reports/statbriefs/sb311-ED-visit-costs-2021.pdf
+10. Nurmagambetov, T., Kuwahara, R., Garbe, P. 2018. The Economic Burden of Asthma in the United States, 2008-2013. Annals of the American Thoracic Society 15(3): 348-356. https://doi.org/10.1513/annalsats.201703-259oc (also cited in AAFA Asthma Facts and Figures, updated April 2026: https://aafa.org/wp-content/uploads/2025/04/aafa-asthma-facts-and-figures.pdf)
 
 ## D. Market and payers (Q6, Q8, Q9)
 
@@ -47,9 +49,9 @@ B7. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. 
 13. Washington OSPI. About school districts (295 districts). https://ospi.k12.wa.us/about-ospi/about-school-districts
 14. NCES. 2025. Common Core of Data, 2023-24 summary table 1 (13,303 regular districts). https://nces.ed.gov/ccd/tables/202324_summary_1.asp
 15. KFF. 2026. Total Medicaid and CHIP child enrollment, July 2026. https://www.kff.org/medicaid/state-indicator/total-medicaid-and-chip-child-enrollment/
-16. Regional Asthma Management and Prevention (RAMP). 2025. Medi-Cal Asthma Preventive Services fact sheet. https://rampasthma.org/wp-content/uploads/2025/07/APS-Fact-Sheet-revised-June-2025.pdf
+16. Regional Asthma Management and Prevention (RAMP). 2025 (updated June 2025). California's Asthma Preventive Services Fact Sheet. https://rampasthma.org/wp-content/uploads/2025/07/APS-Fact-Sheet-revised.pdf
 17. Washington State Hospital Association. 2026. UW Medicine data and outreach connects patients to wildfire smoke guidance. https://members.wsha.org/weekly-newsletter/weekly-report-friday-july-10-thursday-july-16-2026/uw-medicine-data-and-outreach-connects-patient-to-critical-wildfire-smoke-guidance/
-18. Bay Area Air Quality Management District. 2023. RFP 2023-042, Spare the Air advertising and outreach. https://www.baaqmd.gov/~/media/files/administration/rfp-rfq/2023/rfp-2023-042-sta-advertising/rfp-2023-042-sta-advertising-and-outreach-pdf.pdf
+18. Bay Area Air Quality Management District. 2023 (Nov 13). RFP #2023-042, Advertising, Communications, and Survey Research Services for Spare the Air Program. https://www.baaqmd.gov/~/media/files/administration/rfp-rfq/2023/rfp-2023-042-sta-advertising/rfp-2023-042-sta-advertising-and-outreach-pdf.pdf
 19. Ventura County Air Pollution Control District. Farmworker wildfire smoke alert program. https://www.vcapcd.org/farmworker-wildfire-smoke-alert/
 20. Putnam County Board of Education. 2024. Agenda, June 27, 2024 (ParentSquare contract). https://meeting.boeconnect.net/Public/Agenda/546?meeting=641780
 21. Times News. 2025. LASD buys subscription for emergency system (Raptor pricing). https://www.tnonline.com/20250702/lasd-buys-subscription-for-emergency-system/
@@ -74,10 +76,10 @@ sources are numbered 48–53 below.
 31. California Air Resources Board. 2022. California Air Resources Board releases California Smoke Spotter 2.0. [Historical launch announcement](https://ww2.arb.ca.gov/news/california-air-resources-board-releases-california-smoke-spotter-2). A dated precedent, not confirmation of current app availability; not needed for the shortened Q7.
 32. Resmed. Propeller Health operating-status notice. [Current notice](https://www.resmed.com/en-us/health-professionals/solutions/propeller-health/).
 33. US EPA. Smoke Sense Study: A Citizen Science Project Using a Mobile App. [Project and app-availability notice](https://www.epa.gov/air-research/smoke-sense-study-citizen-science-project-using-mobile-app).
-34. AirRater. Environmental information, symptoms and personal alerts. [Current product page](https://airrater.org/). See also the developer listing, reference 50.
-35. Liao, K., Buch, J., Lamb, K., Gentine, P. 2025. Simulating the air quality impact of prescribed fires using graph neural network-based PM2.5 forecasts. Environmental Data Science. [Published paper, DOI 10.1017/eds.2025.4](https://doi.org/10.1017/eds.2025.4). This is the paper in the original NSF PAR 10611007 reference.
+34. AirRater. Environmental information, symptoms and personal alerts. [App Store listing](https://apps.apple.com/au/app/airrater/id1050535426); see also the developer listing, reference 50. (airrater.org currently redirects to a browser safety warning, so it is not linked.)
+35. Liao, K., Buch, J., Lamb, K., Gentine, P. 2025. Simulating the air quality impact of prescribed fires using graph neural network-based PM2.5 forecasts. Environmental Data Science 4: e11. [Published paper, DOI 10.1017/eds.2025.4](https://doi.org/10.1017/eds.2025.4). This is the paper in the original NSF PAR 10611007 reference.
 36. Dong, Z., Mao, J., Sayeed, A., Gupta, P., Zhao, T., Ahmadov, R., James, E. 2026. Machine Learning Bias Correction of HRRR-Smoke Surface PM2.5 Forecasts during the Alaska Wildfire Season. ACS ES&T Air 3(5): 1263–1275. [NOAA publication record and abstract](https://repository.library.noaa.gov/view/noaa/74016); [DOI 10.1021/acsestair.5c00409](https://doi.org/10.1021/acsestair.5c00409).
-37. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A., Broderick, T. 2025, version 2. Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision Making in the Face of Increasing Wildfire Smoke. [Author manuscript actually reviewed, arXiv 2409.05866v2](https://arxiv.org/html/2409.05866v2). The journal page could not be retrieved in this check; claims here are tied to this identified manuscript version.
+37. Same work as B7 (published version, cite once). The earlier check read the arXiv manuscript 2409.05866v2; the journal page (published March 24, 2026) now loads. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. Are Hourly PM2.5 Forecasts Sufficiently Accurate to Plan Your Day? Individual Decision-Making in the Face of Increasing Wildfire Smoke. Bulletin of the American Meteorological Society 107(3): E598-E614. https://doi.org/10.1175/BAMS-D-24-0291.1
 38. Liu, Y., Ma, J., Dhillon, P., Mei, Q. 2024. PM2.5 forecasting under distribution shift: A graph learning approach. AI Open 5: 23–29. [Published paper, DOI 10.1016/j.aiopen.2023.11.001](https://doi.org/10.1016/j.aiopen.2023.11.001).
 39. Kim, P., et al. 2025. mHealth Intervention Integrating Personal PM2.5 Monitoring and Deep Learning to Reduce Pediatric Asthma Exacerbations: Pilot Study. JMIR Preprints 84513, September 22. [Preprint and status page](https://preprints.jmir.org/preprint/84513), DOI 10.2196/preprints.84513. Do not describe this source as a validated Serein intervention.
 
@@ -89,7 +91,7 @@ sources are numbered 48–53 below.
 43. PurpleAir. 2023. API pricing. https://community.purpleair.com/t/api-pricing/4523
 44. USPTO. 2026. Fee schedule. https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule
 45. Space Center Houston. 2026. Conrad Challenge 2026-27 Student Guide. https://conrad.spacecenter.org/wp-content/uploads/2026/08/2026-2027-Conrad-Challenge-Student-Guide-Official.pdf
-46. Conrad Challenge. 2024-25 prizes (1517 Fund, AWS credits). https://www.conradchallenge.org/24-25conradprizes
+46. Conrad Challenge. 2024-25 Conrad Challenge Awards. https://conrad.spacecenter.org/?p=86349 [TEAM: conradchallenge.org is now a parked domain; the 1517 Fund and AWS credit details were not visible on this page in the 2026-11-23 check, so confirm them before citing]
 47. Davidson Institute. Davidson Fellows Scholarship, 2027 cycle. https://www.davidsongifted.org/gifted-programs/fellows-scholarship/eligibility/how-to-apply/
 
 ## Additional competition references (Q7)
@@ -102,6 +104,13 @@ Accessed November 7, 2026.
 51. Wang, R., Bhudia, A., Dos Remedios, B., Teng, M., Ng, R. 2020. Dense Forecasting of Wildfire Smoke Particulate Matter Using Sparsity Invariant Convolutional Neural Networks. Workshop preprint, arXiv 2009.11362. [Abstract and version record](https://arxiv.org/abs/2009.11362); [full text](https://arxiv.org/html/2009.11362v1).
 52. Dimri, R., Choi, Y., Salman, A. K., Park, J., Singh, D. 2024. AGATNet: An Adaptive Graph Attention Network for Bias Correction of CMAQ-Forecasted PM2.5 Concentrations Over South Korea. Journal of Geophysical Research: Machine Learning and Computation 1(3): e2024JH000244. [Published paper, DOI 10.1029/2024JH000244](https://doi.org/10.1029/2024JH000244).
 53. Resmed. 2018. ResMed to Acquire Propeller Health, a Leader in COPD and Asthma Connected Health Solutions, for $225 Million. [Historical product description, December 3](https://newsroom.resmed.com/news-releases/news-details/2018/ResMed-to-Acquire-Propeller-Health-a-Leader-in-COPD-and-Asthma-Connected-Health-Solutions-for-225-Million/default.aspx). Current operating status is documented separately in reference 32.
+
+## Novelty check (Q4), added 2026-11-23
+
+54. Huang, J., McQueen, J., Wilczak, J., et al. 2017. Improving NOAA NAQFC PM2.5 Predictions with a Bias Correction Approach. Weather and Forecasting 32(2): 407-421. https://doi.org/10.1175/WAF-D-16-0118.1
+55. Hamer, S., Sleeman, J., Stajner, I. 2023. Forecast-Aware Model Driven LSTM. arXiv 2303.12963. https://arxiv.org/abs/2303.12963
+56. Su, J. G., Barrett, M. A., Henderson, K., et al. 2017. Feasibility of Deploying Inhaler Sensors to Identify the Impacts of Environmental Triggers and Built Environment Factors on Asthma Short-Acting Bronchodilator Use. Environmental Health Perspectives 125(2): 254-261. https://doi.org/10.1289/EHP266
+57. Google. Air Quality API overview (hourly forecasts up to 96 h on a 500 m grid). https://developers.google.com/maps/documentation/air-quality/overview [TEAM: recheck the product claims on the day before submitting]
 
 ## Optional attachments (up to 2): recommendation
 

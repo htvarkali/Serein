@@ -193,15 +193,18 @@ def model_parts(files: list[Path]) -> dict[Path, tuple[str, str]]:
 
     Protocol 7b splits the live scoreboard when the model is replaced. A new part starts
     when the run name changes, or when two recorded fingerprints differ (a retrain under
-    the same name). Forecasts saved before fingerprints were recorded stay with their run."""
-    parts, run_before, sha_before, start = {}, None, None, ""
+    the same name). Forecasts saved before fingerprints were recorded stay with their run,
+    and one whose record is missing or unreadable stays with the forecast before it."""
+    parts, run, sha_before, start = {}, None, None, ""
     for f in sorted(files):
-        meta = f.with_suffix(".json")
-        info = json.loads(meta.read_text(encoding="utf-8")) if meta.exists() else {}
-        run, sha = info.get("model_run") or "not recorded", info.get("model_sha256")
-        if run != run_before or (sha and sha_before and sha != sha_before):
-            start, sha_before = f"{f.stem[:4]}-{f.stem[4:6]}-{f.stem[6:8]}", None
-        run_before, sha_before = run, sha or sha_before
+        try:
+            info = json.loads(f.with_suffix(".json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            info = {}
+        named, sha = (info.get("model_run"), info.get("model_sha256")) if isinstance(info, dict) else (None, None)
+        if run is None or named and (named != run or sha and sha_before and sha != sha_before):
+            run, start, sha_before = named or "not recorded", f"{f.stem[:4]}-{f.stem[4:6]}-{f.stem[6:8]}", None
+        sha_before = sha or sha_before
         parts[f] = (run, start)
     return parts
 
@@ -244,17 +247,18 @@ def score(study: Study, log=print) -> pd.DataFrame:
     for v in fc["valid_date"].unique():
         f = v + timedelta(days=1)
         want[f] = want.get(f, False) or v >= last_ok - timedelta(days=4)
-    # One comparison per trained model, like the scoreboard; a new model may not have
-    # every lead scored yet.
+    # One comparison per trained model on the scoreboard, so only models with scored rows;
+    # a new model may not have every lead scored yet.
     wides = [(start, part.pivot_table(index=["issue_date", "point_id"], columns="lead",
                                       values=["smokecast", "warn"], aggfunc="first").reset_index(),
-              sorted(part["lead"].unique())) for start, part in fc.groupby("model_from", sort=True)]
+              sorted(part["lead"].unique())) for start, part in fc.groupby("model_from", sort=True)
+             if start in set(s["model_from"])]
     try:
         for f, overwrite in sorted(want.items()):
             airnow.download_reportingarea_day(f, overwrite=overwrite)
         epa = pd.concat([_epa_by_season(study, wide, leads, pts.set_index("point_id"))
                          .assign(model_from=start) for start, wide, leads in wides],
-                        ignore_index=True)
+                        ignore_index=True) if wides else pd.DataFrame()
     except Exception as e:  # noqa: BLE001 - the scoreboard still works without it
         log(f"EPA comparison skipped: {e}")
     _write_board(study, s, epa, len(files))

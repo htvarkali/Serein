@@ -487,7 +487,12 @@ def test_live_forecasts_are_grouped_by_the_model_that_made_them(tmp_path):
         (tmp_path / f"{stem}.parquet").write_bytes(b"")
         meta = {"model_run": run} | ({"model_sha256": sha} if sha else {})
         (tmp_path / f"{stem}.json").write_text(json.dumps(meta), encoding="utf-8")
+    # A record that is missing or unreadable keeps the forecast with the model before it.
     (tmp_path / "20261125.parquet").write_bytes(b"")
+    (tmp_path / "20261126.parquet").write_bytes(b"")
+    (tmp_path / "20261126.json").write_text("", encoding="utf-8")
+    (tmp_path / "20261127.parquet").write_bytes(b"")
+    (tmp_path / "20261127.json").write_text(json.dumps({"model_run": "west_us_dev"}), encoding="utf-8")
     parts = model_parts(sorted(tmp_path.glob("*.parquet"), reverse=True))
     # Fingerprints started on Nov 19, so Nov 3 stays with west_us_dev; Nov 21 was a retrain.
     assert {f.stem: part for f, part in parts.items()} == {
@@ -495,7 +500,11 @@ def test_live_forecasts_are_grouped_by_the_model_that_made_them(tmp_path):
         "20261120": ("west_us_dev", "2026-11-03"), "20261121": ("west_us_dev", "2026-11-21"),
         "20261123": ("west_us_live_v1", "2026-11-23"),
         "20261124": ("west_us_live_v1", "2026-11-23"),
-        "20261125": ("not recorded", "2026-11-25")}
+        "20261125": ("west_us_live_v1", "2026-11-23"),
+        "20261126": ("west_us_live_v1", "2026-11-23"), "20261127": ("west_us_dev", "2026-11-27")}
+    (tmp_path / "20261103.json").unlink()
+    assert model_parts([tmp_path / "20261103.parquet"]) == {
+        tmp_path / "20261103.parquet": ("not recorded", "2026-11-03")}
 
 
 def test_live_scoreboard_scores_each_trained_model_separately(tmp_path, monkeypatch):
@@ -507,13 +516,14 @@ def test_live_scoreboard_scores_each_trained_model_separately(tmp_path, monkeypa
     saved = tmp_path / "test" / "forecasts"
     saved.mkdir(parents=True)
 
-    def save(day, leads, smokecast, run):
+    def save(day, leads, smokecast, run, sha=None):
         pd.DataFrame({
             "issue_date": day, "lead": leads, "valid_date": [day + timedelta(days=k) for k in leads],
             "point_id": "A", "kind": "epa", "on_time": True, "smokecast": smokecast, "warn": False,
             "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0,
         }).to_parquet(saved / f"{day:%Y%m%d}.parquet", index=False)
-        (saved / f"{day:%Y%m%d}.json").write_text(json.dumps({"model_run": run}), encoding="utf-8")
+        meta = {"model_run": run} | ({"model_sha256": sha} if sha else {})
+        (saved / f"{day:%Y%m%d}.json").write_text(json.dumps(meta), encoding="utf-8")
 
     # The new model's forecast has only lead 1 so far.
     save(date(2026, 11, 21), [1, 2], 12.0, "west_us_dev")
@@ -547,6 +557,25 @@ def test_live_scoreboard_scores_each_trained_model_separately(tmp_path, monkeypa
     assert board.groupby("model_from")["lead"].apply(list).to_dict() == {
         "2026-11-21": [1, 2], "2026-11-23": [1]}
     assert set(board["model_run"]) == {"west_us_dev", "west_us_live_v1"}
+
+    # Until the new model has a scored monitor-day, the board and the EPA comparison show only the old one.
+    observed = live._observed
+    monkeypatch.setattr(live, "_observed", lambda *args: observed(*args).iloc[:2])
+    live.score(SimpleNamespace(name="test"), log=lines.append)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Model" not in text and "2026-11-21" in text.split("Official EPA")[1]
+    assert "2026-11-23" not in text.split("Official EPA")[1]
+    monkeypatch.setattr(live, "_observed", observed)
+
+    # A retrain under the same run name is a new model too.
+    save(date(2026, 11, 21), [1, 2], 12.0, "west_us_dev", sha="aaa")
+    save(date(2026, 11, 23), [1], 14.0, "west_us_dev", sha="bbb")
+    live.score(SimpleNamespace(name="test"), log=lines.append)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Model west_us_dev, forecasts issued 2026-11-21 to 2026-11-21" in text
+    assert "## Model west_us_dev, forecasts issued 2026-11-23 to 2026-11-23" in text
+    assert pd.read_csv(tmp_path / "test" / "scoreboard.csv")["model_from"].nunique() == 2
+    assert not lines
 
     # With one model the board keeps its single set of tables.
     (saved / "20261123.json").write_text(json.dumps({"model_run": "west_us_dev"}), encoding="utf-8")

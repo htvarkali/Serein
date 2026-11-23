@@ -53,11 +53,11 @@ SmokeCast forecasts the daily average smoke level (PM2.5) at every air monitor a
 
 AirPlan prototypes a personal risk estimate using a population prior and per-child symptom history. The app demonstrates it with a synthetic child; its separate six-question check-in form accepts fictional entries and does not yet update that demonstration model. Connecting real histories requires observed exposure data, consent and clinical review. English and Spanish draft messages can be generated, with a public-guidance floor and reminders to follow the child's own clinician-approved asthma plan. Clinical and native-speaker reviews remain open tasks.
 
-**What is new.**
-1. Correcting NOAA's smoke forecast with live monitor readings, and checking the result against NOAA and EPA on days the model never saw.
-2. Forecasts for places with no monitor. When we hid 20% of monitors from the model, its forecasts at those hidden sites still beat NOAA's (8.4 vs. 11.1 µg/m³ error, one day ahead).
-3. A per-child smoke sensitivity estimate from a check-in a parent can finish in under a minute.
-[TEAM: verify with a literature search (D-6) that no published tool does all three before keeping "new" claims.]
+**What is new.** Each piece has related work; the combination is what we did not find published.
+1. A graph network over the U.S. monitor network that corrects NOAA's HRRR-Smoke and AQM forecasts, scored on held-out days against EPA's official AQI forecasts. NOAA has corrected its own PM2.5 forecast with past analogs (Huang et al., 2017) and with machine learning that does not use a graph (Hamer et al., 2023), a graph network has corrected the CMAQ model's PM2.5 forecasts in South Korea (Dimri et al., 2024), and another has forecast California PM2.5 without NOAA inputs or an official comparison (Liao et al., 2025).
+2. A measured check at places with no monitor. When we hid 20% of monitors from the model, its forecasts there still beat NOAA's (8.4 vs. 11.1 µg/m³ error, one day ahead). Grid forecasts already exist (for example Google's Air Quality API); what we add is evidence of accuracy away from monitors.
+3. A per-child smoke sensitivity estimate from a check-in a parent can finish in under a minute. A hierarchical model lets a child with few reports borrow from the group, and the estimate sets that child's green, yellow and red plan. Apps such as AirRater already log symptoms and personal triggers; we add an uncertainty-aware estimate tied to a smoke forecast.
+[TEAM: literature search done 2026-11-23 (notes in docs/drafts/novelty_check_2026-11-23.md). Before submitting, read the full text of Dimri et al. 2024 (reference 52) and find Dong et al. (machine-learning correction of HRRR-Smoke in Alaska, ACS ES&T Air), which was seen in search results only; cite Dong if it holds up.]
 
 **Results so far (development mode, 2023 held-out weeks, rerun 2026-11-23 on the current pipeline).** Error is RMSE in µg/m³, which gives larger misses more weight.
 

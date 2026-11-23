@@ -105,6 +105,13 @@ Accessed November 7, 2026.
 52. Dimri, R., Choi, Y., Salman, A. K., Park, J., Singh, D. 2024. AGATNet: An Adaptive Graph Attention Network for Bias Correction of CMAQ-Forecasted PM2.5 Concentrations Over South Korea. Journal of Geophysical Research: Machine Learning and Computation 1(3): e2024JH000244. [Published paper, DOI 10.1029/2024JH000244](https://doi.org/10.1029/2024JH000244).
 53. Resmed. 2018. ResMed to Acquire Propeller Health, a Leader in COPD and Asthma Connected Health Solutions, for $225 Million. [Historical product description, December 3](https://newsroom.resmed.com/news-releases/news-details/2018/ResMed-to-Acquire-Propeller-Health-a-Leader-in-COPD-and-Asthma-Connected-Health-Solutions-for-225-Million/default.aspx). Current operating status is documented separately in reference 32.
 
+## Novelty check (Q4), added 2026-11-23
+
+54. Huang, J., McQueen, J., Wilczak, J., et al. 2017. Improving NOAA NAQFC PM2.5 Predictions with a Bias Correction Approach. Weather and Forecasting 32(2): 407-421. https://doi.org/10.1175/WAF-D-16-0118.1
+55. Hamer, S., Sleeman, J., Stajner, I. 2023. Forecast-Aware Model Driven LSTM. arXiv 2303.12963. https://arxiv.org/abs/2303.12963
+56. Su, J. G., Barrett, M. A., Henderson, K., et al. 2017. Feasibility of Deploying Inhaler Sensors to Identify the Impacts of Environmental Triggers and Built Environment Factors on Asthma Short-Acting Bronchodilator Use. Environmental Health Perspectives 125(2): 254-261. https://doi.org/10.1289/EHP266
+57. Google. Air Quality API overview (hourly forecasts up to 96 h on a 500 m grid). https://developers.google.com/maps/documentation/air-quality/overview [TEAM: recheck the product claims on the day before submitting]
+
 ## Optional attachments (up to 2): recommendation
 
 The Student Guide allows two attachments beyond the reference list. Judges skim; pick the

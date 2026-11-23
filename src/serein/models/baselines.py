@@ -5,6 +5,9 @@
 * hrrr_smoke       NOAA HRRR-Smoke near-surface smoke + the site's clean-air background
                    (HRRR-Smoke only models smoke, so we add typical non-smoke PM2.5)
 * aqm_bc           NOAA's official AQM PM2.5 forecast, bias-corrected (to 72 h)
+* persistence_morning  L0-L1 only: mean of the 6 observed hours ending at the issue-time
+                   cutoff (hours starting 11-16 UTC), carried forward. Pre-registered on
+                   2026-11-23 (review item 7, after Berlinghieri et al. 2026); L2-L3 are NaN.
 * noaa_best        legacy key: AQM-bc where it exists, else HRRR+bg, else persistence.
                    This is an availability fallback, including a non-NOAA last resort.
 """
@@ -31,6 +34,9 @@ def baselines(df: pd.DataFrame, prep: Prep, leads: list[int]) -> dict[str, np.nd
         "hrrr_smoke": np.stack([_col(d, f"hrrr_pm_L{lead}") for lead in leads], 1),
         "aqm_bc": np.stack([_col(d, f"aqm_mean_L{lead}") for lead in leads], 1),
     }
+    morning = _col(d, "obs_last6")
+    out["persistence_morning"] = np.stack(
+        [morning if lead <= 1 else np.full(len(d), np.nan) for lead in leads], 1)
     best = out["aqm_bc"].copy()
     best = np.where(np.isfinite(best), best, out["hrrr_smoke"])
     best = np.where(np.isfinite(best), best, out["persistence"])

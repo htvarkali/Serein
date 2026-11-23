@@ -309,20 +309,20 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 
 **Status key:** **Done** = finished and merged · **In progress** = claimed, being worked on · **Open** = free to claim · **Blocked** = waiting on something outside the repo. ⭐ = on the critical path for the headline result. **(non-code)** = needs a person, not code.
 
-### Summary: what is left (updated 2026-11-07)
+### Summary: what is left (updated 2026-11-23)
 
 | Area | Done | In progress | Open | Blocked |
 |---|---|---|---|---|
-| A: Data pipeline | 13 | 1 | 1 | 0 |
-| B: SmokeCast (Model 1) | 16 | 1 | 3 | 0 |
+| A: Data pipeline | 14 | 0 | 1 | 0 |
+| B: SmokeCast (Model 1) | 17 | 0 | 3 | 0 |
 | C: AirPlan (Model 2) | 10 | 0 | 3 | 0 |
-| D: Proof & science | 8 | 0 | 3 | 1 |
-| E: Product & pitch | 4 | 0 | 7 | 0 |
-| S: Submission (Conrad) | 2 | 0 | 9 | 0 |
-| Q: Code quality | 6 | 2 | 1 | 0 |
+| D: Proof & science | 9 | 0 | 3 | 1 |
+| E: Product & pitch | 4 | 2 | 5 | 0 |
+| S: Submission (Conrad) | 2 | 3 | 6 | 0 |
+| Q: Code quality | 9 | 0 | 0 | 0 |
 
-The `htvarkali` items below are implemented on the reliability/QC branch and
-remain **In progress** until reviewed and merged. Historical results are unchanged.
+The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
+checked against main on 2026-11-23.
 
 **Most urgent open work, in order:**
 1. S-1 Confirm in the Conrad portal that the Lean Canvas was submitted (due Oct 29) and which category was chosen. If it was not submitted, the entry cannot compete.
@@ -345,7 +345,7 @@ remain **In progress** until reviewed and merged. Historical results are unchang
 | A-9 | "No peeking" rules: only data that existed at issue time | Done | Aadi-Tiwari | 2026-11-01 |
 | A-10 ⭐ | Full download of all 5 seasons (EPA, HMS, HRRR, AQM); about 2.2 GB on disk | Done | Aadi-Tiwari | 2026-11-01 |
 | A-11 | AQM archive v5/v6/v7 loader (v5 to 2021-07-19 is 48 h only) | Done | Aadi-Tiwari | 2026-11-01 |
-| A-12 | Offline PurpleAir QC: auditable A/B, indoor, stuck and neighbor screening; CLI and synthetic tests ([guide](docs/PURPLEAIR_QC.md)) | In progress | htvarkali | 2026-11-04 |
+| A-12 | Offline PurpleAir QC: auditable A/B, indoor, stuck and neighbor screening; CLI and synthetic tests ([guide](docs/PURPLEAIR_QC.md)). Merged in PR #2; checked 2026-11-23: `serein purpleair qc` and `tests/test_purpleair_qc.py` on main, suite passes. Tested on synthetic data only until PurpleAir data exists (A-14) | Done | htvarkali | 2026-11-04 |
 | A-13 | HRRR weather at sites: 10 m wind, PBL height, RH, 2 m temperature (precipitation not yet added) | Done | Aadi-Tiwari | 2026-11-01 |
 | A-14 | PurpleAir history for ~300 sensors in 2 test metros (Sacramento, Portland), after the cost estimate is approved | Open | | |
 | A-15 | Data dictionary generated from the real table: `docs/DATA_DICTIONARY.md` | Done | Aadi-Tiwari | 2026-11-01 |
@@ -368,7 +368,7 @@ remain **In progress** until reviewed and merged. Historical results are unchang
 | B-10b | Input ablations: sensors, HRRR, AQM matter most; fires and plumes help a little; wind-on-edges doesn't (table in `docs/METHODS.md`) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-11 | Explainability: `serein explain` shows which input groups moved a forecast (integrated gradients) and which neighbors the graph listened to (`docs/METHODS.md`) | Done | Aadi-Tiwari | 2026-11-02 |
 | B-12 | 5-seed ensemble (`--seeds 5`, now the default) | Done | Aadi-Tiwari | 2026-11-01 |
-| B-12b | Export/load every ensemble member for maps, transfer and explanations; compare graph/no-graph with equal seed counts | In progress | htvarkali | 2026-11-04 |
+| B-12b | Export/load every ensemble member for maps, transfer and explanations; compare graph/no-graph with equal seed counts. Merged in PR #2; checked 2026-11-23: the live model `west_us_live_v1` loads as a 5-member ensemble | Done | htvarkali | 2026-11-04 |
 | B-13 | Smoke days weighted 6x in training: day-1 forecasts reach a median 80% of the true peak (NOAA: 31%) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-14 | Places without a sensor get a base forecast from neighbors' readings | Done | Aadi-Tiwari | 2026-11-01 |
 | B-15 | Peaks still under-predicted at days 2-3. Options: add 2020 as training data (no HRRR smoke fields that year, but AQMv5 and weather exist), or a heavy-tailed output | Open | | |
@@ -416,7 +416,7 @@ Both workflows are development diagnostics.
 | D-2 | Backtest runner with strict season split and a `--final` lock file | Done | Aadi-Tiwari | 2026-11-01 |
 | D-2b | Warning rule: warn when P(PM2.5 ≥ 35.5) beats a cut-off tuned on calibration weeks | Done | Aadi-Tiwari | 2026-11-01 |
 | D-3 | **(non-code)** PurpleAir research access: draft in `docs/drafts/purpleair_data_request.md`, not sent; someone must decide whether to send it | Blocked | | |
-| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08) | Open | | |
+| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08). Review items 1-14 applied 2026-11-23 and the dev numbers rerun; what is left is the freeze commit itself | Open | | |
 | D-5 ⭐ | Run the final test once (`--final`), with day-bootstrap 95% CIs and a Diebold-Mariano test vs. each baseline | Open | | |
 | D-6a | Northeast June 2023 transfer test prepared: data downloaded, `serein transfer` built | Done | Aadi-Tiwari | 2026-11-01 |
 | D-6b ⭐ | Run the transfer test once, right after D-5 | Open | | |
@@ -466,8 +466,8 @@ Both workflows are development diagnostics.
 | Q-4 | Choose a license and add `LICENSE`: MIT, explained in the README's License section and set in `pyproject.toml` | Done | Aadi-Tiwari | 2026-11-04 |
 | Q-6 | Speed: `CQR.apply`, the GBM neighbor features, `prob_exceed` and the fire features are vectorized (tests check they match the old loops); `download firms` fetches only season days | Done | Aadi-Tiwari | 2026-11-02 |
 | Q-7 ⭐ | Repeatable training: same seed now gives the identical model on the GPU (two runs of the old code moved the day-2 warning rate from 70% to 63%). Dev results rerun on this code. Reports now say "+ uncommitted changes" when the code differs from the commit, and `--final` refuses to run on uncommitted code | Done | Aadi-Tiwari | 2026-11-02 |
-| Q-8 | CPU GitHub checks with app extras and real synthetic training/export/inference test; executable scripts stop on failures | In progress | htvarkali | 2026-11-04 |
-| Q-9 | Shared nonnegative ordered forecast calibration, explicit missing HMS data, sparse-network map guards and state-specific EPA area matching | In progress | htvarkali | 2026-11-04 |
+| Q-8 | CPU GitHub checks with app extras and real synthetic training/export/inference test; executable scripts stop on failures. Merged in PR #2; the Python checks workflow passes on main (run of 2026-11-23) | Done | htvarkali | 2026-11-04 |
+| Q-9 | Shared nonnegative ordered forecast calibration, explicit missing HMS data, sparse-network map guards and state-specific EPA area matching. Merged in PR #2; checked 2026-11-23: code and tests (`test_forecast_calibration.py`, `test_hms_missing.py`, `test_map_graph.py`, `test_epa_area_matching.py`) on main, suite passes | Done | htvarkali | 2026-11-04 |
 
 ---
 

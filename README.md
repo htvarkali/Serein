@@ -318,7 +318,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | C: AirPlan (Model 2) | 10 | 0 | 3 | 0 |
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 2 | 5 | 0 |
-| S: Submission (Conrad) | 2 | 3 | 6 | 0 |
+| S: Submission (Conrad) | 2 | 4 | 5 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -446,7 +446,7 @@ Both workflows are development diagnostics.
 |---|---|---|---|---|
 | S-1 | **(non-code)** Confirm the Lean Canvas was submitted on Oct 29 and which category was chosen | Open | | |
 | S-2 | Brief first draft with all 10 questions and dev numbers: [docs/drafts/innovation_brief.md](docs/drafts/innovation_brief.md) | Done | Aadi-Tiwari | 2026-11-01 |
-| S-3 | **(non-code)** Brief Q2 Team: names, grades, roles, advisor | Open | | |
+| S-3 | **(non-code)** Brief Q2 Team: names, grades, roles, advisor. Names, grades, school and four roles written 2026-11-23; Jagath's role and the advisor are left | In progress | Aadi-Tiwari | 2026-11-23 |
 | S-4 | **(non-code)** Brief Q3 and Q5: add interview findings (E-1) and expert feedback (C-8) | Open | | |
 | S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |

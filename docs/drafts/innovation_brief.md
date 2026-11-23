@@ -19,15 +19,15 @@ On held-out 2023 fire-season days, Serein warned a day ahead on 71% of the days 
 
 ## 2. Team (150 words)
 
-[TEAM: one line per person: name, grade, school, what they own. Suggested split by task area (README task board A to E):]
+- Aadi Tiwari, 11th grade, Foothill High School: data pipeline, the SmokeCast forecast model, the AirPlan personal asthma model, and the backtest protocol
+- Harshateja Varkali, 11th grade, Foothill High School: website, sensor quality checks and forecast reliability
+- Abhinav Garg, 12th grade, Foothill High School: business model, market research and IP
+- Arush Kudaraya, 11th grade, Foothill High School: forecast context for family plans (ozone, heat, pollen) and competitor research
+- Jagath Prabath, 11th grade, Foothill High School: [TEAM: his role, written only once he has done the work]
 
-- [Name], [grade]: data pipeline (fire, smoke, weather and air monitor data from NASA, NOAA and EPA)
-- [Name], [grade]: SmokeCast, the neighborhood forecast model and the backtest
-- [Name], [grade]: AirPlan, the personal asthma model and action plans
-- [Name], [grade]: science and validation, the backtest protocol and expert reviews
-- [Name], [grade]: product and pitch, interviews, business plan and video
+Advisor: [TEAM: name and role, once they have agreed]
 
-[TEAM: one sentence on why us. Example shape: "Three of us live in the Bay Area, where smoke from the 2020 and 2021 fires closed our schools for days" only if it is true. Add any mentor or advisor by name and role once they have agreed.]
+[TEAM: one sentence on why us. Example shape: "Three of us live in the Bay Area, where smoke from the 2020 and 2021 fires closed our schools for days" only if it is true.]
 
 ## 3. Opportunity (300 words)
 

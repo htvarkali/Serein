@@ -241,3 +241,27 @@ this rule (Brier interval below 0 at every lead on both folds) was written after
 first dev run, so the result is reported as development evidence; the final test
 scores both versions.
 PROBABILITY ACCEPTANCE: PASS dev, inner_base (Brier); RMSE unchanged by construction.
+
+### Blending, second look (2026-11-23, after a literature review)
+
+The literature explains the first result: estimated combination weights often lose to
+the best single forecaster when the effective sample is small (the "forecast
+combination puzzle"; Smith and Wallis 2009, doi:10.1111/j.1468-0084.2008.00541.x;
+Claeskens et al. 2016, doi:10.1016/j.ijforecast.2015.12.005). Here the effective sample
+is a handful of smoke episodes, and the members share inputs: SmokeCast and the boosted
+trees have error correlations of 0.79, 0.90, 0.91 and 0.92 at leads 0-3 (dev 2023).
+NOAA's forecasts and persistence are already SmokeCast inputs, which is why they get
+weight near 0.
+
+More variants, all cross-fitted or tuned on another season, all compared with
+SmokeCast alone on dev 2023 (RMSE change, 95% day-bootstrap interval):
+
+| Variant | Lead 1 | Lead 2 |
+|---|---|---|
+| Equal weights, SmokeCast + trees | +0.32 (-0.16, +0.82) | +0.39 (-0.27, +0.91) |
+| Convex weights in log space | +0.67 (-0.07, +1.44) | +0.63 (-0.14, +1.28) |
+| Separate weights on smoke / no-smoke days (with NOAA) | +0.79 (+0.03, +1.59) | +1.29 (+0.14, +2.25) |
+| Online exponentially weighted aggregation (Mallet et al. 2009, doi:10.1029/2008JD009978), learning rate chosen on 2022, weights from past errors only | +0.34 (-0.03, +0.83) | +0.97 (+0.04, +1.74) |
+
+None is better at any lead. Blending is closed for this model; the 5-seed ensemble
+inside SmokeCast is already an equal-weight combination.

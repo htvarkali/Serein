@@ -188,6 +188,24 @@ def _observed(study: Study, valid_days: list[date], pts: pd.DataFrame) -> pd.Dat
         ["point_id", "valid_date", "obs"]]
 
 
+def model_parts(files: list[Path]) -> dict[Path, tuple[str, str]]:
+    """Which trained model made each saved forecast: (run name, first issue day of its part).
+
+    Protocol 7b splits the live scoreboard when the model is replaced. A new part starts
+    when the run name changes, or when two recorded fingerprints differ (a retrain under
+    the same name). Forecasts saved before fingerprints were recorded stay with their run."""
+    parts, run_before, sha_before, start = {}, None, None, ""
+    for f in sorted(files):
+        meta = f.with_suffix(".json")
+        info = json.loads(meta.read_text(encoding="utf-8")) if meta.exists() else {}
+        run, sha = info.get("model_run") or "not recorded", info.get("model_sha256")
+        if run != run_before or (sha and sha_before and sha != sha_before):
+            start, sha_before = f"{f.stem[:4]}-{f.stem[4:6]}-{f.stem[6:8]}", None
+        run_before, sha_before = run, sha or sha_before
+        parts[f] = (run, start)
+    return parts
+
+
 def score(study: Study, log=print) -> pd.DataFrame:
     """Score every saved forecast whose days have been observed. Writes the scoreboard."""
     saved = sorted(live_dir(study, "forecasts").glob("*.parquet"))
@@ -198,7 +216,9 @@ def score(study: Study, log=print) -> pd.DataFrame:
         log("no live forecasts yet")
         return pd.DataFrame()
     pts = load_points(study.name)
-    fc = pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    parts = model_parts(files)
+    fc = pd.concat([pd.read_parquet(f).assign(model_run=parts[f][0], model_from=parts[f][1])
+                    for f in files], ignore_index=True)
     late = int((~fc["on_time"]).sum()) if "on_time" in fc else 0
     fc = fc[(fc["kind"] == "epa") & fc.get("on_time", True)]
     if late:
@@ -224,13 +244,17 @@ def score(study: Study, log=print) -> pd.DataFrame:
     for v in fc["valid_date"].unique():
         f = v + timedelta(days=1)
         want[f] = want.get(f, False) or v >= last_ok - timedelta(days=4)
-    wide = fc.pivot_table(index=["issue_date", "point_id"], columns="lead",
-                          values=["smokecast", "warn"], aggfunc="first").reset_index()
-    leads = sorted(fc["lead"].unique())
+    # One comparison per trained model, like the scoreboard; a new model may not have
+    # every lead scored yet.
+    wides = [(start, part.pivot_table(index=["issue_date", "point_id"], columns="lead",
+                                      values=["smokecast", "warn"], aggfunc="first").reset_index(),
+              sorted(part["lead"].unique())) for start, part in fc.groupby("model_from", sort=True)]
     try:
         for f, overwrite in sorted(want.items()):
             airnow.download_reportingarea_day(f, overwrite=overwrite)
-        epa = _epa_by_season(study, wide, leads, pts.set_index("point_id"))
+        epa = pd.concat([_epa_by_season(study, wide, leads, pts.set_index("point_id"))
+                         .assign(model_from=start) for start, wide, leads in wides],
+                        ignore_index=True)
     except Exception as e:  # noqa: BLE001 - the scoreboard still works without it
         log(f"EPA comparison skipped: {e}")
     _write_board(study, s, epa, len(files))
@@ -322,47 +346,62 @@ def _write_board(study: Study, s: pd.DataFrame, epa: pd.DataFrame, n_files: int)
                   ("Days are split by the day forecast (protocol 7b): June-October is the fire "
                    "season and the main live test; November-May is the off-season, reported "
                    "separately.")]
-        fire = _is_fire_season(s["valid_date"])
+        groups = [("", {}, s, epa)]
+        if "model_from" in s and s["model_from"].nunique() > 1:
+            lines += ["", ("The trained model was replaced, so each model's forecasts are "
+                           "scored separately (protocol 7b).")]
+            groups = [((f"Model {part['model_run'].iloc[0]}, forecasts issued "
+                        f"{part['issue_date'].min()} to {part['issue_date'].max()}"),
+                       {"model_run": part["model_run"].iloc[0], "model_from": start}, part,
+                       epa[epa["model_from"] == start] if "model_from" in epa else epa)
+                      for start, part in s.groupby("model_from", sort=True)]
         tables = []
-        for season, title, part in [("fire", "Fire season (June-October)", s[fire]),
-                                    ("off", "Off-season (November-May)", s[~fire])]:
-            if part.empty:
-                continue
-            t = summarize(part)
-            tables.append(t.assign(season=season))
-            lines += ["", f"## {title}", "",
-                      "| lead | monitor-days | SmokeCast | NOAA best | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
-                      "|---|---|---|---|---|---|---|---|"]
-            for r in t.itertuples():
-                lines.append(f"| {r.lead} | {r.monitor_days} | {_fmt(r.rmse_smokecast, '.2f')} | "
-                             f"{_fmt(r.rmse_noaa_best, '.2f')} | "
-                             f"{_fmt(r.skill_vs_noaa, '+.0%')} | {r.usg_days} | "
-                             f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
-            lines += ["", "SmokeCast's RMSE minus NOAA best's (95% interval):", ""]
-            for r in t.itertuples():
-                if np.isnan(r.ci_lo_vs_noaa):
-                    lines.append(f"- lead {r.lead}: needs 5 scored issue days (has {r.issue_days})")
-                else:
-                    lines.append(f"- lead {r.lead}: {r.rmse_smokecast - r.rmse_noaa_best:+.2f} "
-                                 f"({r.ci_lo_vs_noaa:+.2f} to {r.ci_hi_vs_noaa:+.2f})")
-            if t["no_noaa_days"].sum():
-                lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
-                          + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
-            lines += ["", ("Other competitors, each scored with SmokeCast on the monitor-days "
-                           "where both have a forecast:"), "",
-                      "| lead | competitor | monitor-days | SmokeCast | competitor | skill |",
-                      "|---|---|---|---|---|---|"]
-            for r in t.itertuples():
-                for m, name in OTHER_COMPETITORS.items():
-                    lines.append(
-                        f"| {r.lead} | {name} | {getattr(r, f'monitor_days_vs_{m}')} | "
-                        f"{_fmt(getattr(r, f'rmse_smokecast_vs_{m}'), '.2f')} | "
-                        f"{_fmt(getattr(r, f'rmse_{m}'), '.2f')} | "
-                        f"{_fmt(getattr(r, f'skill_vs_{m}'), '+.0%')} |")
-            e = epa[epa["season"] == season].drop(columns="season") if len(epa) else epa
-            if len(e):
-                lines += ["", "Official EPA AQI forecasts, same reporting areas and days:", "",
-                          "```", e.round(3).to_string(index=False), "```"]
+        for heading, model, scored, compared in groups:
+            level = "###" if heading else "##"
+            if heading:
+                lines += ["", f"## {heading}"]
+            fire = _is_fire_season(scored["valid_date"])
+            for season, title, part in [("fire", "Fire season (June-October)", scored[fire]),
+                                        ("off", "Off-season (November-May)", scored[~fire])]:
+                if part.empty:
+                    continue
+                t = summarize(part)
+                tables.append(t.assign(season=season, **model))
+                lines += ["", f"{level} {title}", "",
+                          "| lead | monitor-days | SmokeCast | NOAA best | skill vs NOAA | unhealthy days | caught (SmokeCast / NOAA) | false alarms (SmokeCast / NOAA) |",
+                          "|---|---|---|---|---|---|---|---|"]
+                for r in t.itertuples():
+                    lines.append(f"| {r.lead} | {r.monitor_days} | {_fmt(r.rmse_smokecast, '.2f')} | "
+                                 f"{_fmt(r.rmse_noaa_best, '.2f')} | "
+                                 f"{_fmt(r.skill_vs_noaa, '+.0%')} | {r.usg_days} | "
+                                 f"{r.usg_caught} / {r.noaa_caught} | {r.false_alarms} / {r.noaa_false_alarms} |")
+                lines += ["", "SmokeCast's RMSE minus NOAA best's (95% interval):", ""]
+                for r in t.itertuples():
+                    if np.isnan(r.ci_lo_vs_noaa):
+                        lines.append(f"- lead {r.lead}: needs 5 scored issue days (has {r.issue_days})")
+                    else:
+                        lines.append(f"- lead {r.lead}: {r.rmse_smokecast - r.rmse_noaa_best:+.2f} "
+                                     f"({r.ci_lo_vs_noaa:+.2f} to {r.ci_hi_vs_noaa:+.2f})")
+                if t["no_noaa_days"].sum():
+                    lines += ["", "Left out because NOAA had no forecast there (monitor-days by lead): "
+                              + ", ".join(f"{r.lead}: {r.no_noaa_days}" for r in t.itertuples()) + "."]
+                lines += ["", ("Other competitors, each scored with SmokeCast on the monitor-days "
+                               "where both have a forecast:"), "",
+                          "| lead | competitor | monitor-days | SmokeCast | competitor | skill |",
+                          "|---|---|---|---|---|---|"]
+                for r in t.itertuples():
+                    for m, name in OTHER_COMPETITORS.items():
+                        lines.append(
+                            f"| {r.lead} | {name} | {getattr(r, f'monitor_days_vs_{m}')} | "
+                            f"{_fmt(getattr(r, f'rmse_smokecast_vs_{m}'), '.2f')} | "
+                            f"{_fmt(getattr(r, f'rmse_{m}'), '.2f')} | "
+                            f"{_fmt(getattr(r, f'skill_vs_{m}'), '+.0%')} |")
+                e = (compared[compared["season"] == season]
+                     .drop(columns=["season", "model_from"], errors="ignore")
+                     if len(compared) else compared)
+                if len(e):
+                    lines += ["", "Official EPA AQI forecasts, same reporting areas and days:", "",
+                              "```", e.round(3).to_string(index=False), "```"]
         board = pd.concat(tables, ignore_index=True)
         board.insert(0, "season", board.pop("season"))
         board.to_csv(LIVE / study.name / "scoreboard.csv", index=False)

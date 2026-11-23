@@ -1,9 +1,9 @@
 // Numbers in [data-count-up] count up from zero the first time they scroll
 // into view. The final text is already in the HTML, so nothing is lost
-// without JavaScript or with reduced motion.
+// without JavaScript.
 export function setupCountUp() {
   const items = [...document.querySelectorAll<HTMLElement>("[data-count-up]")]
-  if (!items.length || matchMedia("(prefers-reduced-motion: reduce)").matches) return
+  if (!items.length) return
 
   const observer = new IntersectionObserver(entries => {
     for (const entry of entries) {

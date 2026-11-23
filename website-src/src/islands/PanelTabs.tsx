@@ -57,7 +57,7 @@ export function PanelTabs({ panels, initial, ariaLabel, tone, onMounted }: Props
           key={p.id}
           value={p.id}
           lang={p.lang}
-          className={p.className + " motion-safe:animate-[island-in_.32s_ease-out]"}
+          className={p.className + " animate-[island-in_.32s_ease-out]"}
         >
           {/* Same-page markup that was already in the static HTML. The original
               id stays on this wrapper so existing #links keep working. */}

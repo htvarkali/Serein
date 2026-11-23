@@ -18,7 +18,7 @@ export function RmseBars({ current, all }: { current: Horizon; all: Horizon[] })
             <span className="text-[#d7e6d8]">{r.name}</span>
             <span className="h-[.7rem] overflow-hidden rounded-full bg-[#ffffff12]">
               <span
-                className={"block h-full origin-left rounded-full motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-[cubic-bezier(.22,1,.36,1)] " + r.fill}
+                className={"block h-full origin-left rounded-full transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] " + r.fill}
                 style={{ transform: `scaleX(${r.value / max})` }}
               />
             </span>

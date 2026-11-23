@@ -101,40 +101,53 @@ function setupChapters() {
   update();
 }
 
-// Photos stay in place and looping clips fade in over them while on screen.
-// Every clip has a pause button (WCAG 2.2.2), and pausing is remembered.
+function setupReveal() {
+  if (!("IntersectionObserver" in window)) return;
+  // Switchers are left out because the React islands replace them.
+  const items = [...document.querySelectorAll(
+    "main .section-heading, main .lead, main figure, main p.caption, .project-card, .stat, .rule-list > *, .comparison > div, .interior-hero .button, [data-island]"
+  )].filter(el => !el.closest("[data-switcher]") && !el.parentElement.closest("[data-island]"));
+
+  const observer = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const el = entry.target;
+      el.classList.add("is-visible");
+      observer.unobserve(el);
+      // Hand the element back to its own styles (hover transitions and so on).
+      el.addEventListener("transitionend", function done(event) {
+        if (event.target !== el) return;
+        el.classList.remove("reveal", "is-visible");
+        el.style.transitionDelay = "";
+        el.removeEventListener("transitionend", done);
+      });
+    }
+  }, { rootMargin: "0px 0px -8% 0px" });
+
+  for (const el of items) {
+    const siblings = [...el.parentElement.children].filter(child => items.includes(child));
+    el.style.transitionDelay = `${Math.min(siblings.indexOf(el), 4) * 90}ms`;
+    el.classList.add("reveal");
+    observer.observe(el);
+  }
+}
+
+// Photos stay in place and looping clips fade in over them. Clips run
+// whenever they are on screen, for every visitor.
 function setupMotionVideos() {
   const videos = document.querySelectorAll("video[data-motion]");
   if (!videos.length || !("IntersectionObserver" in window)) return;
-  const key = "serein-motion";
-  const stored = () => { try { return localStorage.getItem(key); } catch { return null; } };
-  const store = value => { try { localStorage.setItem(key, value); } catch { /* private mode */ } };
-  const buttons = [];
 
   for (const video of videos) {
     let visible = false;
     video.playbackRate = .8;
     video.addEventListener("loadedmetadata", () => { video.playbackRate = .8; });
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "motion-toggle";
-    video.parentElement.append(button);
-    buttons.push(button);
+    video.addEventListener("playing", () => video.classList.add("is-playing"));
 
     function sync() {
-      const paused = stored() === "paused";
-      button.setAttribute("aria-label", paused ? "Play background video" : "Pause background video");
-      button.dataset.state = paused ? "paused" : "playing";
-      if (visible && !document.hidden && !paused) video.play().catch(() => {});
+      if (visible && !document.hidden) video.play().catch(() => {});
       else video.pause();
     }
-    video.sync = sync;
-    button.addEventListener("click", () => {
-      store(stored() === "paused" ? "playing" : "paused");
-      for (const other of videos) other.sync();
-    });
-    video.addEventListener("playing", () => video.classList.add("is-playing"));
     new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       sync();
@@ -149,7 +162,6 @@ function setupAtmosphere() {
   const context = canvas.getContext("2d");
   if (!context) return;
 
-  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const points = Array.from({ length: 120 }, () => ({
     x: Math.random(), y: Math.random() * .79, size: .7 + Math.random() * 1.45,
     speed: .002 + Math.random() * .005, opacity: .14 + Math.random() * .38,
@@ -183,7 +195,7 @@ function setupAtmosphere() {
     if (frame) window.cancelAnimationFrame(frame);
     frame = 0;
     last = 0;
-    if (visible && !document.hidden && !motion.matches) frame = window.requestAnimationFrame(tick);
+    if (visible && !document.hidden) frame = window.requestAnimationFrame(tick);
   }
 
   new ResizeObserver(() => {
@@ -199,11 +211,11 @@ function setupAtmosphere() {
     visible = entry.isIntersecting;
     syncMotion();
   }).observe(canvas);
-  motion.addEventListener("change", syncMotion);
   document.addEventListener("visibilitychange", syncMotion);
 }
 
 setupMenu();
+setupReveal();
 setupMotionVideos();
 setupSwitchers();
 setupChapters();

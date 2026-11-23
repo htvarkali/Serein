@@ -220,3 +220,24 @@ still have 1.2-5x the error of the rest on both folds, so the flag is not only a
 for smoky days. Disagreement between SmokeCast and NOAA's best is a weaker flag (28-29%
 of error on dev). The interval-width flag will be used in the product, with its
 threshold taken from calibration rows.
+
+### Recalibrated warning probabilities (accepted as an output change)
+
+Isotonic regression from the raw P(PM2.5 >= 35.5) to the event frequency on calibration
+rows only (`smokecast_probcal_L<lead>`); point forecasts, intervals and the warning
+cut-off are unchanged. Brier score, raw -> recalibrated, with the 95% day-bootstrap
+interval of the difference:
+
+| Lead | Dev 2023 | Interval | Inner 2022 | Interval |
+|---|---|---|---|---|
+| 0 | 0.0053 -> 0.0048 | (-0.0008, -0.0002) | 0.0059 -> 0.0048 | (-0.0014, -0.0007) |
+| 1 | 0.0095 -> 0.0081 | (-0.0018, -0.0008) | 0.0091 -> 0.0078 | (-0.0019, -0.0008) |
+| 2 | 0.0118 -> 0.0102 | (-0.0027, -0.0004) | 0.0144 -> 0.0105 | (-0.0053, -0.0026) |
+| 3 | 0.0153 -> 0.0136 | (-0.0032, -0.0002) | 0.0212 -> 0.0148 | (-0.0090, -0.0041) |
+
+Reliability, lead 1 dev: stated 0.40 verified 0.34, 0.57 verified 0.52, 0.83 verified
+0.69 (raw: 0.39/0.16, 0.59/0.39, 0.81/0.64). Better at every lead on both folds. Note:
+this rule (Brier interval below 0 at every lead on both folds) was written after the
+first dev run, so the result is reported as development evidence; the final test
+scores both versions.
+PROBABILITY ACCEPTANCE: PASS dev, inner_base (Brier); RMSE unchanged by construction.

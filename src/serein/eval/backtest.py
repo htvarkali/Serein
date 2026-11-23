@@ -146,6 +146,23 @@ def tune_warning_threshold(p_exceed: np.ndarray, obs: np.ndarray, thr: float = 3
     return best
 
 
+def fit_probability_recalibration(p_exceed: np.ndarray, obs: np.ndarray, thr: float = 35.5):
+    """Isotonic map from raw P(>= thr) to the event frequency seen on calibration rows.
+
+    Fit on calibration rows only; it changes reported probabilities, never the point
+    forecast or the warning cut-off. Returns None when calibration has no events.
+    """
+    from sklearn.isotonic import IsotonicRegression
+
+    ok = np.isfinite(p_exceed) & np.isfinite(obs)
+    events = obs[ok] >= thr
+    if not events.any() or events.all():
+        return None
+    iso = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds="clip")
+    iso.fit(p_exceed[ok], events.astype(float))
+    return iso
+
+
 def cutoff_for_hit_rate(p_exceed: np.ndarray, obs: np.ndarray, target: float,
                         thr: float = 35.5) -> float:
     """Highest probability cut-off whose hit rate on calibration data reaches ``target``.
@@ -386,6 +403,7 @@ def run_backtest(study: Study, args) -> dict:
     obs_conf[hidden_conf] = np.nan
     warn_test = np.zeros_like(obs, dtype=bool)
     prob_test = np.full(obs.shape, np.nan)
+    prob_cal_test = np.full(obs.shape, np.nan)
     cutoffs, dial = {}, []
     for li, lead in enumerate(leads):
         pc = prob_exceed(q_conf_cal[:, li], QUANTILES)
@@ -393,6 +411,10 @@ def run_backtest(study: Study, args) -> dict:
         cutoffs[lead] = cut
         pt = prob_exceed(preds_q["smokecast"][:, li], QUANTILES)
         prob_test[:, li] = pt
+        iso = fit_probability_recalibration(pc, obs_conf[:, li])
+        if iso is not None:
+            prob_cal_test[:, li] = iso.predict(np.nan_to_num(pt, nan=0.0))
+            prob_cal_test[~np.isfinite(pt), li] = np.nan
         warn_test[:, li] = pt >= cut
         settings = [("best_csi", cut)] + [(f"hit_rate_{t:.2f}", cutoff_for_hit_rate(pc, obs_conf[:, li], t))
                                           for t in DIAL_TARGETS]
@@ -439,6 +461,7 @@ def run_backtest(study: Study, args) -> dict:
         keep[f"smokecast_lo_L{lead}"] = np.expm1(preds_q["smokecast"][:, li, 0])
         keep[f"smokecast_hi_L{lead}"] = np.expm1(preds_q["smokecast"][:, li, -1])
         keep[f"smokecast_prob_L{lead}"] = prob_test[:, li]
+        keep[f"smokecast_probcal_L{lead}"] = prob_cal_test[:, li]
     keep.to_parquet(out_dir / "predictions.parquet", index=False)
 
     # Report

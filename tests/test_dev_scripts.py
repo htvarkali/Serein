@@ -20,7 +20,7 @@ def script_repo(tmp_path):
     scripts = tmp_path / "scripts"
     scripts.mkdir()
     for name in ("run_dev_suite.sh", "run_ablations.sh", "run_scale_suite.sh", "sweep_graph.sh",
-                 "sweep_peaks.sh"):
+                 "sweep_peaks.sh", "run_live.sh"):
         shutil.copy2(SCRIPTS / name, scripts / name)
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
@@ -40,6 +40,8 @@ elif "map" in args:
     step = "map"
 elif "scripts/compare_runs.py" in args:
     step = "compare_runs"
+elif "live" in args:
+    step = "live --run " + args[args.index("--run") + 1]
 elif "build-table" in args:
     step = "conus_table_" + args[args.index("--split") + 1]
 else:
@@ -101,3 +103,16 @@ def test_research_sweeps_stop_when_a_command_fails(script_repo, script, failed_s
     assert f"FAILED (exit 7): see outputs/logs/{failed_step}.log" in result.stderr
     assert (repo / "calls.txt").read_text().splitlines() == called_steps
     assert "injected failure" in (repo / "outputs/logs" / f"{failed_step}.log").read_text()
+
+
+@pytest.mark.parametrize(("pinned", "expected_run"), [(None, "west_us_dev"),
+                                                      ("west_us_live_v1", "west_us_live_v1")])
+def test_live_forecast_uses_the_pinned_run(script_repo, pinned, expected_run):
+    repo, env = script_repo
+    if pinned:
+        env["SEREIN_LIVE_RUN"] = pinned
+    result = subprocess.run(["bash", "scripts/run_live.sh"], cwd=repo, env=env,
+                            capture_output=True, text=True, check=False, timeout=10)
+
+    assert result.returncode == 0, result.stderr
+    assert (repo / "calls.txt").read_text().splitlines() == [f"live --run {expected_run}"]

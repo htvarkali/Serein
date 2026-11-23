@@ -1,6 +1,6 @@
 # Innovation Brief draft (UNSENT, team edits welcome)
 
-Status: first draft, 2026-11-01. Nothing here has been submitted. Every `[TEAM: ...]` slot needs a real fact from us before this goes into the Conrad portal. Word limits are from the 2026-27 Student Guide (see `docs/CONRAD.md`); the count after each heading is the limit, not the current length.
+Status: first draft, 2026-11-01; development numbers updated 2026-11-23 to the rerun on the current pipeline. Nothing here has been submitted. Every `[TEAM: ...]` slot needs a real fact from us before this goes into the Conrad portal. Word limits are from the 2026-27 Student Guide (see `docs/CONRAD.md`); the count after each heading is the limit, not the current length.
 
 Rules for editing this draft:
 - All numbers below are **dev results** (2023 held-out weeks). After the final 2024-25 test runs (README "Finishing the proof"), replace them with the final numbers, even if they are worse.
@@ -15,7 +15,7 @@ When wildfire smoke rolls in, a parent of a child with asthma gets one piece of 
 
 Serein gives a smoke forecast for each neighborhood, one to three days ahead, and turns it into a plan for one specific child. Our first model corrects NOAA's smoke forecast using what air monitors are measuring right now. Our second model learns from a short daily check-in how much smoke affects that child, then sends the family a green, yellow or red plan in their own language.
 
-On held-out 2023 fire-season days, Serein warned a day ahead on 71% of the days that reached "Unhealthy for Sensitive Groups". EPA's official forecast warned on 46%, and Serein raised fewer false alarms (81 vs. 98).
+On held-out 2023 fire-season days, Serein warned a day ahead on 72% of the days that reached "Unhealthy for Sensitive Groups". EPA's official forecast warned on 46%, and Serein raised fewer false alarms (92 vs. 98).
 
 ## 2. Team (150 words)
 
@@ -55,23 +55,23 @@ AirPlan prototypes a personal risk estimate using a population prior and per-chi
 
 **What is new.**
 1. Correcting NOAA's smoke forecast with live monitor readings, and checking the result against NOAA and EPA on days the model never saw.
-2. Forecasts for places with no monitor. When we hid 20% of monitors from the model, its forecasts at those hidden sites still beat NOAA's (8.5 vs. 11.1 µg/m³ error, one day ahead).
+2. Forecasts for places with no monitor. When we hid 20% of monitors from the model, its forecasts at those hidden sites still beat NOAA's (8.4 vs. 11.1 µg/m³ error, one day ahead).
 3. A per-child smoke sensitivity estimate from a check-in a parent can finish in under a minute.
 [TEAM: verify with a literature search (D-6) that no published tool does all three before keeping "new" claims.]
 
-**Results so far (historical dev mode, 2023 held-out weeks).** Error is RMSE in µg/m³, which gives larger misses more weight. These numbers predate the latest pipeline fixes and require a development rerun before representing the revised system.
+**Results so far (development mode, 2023 held-out weeks, rerun 2026-11-23 on the current pipeline).** Error is RMSE in µg/m³, which gives larger misses more weight.
 
 | Forecast for | Serein | AQM → HRRR → persistence fallback |
 |---|---|---|
-| Tomorrow | 7.9 | 11.0 |
+| Tomorrow | 7.8 | 11.0 |
 | In 2 days | 9.7 | 12.3 |
-| In 3 days | 11.4 | 15.5 |
+| In 3 days | 11.6 | 15.5 |
 
-Against EPA's official AQI forecast, one day ahead: Serein had the right AQI category on 87.9% of area-days vs. 82.7% for EPA, and warned on 71% of real "Unhealthy for Sensitive Groups" days vs. 46%, with fewer false alarms (81 vs. 98). Two days ahead it warned on 66% vs. 37%, but with more false alarms (54 vs. 36), which we report as a real tradeoff.
+Against EPA's official AQI forecast, one day ahead: Serein had the right AQI category on 88.1% of area-days vs. 82.7% for EPA, and warned on 72% of real "Unhealthy for Sensitive Groups" days vs. 46%, with fewer false alarms (92 vs. 98). Two days ahead it warned on 62% vs. 37%, but with more false alarms (48 vs. 36), which we report as a real tradeoff.
 
 [TEAM: after the final test, replace this table and paragraph with 2024-25 results, and keep the 2023 numbers only as "development".]
 
-**Impact.** In those 2023 test weeks alone, warning a day ahead, Serein caught 61 more smoky area-days than EPA's forecast, days on which a family would have had time to keep a child inside, run an air purifier and keep the inhaler close. In our AirPlan simulation of 300 children, after 100 logged days the personal model predicted symptom days better than the average-child model, most of all for very smoke-sensitive children (10% better Brier score). [TEAM: these are simulated children. Replace or add real-world evidence if a clinician pilot happens.]
+**Impact.** In those 2023 test weeks alone, warning a day ahead, Serein caught 63 more smoky area-days than EPA's forecast, days on which a family would have had time to keep a child inside, run an air purifier and keep the inhaler close. In our AirPlan simulation of 300 children, after 100 logged days the personal model predicted symptom days better than the average-child model, most of all for very smoke-sensitive children (10% better Brier score). [TEAM: these are simulated children. Replace or add real-world evidence if a clinician pilot happens.]
 
 **IP protection.** [TEAM decision needed. Facts: our code is public on GitHub. Options to discuss: (a) keep the forecasting code open so health departments can trust and audit it, and protect the name and brand (trademark search on "Serein"); (b) move the trained models and the AirPlan service to a private repository; (c) talk to a mentor about whether a provisional patent on the per-child method is worth it. Our main advantage beyond code is the validated backtest and partnerships with school districts.]
 
@@ -82,8 +82,8 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 **Evaluation plan.** The draft protocol (docs/BACKTEST_PROTOCOL.md) reserves 2024-25 for a final test after the team freezes the methods. That final test has not run. Development trains on 2021-22 and uses 2023 for tuning and scoring. Availability cutoffs are enforced using documented posting-lag assumptions; historical availability still needs an audit. Comparisons use archived forecasts for paired places and days.
 
 **What the tests showed (development weeks of 2023).**
-- One day ahead, Serein's RMSE was 7.9 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). We report persistence on its own because a 2026 evaluation in BAMS found that for day-level decisions it matched or beat every operational smoke model; Serein's warning skill one day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
-- It warned on 71% of "Unhealthy for Sensitive Groups" days vs. 46% for EPA, with fewer false alarms.
+- One day ahead, Serein's RMSE was 7.8 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). We report persistence on its own because a 2026 evaluation in BAMS found that for day-level decisions it matched or beat every operational smoke model; Serein's warning skill one day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
+- It warned on 72% of "Unhealthy for Sensitive Groups" days vs. 46% for EPA, with fewer false alarms.
 - With 20% of monitors hidden, it still beat NOAA at the hidden sites, so it can forecast for neighborhoods with no monitor.
 - We removed one input at a time to see what matters. Without NOAA's HRRR smoke and weather forecasts, tomorrow's error got 29% worse. Without live monitor readings, today's error got 66% worse. Wind direction between monitors, which we expected to help, made no difference, and satellite fire detections helped only a little (1-4%). We report both.
 
@@ -150,7 +150,7 @@ Families never pay. Organizations that make decisions on smoke days pay a yearly
 - Health plans and children's hospitals: $10 to $20 per enrolled child with asthma per year, less than one Medi-Cal asthma-education unit ($26.66 per 30 minutes). A child asthma hospitalization costs $7,464, so one avoided stay funds 370 to 750 child-years of Serein. We do not yet have evidence that Serein avoids visits; a pilot would measure it.
 - Air districts and health departments: a license to embed the forecast in alerts they already send.
 
-**Costs.** All inputs are free public data from NOAA, NASA and EPA. [TEAM: paste the measured median seconds per issue day and the hardware from `outputs/timing/`.] A T4 GPU costs $0.53 an hour on demand, so a daily forecast for the western US costs cents a day, and a small web host is $7 to $25 a month. Text alerts cost about $0.013 per SMS part; our messages fit in one or two parts, so 60 smoke-day alerts to 1,000 families cost about $1,100 a season. WhatsApp utility messages cost $0.0034 each. PurpleAir sensor history, if added, costs about $1 to $5 per sensor-year. At the prices above, compute and messaging together stay under 10% of revenue.
+**Costs.** All inputs are free public data from NOAA, NASA and EPA. Running the trained model (all 5 ensemble members, 425 western monitors) takes 0.016 seconds per forecast day on a desktop CPU (median of 20 runs, measured 2026-11-23); downloading NOAA's daily files takes longer and was not timed. No GPU is needed to forecast, so a small web host at $7 to $25 a month covers it. Text alerts cost about $0.013 per SMS part; our messages fit in one or two parts, so 60 smoke-day alerts to 1,000 families cost about $1,100 a season. WhatsApp utility messages cost $0.0034 each. PurpleAir sensor history, if added, costs about $1 to $5 per sensor-year. At the prices above, compute and messaging together stay under 10% of revenue.
 
 
 ## 10. Fundraising (150 words)
@@ -162,14 +162,7 @@ To reach the Summit and run one pilot season we need about $3,000 to $5,000: the
 
 ## References (attachment)
 
-[TEAM: copy the full citations from docs/METHODS.md (priors table) and docs/DATA.md (data sources). At minimum:]
-- CDC (2023). Most recent national asthma data, children under 18.
-- Sugrue et al. (2026). Wildfire-Specific PM2.5 Asthma Risk Across a Disproportionately Burdened Pediatric Population in Northern California. GeoHealth 10(2):e2025GH001530. https://doi.org/10.1029/2025GH001530
-- Khetsuriani et al. (2007). Viral infections and asthma exacerbations in children.
-- Williams et al. (2011). J Allergy Clin Immunol 128:1185. Inhaled corticosteroid adherence and asthma exacerbations.
-- Barkjohn, Gantt and Clements (2021). U.S.-wide correction for PurpleAir PM2.5 sensors.
-- U.S. EPA (2024). Updated AQI breakpoints for PM2.5.
-- NOAA: HRRR-Smoke, AQM (NAQFC) and Hazard Mapping System smoke product documentation.
+The full, checked reference list is `docs/drafts/references_DRAFT.md` (draft 3, every entry checked 2026-11-23 against Crossref, PubMed or the source page). Before submitting, keep only the references the final text cites, renumber them in citation order, and recheck the links the day before. Its remaining `[TEAM]` items (the CDC "not well controlled" definition page, the Gabbay data source, the Conrad prize details) need a person.
 
 ## Optional attachments (up to 2)
 1. `docs/results/figures/` rmse-by-lead chart (Serein vs. NOAA vs. EPA).

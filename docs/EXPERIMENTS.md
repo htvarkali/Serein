@@ -265,3 +265,36 @@ SmokeCast alone on dev 2023 (RMSE change, 95% day-bootstrap interval):
 
 None is better at any lead. Blending is closed for this model; the 5-seed ensemble
 inside SmokeCast is already an equal-weight combination.
+
+## 2026-11-23 New information: GOES-West satellite smoke haze (AOD)
+
+Hypothesis: every failed attempt so far reused the same information (NOAA forecasts,
+monitors, fire detections, HMS plumes). GOES-West measures aerosol optical depth over
+the whole West every few minutes, including places with no monitor, so it adds
+independent evidence of smoke that is present now and upwind. Inputs: mean and max of
+quality-0 AOD within about 10 km of each monitor over the first scan of each hour
+14-17 UTC on the issue day (before the 18:30 UTC issue time), plus how many hours had
+a clear view (`build-table --goes-aod`; GOES-17 through 2023-01-03, GOES-18 after).
+Expected: lower RMSE at leads 0-1 on smoke days and at hidden monitors; possibly lead 2.
+Same acceptance rule; tags `goes_aod` (dev) and `inner_goes_aod` (2021/2022).
+
+Not possible: NASA's GEOS-FP forecasts as an independent forecast input. Its public
+forecast archive holds only 2026 (checked 2026-11-23), so 2021-2025 cannot be trained
+or tested.
+
+Result. Point AOD covered 63% of site-days (clouds, early-morning sun angle; 4 of 459
+days had no scans). It tracks smoke: median AOD 0.06 under no HMS smoke, 0.08 light,
+0.16 medium, 0.41 heavy; Spearman 0.29 with morning PM2.5 and 0.19 with next-day PM2.5.
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.278 | (-0.24, +0.04) | 4.040 -> 4.028 | (-0.13, +0.10) | 6.92 -> 6.72 |
+| 1 | 7.776 -> 8.021 | (-0.22, +0.81) | 6.463 -> 6.457 | (-0.14, +0.15) | 8.39 -> 8.51 |
+| 2 | 9.721 -> 9.994 | (-0.06, +0.61) | 8.034 -> 8.157 | (-0.05, +0.32) | 9.90 -> 10.26 |
+| 3 | 11.584 -> 11.401 | (-0.46, +0.10) | 10.439 -> 10.672 | (+0.04, +0.41) | 11.38 -> 11.50 |
+
+Satellite haze helps only the same-day forecast (lead 0, not significant) and does
+not help the forecast days, also not at hidden monitors. Lead 3 is worse on the inner
+fold with its interval above 0. Not merged; the extraction code is kept on branch
+`conrad/goes-aod` for possible same-day use.
+ACCEPTANCE: FAIL goes_aod, inner_goes_aod: no lead 1-2 gain; inner lead 3 worse.

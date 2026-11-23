@@ -127,7 +127,8 @@ def cmd_build_table(args):
     days = _days(args)
     pts = load_points(study.name)
     pts = pts[pts["kind"].isin(args.kinds.split(","))]
-    tab = build_table(study, days, pts, use_firms=not args.no_firms)
+    tab = build_table(study, days, pts, use_firms=not args.no_firms,
+                      goes_aod=args.goes_aod)
     name = args.out or (args.split or f"{days[0]:%Y%m%d}_{days[-1]:%Y%m%d}")
     path = processed_dir(study) / f"table_{name}.parquet"
     tab.to_parquet(path, index=False)
@@ -290,6 +291,8 @@ def main(argv=None):
     sp.add_argument("--kinds", default="epa")
     sp.add_argument("--out")
     sp.add_argument("--no-firms", action="store_true")
+    sp.add_argument("--goes-aod", action="store_true",
+                    help="add GOES-West satellite smoke haze (run the AOD extraction first)")
     sp.set_defaults(fn=cmd_build_table)
 
     sp = sub.add_parser("backtest", help="train on train split, calibrate, score on test")

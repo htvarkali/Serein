@@ -10,6 +10,8 @@ Column groups
   aqm_*_L{l}           NOAA AQM bias-corrected PM2.5, local-day mean/max
   hms_prev             yesterday's HMS smoke density at the point (0..3)
   frp_*                nearby fire radiative power in the last 24 h (FIRMS)
+  goes_aod_*           optional (--goes-aod): GOES-West satellite smoke haze (AOD) near
+                       the point, scans from 14-17 UTC of the issue day
   lat, lon, doy_sin, doy_cos
 """
 
@@ -139,7 +141,8 @@ def _model_features(days, points, offsets, store: str, av: Availability) -> pd.D
 
 
 def build_table(study: Study, days: list[date], points: pd.DataFrame,
-                use_firms: bool = True, progress: bool = True) -> pd.DataFrame:
+                use_firms: bool = True, progress: bool = True,
+                goes_aod: bool = False) -> pd.DataFrame:
     if not days:
         raise ValueError("feature table requires at least one issue date")
     # Issue days are calendar labels, so UTC conversion could change the day.
@@ -205,6 +208,14 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
     tab = tab.merge(pd.concat(hms_cols), on=["issue_date", "point_id"], how="left")
     if fire_parts:
         tab = tab.merge(pd.concat(fire_parts), on=["issue_date", "point_id"], how="left")
+
+    if goes_aod:
+        from serein.data import goes_aod as goes
+
+        aod = goes.daily_features(days, study.name)
+        if len(aod):
+            aod["issue_date"] = pd.to_datetime(aod["issue_date"]).dt.date
+            tab = tab.merge(aod, on=["issue_date", "point_id"], how="left")
 
     tab = tab.merge(points[["point_id", "lat", "lon", "kind"]], on="point_id", how="left")
     doy = pd.to_datetime(tab["issue_date"]).dt.day_of_year

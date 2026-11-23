@@ -163,3 +163,21 @@ fields are missing or labelled differently in 2020 and AQM was v5 (48 h); the mo
 already treats missing inputs as missing. Training on 2020-22 (calibration 2023
 unchanged) should raise the day 2-3 peak capture and lower smoke-day RMSE. Tags
 `b15_2020` (train 2020-22, dev) and `inner_b15_2020` (train 2020-21, score 2022).
+
+Result, dev (`b15_2020` vs. `dev`) and inner fold (`inner_b15_2020` vs. `inner_base`):
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval |
+|---|---|---|---|---|
+| 0 | 4.362 -> 4.542 | (-0.02, +0.36) | 4.040 -> 4.076 | (-0.11, +0.17) |
+| 1 | 7.776 -> 8.068 | (-0.12, +0.83) | 6.463 -> 6.356 | (-0.33, +0.12) |
+| 2 | 9.721 -> 9.586 | (-0.47, +0.20) | 8.034 -> 8.185 | (-0.18, +0.49) |
+| 3 | 11.584 -> 11.464 | (-0.64, +0.40) | 10.439 -> 10.020 | (-0.91, +0.13) |
+
+No lead changed significantly on either fold, and leads 1 and 2 moved in opposite
+directions on the two folds. Day-3 peak capture rose on both (0.29 -> 0.36 and
+0.24 -> 0.36) and day-1 USG CSI rose on both (0.515 -> 0.539; 0.388 -> 0.488), but
+the rule is decided on RMSE. 90% coverage stayed 0.89-0.91. 2020 is not added to
+training. The 2020 caches stay in the development worktree only.
+ACCEPTANCE: FAIL b15_2020, inner_b15_2020: no lead better with its interval below 0.
+
+B-15 stays open; every listed option has now been tried once.

@@ -30,7 +30,8 @@ def test_baselines_take_aqm_then_hrrr_with_background_then_persistence():
     before = df.copy()
     out = baselines(df, prep(), [0, 1, 2])
 
-    assert set(out) == {"persistence", "climatology", "hrrr_smoke", "aqm_bc", "noaa_best"}
+    assert set(out) == {"persistence", "persistence_morning", "climatology", "hrrr_smoke",
+                        "aqm_bc", "noaa_best"}
     assert all(v.shape == (4, 3) for v in out.values())
     np.testing.assert_allclose(out["persistence"], [[7.0] * 3, [9.0] * 3, [NAN] * 3, [11.0] * 3])
     np.testing.assert_allclose(out["climatology"], [[8.0] * 3, [6.0] * 3, [NAN] * 3, [5.0] * 3])

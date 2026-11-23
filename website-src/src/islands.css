@@ -1,0 +1,7 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* No Tailwind preflight: site.css owns the base styles. */
+@keyframes island-in {
+  from { opacity: 0; transform: translateY(6px); }
+}

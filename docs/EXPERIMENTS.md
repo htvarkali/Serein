@@ -181,3 +181,42 @@ training. The 2020 caches stay in the development worktree only.
 ACCEPTANCE: FAIL b15_2020, inner_b15_2020: no lead better with its interval below 0.
 
 B-15 stays open; every listed option has now been tried once.
+
+## 2026-11-23 Phase 1 product ideas (diagnostics; no model change)
+
+### Blending forecasters (not built)
+
+Question: does a fixed weighted average of SmokeCast with the boosted-tree model,
+NOAA's best, persistence and the no-graph model beat SmokeCast alone? Cross-fitted on
+the dev predictions: weights fit on alternate pairs of scoring weeks, applied to the
+other half, convex weights (nonnegative, sum to 1). Result: worse at every lead
+(for example SmokeCast + trees: lead 1 RMSE 7.776 -> 8.547, interval +0.05 to +1.53;
+lead 2 9.721 -> 10.840, +0.15 to +1.94). NOAA and persistence got weight near 0; the
+trees got about 0.4 in one half and hurt in the other, because the two halves contain
+different smoke episodes. Not built.
+
+### Warning probabilities and a sensitivity dial (built as outputs only)
+
+The backtest now saves `smokecast_prob_L<lead>`, P(daily PM2.5 >= 35.5), and writes
+`warn_dial.csv`: hit rate and false alarms on the scoring rows for the CSI-best cut-off
+and for cut-offs chosen on calibration rows to reach an 80% or 90% hit rate. Dev 2023:
+the 80% and 90% settings collapse to cut-offs near 0.01 at leads 1-3 (false-alarm ratio
+about 0.98), so a more sensitive dial is not useful beyond day 0; at day 0 the 90%
+setting catches 90% of unhealthy site-days with a false-alarm ratio of 0.35 (vs. 78%
+and 0.18 at the CSI-best cut-off). The CSI-best rule stays the default.
+
+Reliability on dev 2023 (lead 1): Brier 0.0095 vs. 0.0175 for always predicting the
+base rate. Probabilities are too high in the middle: forecasts near 0.39 verified 0.16,
+near 0.59 verified 0.39, near 0.81 verified 0.64; near 0.95 verified 0.95. Lead 2 is
+similar. Recalibrating them on calibration rows is the next step.
+
+### Low-confidence flag (diagnostic)
+
+Flag = the 10% of site-days with the widest 90% interval (log scale). Dev 2023 lead 1:
+mean absolute error 10.6 on flagged rows vs. 1.8 on the rest, 39% of all error on 10%
+of rows; lead 2: 13.1 vs. 2.1, 41%. Inner fold 2022: 9.3 vs. 1.8 (36%) and 12.6 vs. 2.4
+(37%). Within the same forecast level (quintiles of the point forecast), flagged rows
+still have 1.2-5x the error of the rest on both folds, so the flag is not only a proxy
+for smoky days. Disagreement between SmokeCast and NOAA's best is a weaker flag (28-29%
+of error on dev). The interval-width flag will be used in the product, with its
+threshold taken from calibration rows.

@@ -49,7 +49,58 @@ with st.sidebar:
                         key="language")
 
 d = fc[fc["lead"] == lead].copy()
-tab_map, tab_family, tab_log = st.tabs(["Map", "Family plan (simulation)", "Daily check-in"])
+tab_crew, tab_map, tab_family, tab_log = st.tabs(
+    ["Crew planner", "Map", "Family plan (simulation)", "Daily check-in"])
+
+with tab_crew:
+    import json
+    import os
+
+    from serein.crew import QUANTILE_COLUMNS, SPANISH_IS_DRAFT, outlook
+
+    st.subheader("Smoke outlook for an outdoor work site")
+    st.caption("For planning shifts up to 3 days ahead. California's wildfire smoke rule "
+               "(Title 8, section 5141.1) applies when the current AQI for PM2.5 is 151 or more; "
+               "this outlook forecasts the daily average and never replaces the current-AQI check "
+               "at the start of each shift.")
+    run_dir = REPO_ROOT / "outputs" / "backtest" / os.environ.get("SEREIN_LIVE_RUN", "west_us_dev")
+    recal = (json.loads((run_dir / "prob_recal.json").read_text())
+             if (run_dir / "prob_recal.json").exists() else None)
+    flag = (json.loads((run_dir / "flag_width.json").read_text())
+            if (run_dir / "flag_width.json").exists() else None)
+    if recal is None:
+        st.caption("Chances shown are not recalibrated (no prob_recal.json for this run).")
+    c1, c2 = st.columns([1, 3])
+    with c1:
+        site = st.text_input("Site name", "Field 4")
+        s_lat = st.number_input("Site latitude", value=36.74, format="%.3f", key="crew_lat")
+        s_lon = st.number_input("Site longitude", value=-119.79, format="%.3f", key="crew_lon")
+    allf = fc.copy()
+    first = allf[allf["lead"] == allf["lead"].min()]
+    dist = (first["lat"] - s_lat) ** 2 + ((first["lon"] - s_lon) * np.cos(np.radians(s_lat))) ** 2
+    nearest = first.iloc[int(np.argmin(dist.to_numpy()))]
+    rows = allf[allf["point_id"] == nearest["point_id"]].sort_values("lead")
+    with c2:
+        st.markdown(f"**{site}**: nearest forecast point {nearest['point_id']} "
+                    f"({'air monitor' if nearest['kind'] == 'epa' else 'map cell'}), "
+                    f"forecast issued {pd.Timestamp(nearest['issue_date']).date()}")
+        cols = st.columns(len(rows))
+        for col, (_, r) in zip(cols, rows.iterrows()):
+            o = outlook([r[c] for c in QUANTILE_COLUMNS], int(r["lead"]), recal, flag, lang)
+            label = ["Today", "Tomorrow", "Day +2", "Day +3"][int(r["lead"])]
+            with col:
+                st.markdown(f"#### {label}")
+                st.caption(str(pd.Timestamp(r["valid_date"]).date()))
+                st.metric("Daily PM2.5", f"{o.median:.0f} µg/m³", help="Median forecast")
+                st.caption(f"90% range {o.low:.0f}-{o.high:.0f}. {o.category}.")
+                st.caption(f"Chance unhealthy for sensitive groups: {o.p_unhealthy_sensitive:.0%}. "
+                           f"Chance of a daily average at the rule's level (AQI 151+): "
+                           f"{o.p_rule_level:.0%}.")
+                (st.warning if o.low_confidence else st.info)(o.action)
+                for note in o.notes:
+                    st.caption(note)
+    if lang == "es" and SPANISH_IS_DRAFT:
+        st.caption("Spanish text is a draft and has not been reviewed by a native speaker.")
 
 with tab_map:
     import folium

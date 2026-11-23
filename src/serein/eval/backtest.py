@@ -180,7 +180,9 @@ def cutoff_for_hit_rate(p_exceed: np.ndarray, obs: np.ndarray, target: float,
     return 0.0125
 
 
-DIAL_TARGETS = (0.80, 0.90)  # hit rates on calibration rows for the sensitive settings
+DIAL_TARGETS = (0.80, 0.90)
+# Low-confidence flag: a 90% range wider (log scale) than this share of calibration rows.
+FLAG_QUANTILE = 0.90  # hit rates on calibration rows for the sensitive settings
 
 
 def warning_scores(warn: np.ndarray, obs: np.ndarray, thr: float = 35.5) -> dict:
@@ -404,7 +406,7 @@ def run_backtest(study: Study, args) -> dict:
     warn_test = np.zeros_like(obs, dtype=bool)
     prob_test = np.full(obs.shape, np.nan)
     prob_cal_test = np.full(obs.shape, np.nan)
-    cutoffs, dial = {}, []
+    cutoffs, dial, recal, flag_width = {}, [], {}, {}
     for li, lead in enumerate(leads):
         pc = prob_exceed(q_conf_cal[:, li], QUANTILES)
         cut = tune_warning_threshold(pc, obs_conf[:, li])
@@ -412,7 +414,10 @@ def run_backtest(study: Study, args) -> dict:
         pt = prob_exceed(preds_q["smokecast"][:, li], QUANTILES)
         prob_test[:, li] = pt
         iso = fit_probability_recalibration(pc, obs_conf[:, li])
+        width = q_conf_cal[:, li, -1] - q_conf_cal[:, li, 0]
+        flag_width[str(lead)] = float(np.nanquantile(width, FLAG_QUANTILE))
         if iso is not None:
+            recal[str(lead)] = {"x": iso.X_thresholds_.tolist(), "y": iso.y_thresholds_.tolist()}
             prob_cal_test[:, li] = iso.predict(np.nan_to_num(pt, nan=0.0))
             prob_cal_test[~np.isfinite(pt), li] = np.nan
         warn_test[:, li] = pt >= cut
@@ -429,6 +434,10 @@ def run_backtest(study: Study, args) -> dict:
     log(f"warning cut-offs P(>=35.5) tuned on calibration: {cutoffs}")
     (out_dir / "warn_cutoffs.json").write_text(json.dumps({str(k): v for k, v in cutoffs.items()}))
     pd.DataFrame(dial).to_csv(out_dir / "warn_dial.csv", index=False)
+    # Saved with the model so maps and the live forecast use the same calibration-row fits.
+    (out_dir / "prob_recal.json").write_text(json.dumps(recal))
+    (out_dir / "flag_width.json").write_text(json.dumps(
+        {"quantile": FLAG_QUANTILE, "log_width": flag_width}))
 
     # Head-to-head on IDENTICAL rows, with day-block bootstrap CIs.
     h2h = []

@@ -81,16 +81,18 @@ with tab_crew:
     nearest = first.iloc[int(np.argmin(dist.to_numpy()))]
     rows = allf[allf["point_id"] == nearest["point_id"]].sort_values("lead")
     with c2:
-        st.markdown(f"**{site}**: nearest forecast point {nearest['point_id']} "
-                    f"({'air monitor' if nearest['kind'] == 'epa' else 'map cell'}), "
-                    f"forecast issued {pd.Timestamp(nearest['issue_date']).date()}")
+        issued = nearest.get("issue_date")
+        kind = "air monitor" if nearest.get("kind") == "epa" else "map cell"
+        st.markdown(f"**{site}**: nearest forecast point {nearest['point_id']} ({kind})"
+                    + ("" if pd.isna(issued) else f", forecast issued {pd.Timestamp(issued).date()}"))
         cols = st.columns(len(rows))
         for col, (_, r) in zip(cols, rows.iterrows()):
             o = outlook([r[c] for c in QUANTILE_COLUMNS], int(r["lead"]), recal, flag, lang)
             label = ["Today", "Tomorrow", "Day +2", "Day +3"][int(r["lead"])]
             with col:
                 st.markdown(f"#### {label}")
-                st.caption(str(pd.Timestamp(r["valid_date"]).date()))
+                if pd.notna(r.get("valid_date")):
+                    st.caption(str(pd.Timestamp(r["valid_date"]).date()))
                 st.metric("Daily PM2.5", f"{o.median:.0f} µg/m³", help="Median forecast")
                 st.caption(f"90% range {o.low:.0f}-{o.high:.0f}. {o.category}.")
                 st.caption(f"Chance unhealthy for sensitive groups: {o.p_unhealthy_sensitive:.0%}. "

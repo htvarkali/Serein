@@ -49,14 +49,14 @@ def tracts(region: dict) -> pd.DataFrame:
     import geopandas as gpd
 
     parts = []
-    for fips in STATES:
+    for fips, abbr in STATES.items():
         g = gpd.read_file(raw_dir("census") / f"cb_2023_{fips}_tract_500k.zip")
         pt = g.geometry.representative_point()
         parts.append(
             pd.DataFrame(
                 {
                     "GEO_ID": "1400000US" + g["GEOID"].astype(str),
-                    "state": STATES[fips],
+                    "state": abbr,
                     "lat": pt.y,
                     "lon": pt.x,
                 }

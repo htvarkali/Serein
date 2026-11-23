@@ -122,3 +122,44 @@ ACCEPTANCE: FAIL b16_growth, inner_b16_growth: no lead better; inner fold worse 
 B-16 stays open. One untested explanation is that a single day-over-day FRP change is too noisy; a
 plume-age or transport input (HRRR smoke beyond lead 1, HMS plume history) is the
 remaining idea.
+
+### Try 2: the forecast hours that exist for a partly covered day (`build-table --partial-days`)
+
+Hypothesis: the 12z HRRR run ends 48 h after 12z, about 6 hours into local day 2,
+and the 12z AQM run ends about 6 hours into day 3. The daily features need at least
+12 hours, so those hours are thrown away and day 2 has no HRRR smoke input and day 3
+no AQM input. Adding the mean of the hours that do exist (`hrrr_smoke_first_L2`,
+`aqm_first_L3`, at least 3 hours, otherwise missing; same runs and availability as the
+existing inputs, no new download) gives the model official smoke information for the
+overnight start of day 2 and day 3. Expected: lower RMSE at lead 2, maybe lead 3; no
+change at leads 0-1. Tags `b16_partial` (dev) and `inner_b16_partial` (2021/2022).
+
+Result, dev (`b16_partial` vs. `dev`) and inner fold (`inner_b16_partial` vs. `inner_base`):
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval |
+|---|---|---|---|---|
+| 0 | 4.362 -> 4.453 | (+0.01, +0.19) | 4.040 -> 4.063 | (-0.11, +0.13) |
+| 1 | 7.776 -> 8.051 | (-0.19, +0.86) | 6.463 -> 6.532 | (-0.12, +0.27) |
+| 2 | 9.721 -> 9.630 | (-0.47, +0.21) | 8.034 -> 7.905 | (-0.31, +0.06) |
+| 3 | 11.584 -> 11.342 | (-0.50, -0.07) | 10.439 -> 10.476 | (-0.18, +0.31) |
+
+Day 3 improved on dev with the interval below 0, and day 2 moved the right way on
+both folds without reaching significance, but day 0 got worse on dev with its
+interval above 0, so the rule fails. Leads 0-1 change although their inputs did not,
+because all leads share one network. USG CSI rose at leads 2-3 on both folds
+(dev 0.435 -> 0.448 and 0.273 -> 0.306; inner 0.230 -> 0.251 and 0.119 -> 0.126).
+The `--partial-days` option is not merged.
+ACCEPTANCE: FAIL b16_partial, inner_b16_partial: lead 0 worse on dev with the interval above 0; lead 2 not significant.
+
+Possible follow-up (not run): feed the partial-day inputs only to the lead 2-3
+outputs, so leads 0-1 cannot drift.
+
+## 2026-11-23 B-15: 2020 as extra training data
+
+Hypothesis: the model has seen two training seasons (2021-22). 2020 was one of the
+worst Western smoke seasons on record (the September 2020 fires), so it adds many
+heavy-smoke days, which is what the model under-forecasts at days 2-3. HRRR-Smoke
+fields are missing or labelled differently in 2020 and AQM was v5 (48 h); the model
+already treats missing inputs as missing. Training on 2020-22 (calibration 2023
+unchanged) should raise the day 2-3 peak capture and lower smoke-day RMSE. Tags
+`b15_2020` (train 2020-22, dev) and `inner_b15_2020` (train 2020-21, score 2022).

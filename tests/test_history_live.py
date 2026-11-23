@@ -506,6 +506,21 @@ def test_live_forecasts_are_grouped_by_the_model_that_made_them(tmp_path):
     assert model_parts([tmp_path / "20261103.parquet"]) == {
         tmp_path / "20261103.parquet": ("not recorded", "2026-11-03")}
 
+    # Without a record, the fingerprint saved in the forecast file decides.
+    switch = tmp_path / "switch"
+    switch.mkdir()
+    for stem, record, saved_sha in (("20261120", {"model_run": "west_us_dev", "model_sha256": "aaa"}, "aaa"),
+                                    ("20261121", None, "aaa"), ("20261122", {"model_sha256": "bbb"}, "bbb"),
+                                    ("20261123", None, "ccc"),
+                                    ("20261124", {"model_run": "west_us_live_v1", "model_sha256": "ccc"}, "ccc")):
+        pd.DataFrame({"point_id": ["A"], "model_sha256": [saved_sha]}).to_parquet(switch / f"{stem}.parquet")
+        if record:
+            (switch / f"{stem}.json").write_text(json.dumps(record), encoding="utf-8")
+    assert {f.stem: part for f, part in model_parts(sorted(switch.glob("*.parquet"))).items()} == {
+        "20261120": ("west_us_dev", "2026-11-20"), "20261121": ("west_us_dev", "2026-11-20"),
+        "20261122": ("not recorded", "2026-11-22"), "20261123": ("not recorded", "2026-11-23"),
+        "20261124": ("west_us_live_v1", "2026-11-24")}
+
 
 def test_live_scoreboard_scores_each_trained_model_separately(tmp_path, monkeypatch):
     from serein import live

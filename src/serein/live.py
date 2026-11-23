@@ -188,13 +188,23 @@ def _observed(study: Study, valid_days: list[date], pts: pd.DataFrame) -> pd.Dat
         ["point_id", "valid_date", "obs"]]
 
 
+def _saved_fingerprint(path: Path) -> str | None:
+    """The model fingerprint stored in a forecast file itself (recorded since 2026-11-19)."""
+    try:
+        values = pd.read_parquet(path, columns=["model_sha256"])["model_sha256"].dropna()
+    except Exception:  # noqa: BLE001 - an older or unreadable file has no fingerprint
+        return None
+    return str(values.iloc[0]) if len(values) else None
+
+
 def model_parts(files: list[Path]) -> dict[Path, tuple[str, str]]:
     """Which trained model made each saved forecast: (run name, first issue day of its part).
 
     Protocol 7b splits the live scoreboard when the model is replaced. A new part starts
     when the run name changes, or when two recorded fingerprints differ (a retrain under
-    the same name). Forecasts saved before fingerprints were recorded stay with their run,
-    and one whose record is missing or unreadable stays with the forecast before it."""
+    the same name). Forecasts saved before fingerprints were recorded stay with their run.
+    One whose record is missing or unreadable stays with the forecast before it unless the
+    fingerprint saved in the forecast file differs, which starts a "not recorded" part."""
     parts, run, sha_before, start = {}, None, None, ""
     for f in sorted(files):
         try:
@@ -202,7 +212,9 @@ def model_parts(files: list[Path]) -> dict[Path, tuple[str, str]]:
         except (OSError, ValueError):
             info = {}
         named, sha = (info.get("model_run"), info.get("model_sha256")) if isinstance(info, dict) else (None, None)
-        if run is None or named and (named != run or sha and sha_before and sha != sha_before):
+        if not named:
+            sha = sha or _saved_fingerprint(f)
+        if run is None or named and named != run or sha and sha_before and sha != sha_before:
             run, start, sha_before = named or "not recorded", f"{f.stem[:4]}-{f.stem[4:6]}-{f.stem[6:8]}", None
         sha_before = sha or sha_before
         parts[f] = (run, start)

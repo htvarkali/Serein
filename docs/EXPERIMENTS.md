@@ -298,3 +298,10 @@ not help the forecast days, also not at hidden monitors. Lead 3 is worse on the 
 fold with its interval above 0. Not merged; the extraction code is kept on branch
 `conrad/goes-aod` for possible same-day use.
 ACCEPTANCE: FAIL goes_aod, inner_goes_aod: no lead 1-2 gain; inner lead 3 worse.
+
+### Day-3-only use of the partial-day inputs (closed without a new run)
+
+Using `b16_partial` only for the lead-3 forecast: dev 2023 lead 3 RMSE 11.584 -> 11.342
+(interval -0.50 to -0.07), but the inner fold did not repeat it (10.439 -> 10.476,
+-0.18 to +0.31). The acceptance rule also needs a lead 1 or lead 2 gain, which a
+lead-3-only change cannot give. Closed.

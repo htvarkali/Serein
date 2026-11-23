@@ -155,12 +155,11 @@ Gotchas we found (details in [docs/DATA.md](docs/DATA.md)): HRRR `MASSDEN` was l
 
 ---
 
-## Current results (historical dev snapshot, 2026-11-02)
+## Current results (development rerun, 2026-11-23)
 
-These saved numbers predate the latest observation-processing, missing-smoke-map,
-forecast-bound and ensemble-export fixes. New graph/no-graph runs also use matching
-ensemble sizes. Rebuild feature tables and rerun the development suite before
-updating these results or claiming accuracy for the revised pipeline.
+Rerun on the current pipeline (code 7334216, feature tables rebuilt 2026-11-22),
+with equal ensemble sizes for the graph and no-graph models. The ablation line at
+the end is still from 2026-11-02 and was not rerun.
 
 Trained on 2021-22 fire seasons, scored on held-out weeks of 2023. **These are
 development numbers, not the final test.** The 2024-25 test seasons are locked
@@ -168,28 +167,29 @@ until the protocol is frozen (TODO D-4/D-5).
 
 | Error (RMSE, µg/m³) | Today | +1 day | +2 days | +3 days |
 |---|---|---|---|---|
-| **SmokeCast** | **4.5** | **7.9** | **9.7** | **11.4** |
+| **SmokeCast** | **4.4** | **7.8** | **9.7** | **11.6** |
 | AQM → HRRR → persistence fallback | 10.1 | 11.0 | 12.3 | 15.5 |
-| Same model, graph turned off | 4.8 | 8.2 | 10.3 | 12.0 |
-| **At monitors hidden from SmokeCast** (no sensor) | **7.0** | **8.5** | **10.1** | **11.3** |
+| Same model, graph turned off | 4.5 | 8.2 | 10.1 | 12.0 |
+| **At monitors hidden from SmokeCast** (no sensor) | **6.9** | **8.4** | **9.9** | **11.4** |
 | NOAA at those same hidden monitors | 10.5 | 11.1 | 11.9 | 14.1 |
 
 The fallback selects forecasts by availability, in the order shown. Its day-3
 prediction can be persistence when NOAA forecasts are unavailable.
 
 - Beats that fallback at every lead (day-bootstrap 95% CIs all below zero), and
-  beats NOAA at 87% of 344 individual monitors (day 1).
+  beats NOAA at 90% of 344 individual monitors (day 1, monitors with at least 20 scored days).
 - **Warnings a day ahead:** of 244 reporting-area days that really turned orange-or-worse,
-  Serein warned on 71% vs. 46% for EPA's official forecast, with fewer false alarms
-  (81 vs. 98). Day 2: 66% vs. 37%, but more false alarms (54 vs. 36).
-- **Peaks:** on smoky days, the day-1 forecast reaches a median 80% of the true level
-  (NOAA: 31%); day 2: 56%, day 3: 31%.
-- The graph matters most where there is **no sensor**: 17% lower error today and 16% on
+  Serein warned on 72% vs. 46% for EPA's official forecast, with fewer false alarms
+  (92 vs. 98). Day 2: 62% vs. 37%, but more false alarms (48 vs. 36).
+- **Peaks:** on smoky days, the day-1 forecast reaches a median 76% of the true level
+  (NOAA: 31%); day 2: 55%, day 3: 29%. Two fixes tried on 2026-11-23 did not help
+  ([experiment log](docs/EXPERIMENTS.md)).
+- The graph matters most where there is **no sensor**: 18% lower error today and 17% on
   day 3 at hidden monitors vs. the same model without neighbors.
 - 90% ranges contain the truth 89-91% of the time.
 - Weak spots we report: big peaks are still under-forecast at days 2-3; day-2 warnings
   have more false alarms than EPA's.
-- **What drives the skill** (ablations): live sensors matter most for today (+66% error
+- **What drives the skill** (ablations, 2026-11-02, not rerun): live sensors matter most for today (+66% error
   without them), HRRR-Smoke for days 1-2 (+29% on day 1), AQM for every day (+7-14%).
   Fire detections and smoke plume maps help a little (1-5% on days 1-3); wind direction
   on graph edges adds nothing (details in `docs/METHODS.md`).

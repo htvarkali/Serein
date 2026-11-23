@@ -140,6 +140,9 @@ section[id] { scroll-margin-top: 1.25rem; }
     linear-gradient(110deg, #0a231fc7, #11292338 62%, #0c211919 100%);
 }
 .hero-atmosphere { z-index: -1; pointer-events: none; }
+/* Motion clips start on the exact photo frame, so fading in over the photo is seamless. */
+.motion-video { display: block; opacity: 0; transition: opacity .9s ease; }
+.motion-video.is-playing { opacity: 1; }
 .hero-content { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(0, .85fr); gap: clamp(1.6rem, 4vw, 4.5rem); align-items: end; padding-block: 3rem 2.7rem; }
 .hero-heading h1 { font-size: clamp(4.1rem, 8.9vw, 8.7rem); margin-top: .7rem; line-height: .89; }
 .hero-heading h1 em { color: var(--sage); font-weight: 400; }
@@ -196,7 +199,9 @@ section[id] { scroll-margin-top: 1.25rem; }
 .hero-map figcaption { padding: 0 .4rem .35rem; }
 .hero-map img { width: 100%; }
 .family-hero { background: radial-gradient(ellipse at 90% 30%, #2b4b41, transparent 65%), var(--pine); }
-.family-photo img { width: 100%; aspect-ratio: 5/4; object-fit: cover; object-position: 72% 50%; border-radius: .4rem; }
+.family-photo { position: relative; }
+.family-photo :is(img, video) { width: 100%; aspect-ratio: 5/4; object-fit: cover; object-position: 72% 50%; border-radius: .4rem; }
+.family-photo video { position: absolute; inset: 0 0 auto; }
 .family-hero .lead { font-family: var(--serif); font-size: clamp(1.95rem, 3.8vw, 3.5rem); line-height: 1.02; }
 .figure-frame > a { display: block; }
 .figure-frame img { border-radius: .3rem; object-fit: contain; }

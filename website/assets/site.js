@@ -101,6 +101,33 @@ function setupChapters() {
   update();
 }
 
+// Photos stay in place; looping clips fade in over them only when motion is
+// allowed and they are on screen. Nothing downloads under reduced motion.
+function setupMotionVideos() {
+  const videos = document.querySelectorAll("video[data-motion]");
+  if (!videos.length || !("IntersectionObserver" in window)) return;
+  const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  for (const video of videos) {
+    let visible = false;
+    function sync() {
+      if (visible && !document.hidden && !motion.matches) {
+        video.play().catch(() => {});
+      } else {
+        video.pause();
+      }
+      if (motion.matches) video.classList.remove("is-playing");
+    }
+    video.addEventListener("playing", () => video.classList.add("is-playing"));
+    new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      sync();
+    }).observe(video);
+    motion.addEventListener("change", sync);
+    document.addEventListener("visibilitychange", sync);
+  }
+}
+
 function setupAtmosphere() {
   const canvas = document.querySelector(".hero-atmosphere");
   if (!canvas || !("IntersectionObserver" in window) || !("ResizeObserver" in window)) return;
@@ -162,6 +189,7 @@ function setupAtmosphere() {
 }
 
 setupMenu();
+setupMotionVideos();
 setupSwitchers();
 setupChapters();
 setupAtmosphere();

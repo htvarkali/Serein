@@ -271,10 +271,15 @@ result trustworthy to judges:
 
 1. Read `docs/BACKTEST_PROTOCOL.md` together and agree on it. Change its status line to **FROZEN**.
 2. Commit and push it. The commit time is your public proof the rules came first.
-3. Run the test (about 10 min on an RTX-class GPU):
+3. Run the test (each step once; the exact list is section 6 of the protocol):
    ```bash
+   uv run serein build-table --split test
    uv run serein backtest --final
    uv run serein backtest --final --tag final_holdout --holdout-sites 0.2 --no-gbm
+   uv run serein backtest --final --tag final_no_aqm --drop aqm_ --no-gbm --no-ablation
+   uv run python -m serein.eval.final_report outputs/backtest/west_us_final --table data/processed/west_us/table_test.parquet
+   uv run python -m serein.eval.final_report outputs/backtest/west_us_final_holdout --table data/processed/west_us/table_test.parquet
+   uv run python -m serein.eval.final_report outputs/backtest/west_us_final_no_aqm --table data/processed/west_us/table_test.parquet
    uv run python -m serein.eval.figures outputs/backtest/west_us_final
    uv run python -m serein.eval.impact outputs/backtest/west_us_final
    ```

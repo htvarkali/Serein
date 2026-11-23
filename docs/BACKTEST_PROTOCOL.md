@@ -62,8 +62,8 @@ Limitation: those stamps were read in 2026, so for 2024-25 files they may show a
 later re-upload, not the original posting time. The input that matters most is the
 AQM 12z run, which lands about 27 minutes before the 18:30 UTC issue time.
 Pre-registered sensitivity: if AQM had been late, the forecast would have had HRRR,
-sensors and persistence only. We report that case with the existing no-AQM ablation
-(`--drop aqm_`, dev error +7-14%) next to the main result.
+sensors and persistence only. We report that case with the no-AQM ablation
+(`--drop aqm_`, dev error +7-14%) next to the main result: section 6, final step 3.
 
 ## 4. Target
 
@@ -128,16 +128,24 @@ primary criterion is not met, that is the headline result and the Brief will say
 
 ### The final evaluation, exactly (each command runs once, after the freeze)
 
+0. Build the test feature table once: `uv run serein build-table --split test`.
 1. `uv run serein backtest --final` (main result, all monitors).
 2. `uv run serein backtest --final --tag final_holdout --holdout-sites 0.2 --no-gbm`
    (hidden-monitor result; the hidden 20% is fixed by seed 1234, chosen in advance).
-3. `uv run serein transfer --run west_us_final` (Northeast June 2023, out of region).
-4. Then, reading only those saved outputs: figures, impact, the comparison report
-   with the Diebold-Mariano test (metric 6), the 2024 vs. 2025 split (section 2) and
-   the no-AQM sensitivity (section 3).
+3. `uv run serein backtest --final --tag final_no_aqm --drop aqm_ --no-gbm --no-ablation`
+   (the "AQM was late" sensitivity of section 3: the same settings trained without the
+   AQM inputs; reported next to the main result, never in place of it).
+4. `uv run serein transfer --run west_us_final` (Northeast June 2023, out of region).
+5. Then, reading only those saved outputs:
+   `uv run python -m serein.eval.final_report outputs/backtest/west_us_final --table data/processed/west_us/table_test.parquet`
+   (primary PASS/FAIL, the 2024 vs. 2025 split of section 2, every competitor's row
+   counts, SHA-256 hashes), the same for `west_us_final_holdout` and
+   `west_us_final_no_aqm`, the comparison report with the Diebold-Mariano test
+   (metric 6), figures and impact.
 
-That is the whole final evaluation. Steps 1-3 are three runs, written down now, not
-three tries at the same question.
+That is the whole final evaluation. Steps 1-4 are four runs, written down now, not
+four tries at the same question. The summary code (`src/serein/eval/final_report.py`)
+was written and tested on development runs before the freeze.
 
 ## 6b. Model settings chosen on dev weeks (2026-11-01)
 
@@ -176,10 +184,11 @@ The 2024-25 test is the only fully out-of-sample estimate of either.
 - Bug fixes that don't change model choices, with a note here explaining them.
 - Running the test once. If a bug is found *after* the final run, we fix it,
   re-run, and report **both** results.
-- Archiving: right after the final run, the SHA-256 of the test feature table, the
-  model export (`smokecast.pt`) and `predictions.parquet` go into the change-log row
-  for that run, and the files are kept unchanged, so anyone can reproduce the
-  reported numbers from the same inputs.
+- Archiving: right after the final run, `serein.eval.final_report` writes the SHA-256
+  of the test feature table, the model export (`smokecast.pt`), `predictions.parquet`
+  and the lock file to `final_hashes.json`; those hashes go into the change-log row for
+  that run, and the files are kept unchanged, so anyone can reproduce the reported
+  numbers from the same inputs.
 
 ## 7b. Live test (prospective; rules written 2026-11-03, before the first live forecast)
 
@@ -221,3 +230,4 @@ yet (`serein live`, run daily at 11:45 AM Pacific by `scripts/run_live.sh`).
 | 2026-11-19 | Hidden monitors are also left out of early stopping, interval calibration and warning tuning (no settings changed) | Leave-sites-out removed hidden monitors' targets from training only, so their readings still chose the stopping epoch and tuned the 90% intervals and warning cut-offs. This answers item 10 of the 2026-11-08 pre-freeze review. The hidden-monitor dev numbers above (7.0 / 8.5 / 10.1 / 11.3) came from the old code and need a rerun |
 | 2026-11-22 | Live forecast pinned to its own trained run, `west_us_live_v1`, from the 2026-11-23 forecast (no settings changed) | `serein live` used `west_us_dev`, which every development rerun overwrites, so a rerun would have replaced the live model without notice; that run was also a legacy single-member export. `scripts/run_live.sh` now passes `--run "${SEREIN_LIVE_RUN:-west_us_dev}"`. `west_us_live_v1` was trained on code 565bbba with rebuilt train and calibrate tables (dev mode, test seasons untouched): 5 members, seeds 0-4, model fingerprint `66c772b333a9...`. Dev numbers: RMSE 4.4 / 7.8 / 9.7 / 11.4; 90% coverage 0.89-0.91. Forecasts through 2026-11-22 came from `west_us_dev`; as section 7b says, the live scoreboard is split at 2026-11-23 and both parts are reported. The points registry kept its monitors and gained a state column taken from 2021-2023 AirNow metadata only |
 | 2026-11-23 | D-4 preparation from the 2026-11-08 review (no model settings changed) | Change-log rows for Nov 4-18 (item 1); in-sample caveat (2); the exact final commands (3); Diebold-Mariano test written in as metric 6 (4); posting-time limitation and no-AQM sensitivity (5); why `noaa_best` and per-product rows (6); `persistence_morning` competitor for L0-L1, code in `src/serein/models/baselines.py` (7); AQM v7 covers the whole test period, results split 2024 vs. 2025 (8); lead 3 framing (9); test-season files counted by name, 0 missing days (11); what "we lose" looks like (12); Northeast uses West calibration (13); archive hashes (14). Dev and hidden-monitor backtests rerun on code 7334216 with the rebuilt 2026-11-22 tables (figures, map and ablations not rerun): RMSE 4.4 / 7.8 / 9.7 / 11.6; hidden monitors 6.9 / 8.4 / 9.9 / 11.4 (the rerun the 2026-11-19 row asked for); 90% coverage 0.89-0.91. Test seasons still untouched |
+| 2026-11-23 | Final evaluation steps made exact; summary code added (no model settings changed) | The no-AQM sensitivity is now its own listed run (`final_no_aqm`) instead of an unstated extra; `src/serein/eval/final_report.py` computes the primary PASS/FAIL, the 2024 vs. 2025 split, per-competitor row counts and the SHA-256 archive hashes from saved outputs only. It was tested on synthetic data and on the 2023 dev run (dev: PASS, matching the backtest's own head-to-head) before any test-season run |

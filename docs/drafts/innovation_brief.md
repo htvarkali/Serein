@@ -1,6 +1,6 @@
 # Innovation Brief draft (UNSENT, team edits welcome)
 
-Status: first draft, 2026-11-01; development numbers updated 2026-11-23 to the rerun on the current pipeline. Nothing here has been submitted. Every `[TEAM: ...]` slot needs a real fact from us before this goes into the Conrad portal. Word limits are from the 2026-27 Student Guide (see `docs/CONRAD.md`); the count after each heading is the limit, not the current length.
+Status: first draft, 2026-11-01; development numbers updated 2026-11-23 to the rerun on the current pipeline; Smoke World, equity, recalibration and hourly results added 2026-11-23. Section 5 is now over its 450-word limit: cut when the final numbers go in. Nothing here has been submitted. Every `[TEAM: ...]` slot needs a real fact from us before this goes into the Conrad portal. Word limits are from the 2026-27 Student Guide (see `docs/CONRAD.md`); the count after each heading is the limit, not the current length.
 
 Rules for editing this draft:
 - All numbers below are **dev results** (2023 held-out weeks). After the final 2024-25 test runs (README "Finishing the proof"), replace them with the final numbers, even if they are worse.
@@ -77,14 +77,17 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 
 ## 5. Validation and progress (450 words)
 
-**What we built.** A working pipeline that downloads five fire seasons (2021 to 2025) of free public data from NOAA, NASA and EPA, trains SmokeCast, scores it, and draws forecast maps. A demo app shows the neighborhood map, a family's plan and the daily check-in. The project has automated tests that run on every change.
+**What we built.** Smoke World (htvarkali.github.io/Serein), a public 3D map of the western U.S. that updates every morning with the next 72 hours of smoke, wind and fires, shows the tested daily forecast and its range for any place clicked, and counts how many people live under unhealthy smoke each hour. Behind it, a working pipeline that downloads five fire seasons (2021 to 2025) of free public data from NOAA, NASA and EPA, trains SmokeCast, scores it, and draws forecast maps. A demo app shows the neighborhood map, a family's plan and the daily check-in. The project has automated tests that run on every change.
 
 **Evaluation plan.** The draft protocol (docs/BACKTEST_PROTOCOL.md) reserves 2024-25 for a final test after the team freezes the methods. That final test has not run. Development trains on 2021-22 and uses 2023 for tuning and scoring. Availability cutoffs are enforced using documented posting-lag assumptions; historical availability still needs an audit. Comparisons use archived forecasts for paired places and days.
 
 **What the tests showed (development weeks of 2023).**
 - One day ahead, Serein's RMSE was 7.8 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). We report persistence on its own because a 2026 evaluation in BAMS found that for day-level decisions it matched or beat every operational smoke model; Serein's warning skill one day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
 - It warned on 72% of "Unhealthy for Sensitive Groups" days vs. 46% for EPA, with fewer false alarms.
-- With 20% of monitors hidden, it still beat NOAA at the hidden sites, so it can forecast for neighborhoods with no monitor.
+- With 20% of monitors hidden, it still beat NOAA at the hidden sites, in every distance band, so it can forecast for neighborhoods with no monitor. This matters for fairness: in the lowest-income fifth of western neighborhoods, 10.8% of people live 25 km or more from any EPA monitor, vs. 0.6% in the highest-income fifth (Census ACS 2019-2023; docs/EQUITY.md).
+- Warning probabilities were recalibrated so a stated 60% chance of an unhealthy day comes true about 60% of the time, and a low-confidence flag marks the days with the largest misses.
+- Hour by hour, against real hourly monitor readings, Serein's corrected values beat NOAA's hourly forecast on days 0-2, but neither could tell which hours of a day would be worst; a flat daily value was as accurate. So our advice is per day, not per hour (docs/HOURLY_ACCURACY.md).
+- Nine ideas to improve accuracy failed our fixed acceptance test (bigger models, more seasons, fire growth, satellite smoke, five blends). All are logged in docs/EXPERIMENTS.md.
 - We removed one input at a time to see what matters. Without NOAA's HRRR smoke and weather forecasts, tomorrow's error got 29% worse. Without live monitor readings, today's error got 66% worse. Wind direction between monitors, which we expected to help, made no difference, and satellite fire detections helped only a little (1-4%). We report both.
 
 [TEAM: final test results, 2024-25. Run once as a team. Paste the headline numbers here.]

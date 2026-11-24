@@ -104,6 +104,7 @@ export default function SmokeCast() {
               ["The final test", "The 2024-25 seasons have never been scored. The rules are written down in advance and run once after the December 17 freeze, including where SmokeCast loses."],
               ["What did not work", "Nine attempts to improve accuracy failed our fixed test: bigger models, more seasons, fire and satellite inputs, and five ways of blending forecasters. Each is in the public experiment log."],
               ["What did", "Warning probabilities recalibrated so that 60% really means about 60%, and a low-confidence flag that marks the days with the largest misses."],
+              ["Hour by hour", "Against real hourly readings, the corrected hourly values beat NOAA's, but neither tells which hours of a day will be worst. A flat daily value is as accurate, so advice is given per day."],
             ].map(([t, d]) => (
               <div key={t} className="py-6"><h3 className="text-xl font-medium">{t}</h3><p className="mt-2 text-muted-foreground">{d}</p></div>
             ))}
@@ -118,7 +119,7 @@ export default function SmokeCast() {
             <Heading>What could a forecast mean for your day?</Heading>
           </div>
           <div className="space-y-5">
-            <Lead>AirPlan turns the forecast into the cleanest and smokiest hours for outdoor crews and families.</Lead>
+            <Lead>AirPlan turns the forecast into a plan for each of the next days, for outdoor crews and families.</Lead>
             <Button asChild><Link to="/airplan">Explore AirPlan <ArrowRight /></Link></Button>
           </div>
         </Split>

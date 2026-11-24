@@ -14,6 +14,8 @@ export type WorldData = {
   u: (number | null)[]
   v: (number | null)[]
   fires: [number, number, number][] // lat, lon, fire radiative power
+  // SmokeCast's tested daily forecast per local day: median and 90% range per point.
+  daily?: { lead: number; date: string | null; q05: (number | null)[]; q50: (number | null)[]; q95: (number | null)[] }[]
   grid: Int32Array
 }
 export type Which = "serein" | "noaa"

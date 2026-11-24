@@ -76,7 +76,7 @@ export function Home() {
           <ProjectCard eyebrow="See it hour by hour" title="Smoke World" to="/world" cta="Open Smoke World" image="img/world-preview.png"
             text="Fly over the West on real terrain and watch the next 72 hours of smoke, wind and fires. Click any place for its forecast." />
           <ProjectCard eyebrow="Plans for people" title="AirPlan" to="/airplan" cta="Plan a day" image="img/photo-family.webp"
-            text="The forecast as a plan: the cleanest and smokiest hours for outdoor crews and families, and how much smoke a person breathes in." />
+            text="The forecast as a plan for outdoor crews and families: what each of the next days looks like, what to do, and how much smoke a person breathes in." />
         </div>
       </Section>
 
@@ -103,7 +103,7 @@ export function Home() {
           <div className="divide-y divide-border border-y border-border">
             {[
               ["The final test", "The rules are written down. On December 17 they are frozen, and the 2024-25 seasons are scored once."],
-              ["Hour-by-hour accuracy", "Smoke World shows hourly smoke. We are testing it against real hourly monitor readings before calling it a result."],
+              ["Hour by hour", "Tested against real hourly readings: the correction beats NOAA hour by hour, but no forecast we tried can tell which hours of a day will be worst, so we only give advice for the day."],
               ["People", "Interviews with outdoor crews, farm managers and school nurses, and a review of the advice by a health professional."],
             ].map(([t, d]) => (
               <div key={t} className="py-6">

@@ -26,7 +26,7 @@ export default function AirPlan() {
       <Section id="example">
         <Eyebrow>Live forecast</Eyebrow>
         <Heading>Plan the next three days.</Heading>
-        <Lead>Pick a place and who it is for. Each day shows the average smoke, the smokiest and cleanest hours, and what to do.</Lead>
+        <Lead>Pick a place and who it is for. Each day shows SmokeCast's tested forecast, its likely range, and what to do.</Lead>
         <div className="mt-8"><PlanCards /></div>
       </Section>
 

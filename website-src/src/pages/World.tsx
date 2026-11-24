@@ -186,7 +186,7 @@ export default function World() {
             <PopoverContent className="w-96 text-sm">
               <p className="font-medium">Where this comes from</p>
               <p className="mt-2 text-muted-foreground">{data?.source}</p>
-              <p className="mt-2 text-muted-foreground">Smoke detail is about 25 km: two places in the same square get the same number. Terrain, photos, roads and buildings are context only.</p>
+              <p className="mt-2 text-muted-foreground">Smoke detail is about 25 km: two places in the same square get the same number. The daily level is SmokeCast's tested forecast; the hour-to-hour movement is NOAA's pattern, which did not prove reliable at saying which hours are worst. Terrain, photos, roads and buildings are context only.</p>
               <p className="mt-2 text-muted-foreground">Map: imagery USGS The National Map; terrain AWS Terrain Tiles (USGS 3DEP and others); places, roads and buildings © OpenStreetMap contributors via OpenFreeMap; engine MapLibre GL JS.</p>
               <Button asChild variant="link" className="mt-1 px-0"><Link to="/about">All sources and methods</Link></Button>
             </PopoverContent>
@@ -222,6 +222,21 @@ export default function World() {
               <div className="font-serif text-5xl">{now === null ? "No data" : `${now} µg/m³`}</div>
               <div className="text-sm text-muted-foreground">{now === null ? "" : aqiOf(now).name} · {localTime(data, hour)} · {which === "serein" ? "Serein" : "NOAA"}</div>
             </div>
+            {data.daily && (
+              <div className="grid grid-cols-4 gap-2 rounded-xl border p-3 text-center">
+                {data.daily.map(d => {
+                  const q50 = d.q50[picked], q05 = d.q05[picked], q95 = d.q95[picked]
+                  return (
+                    <div key={d.lead}>
+                      <div className="text-[0.7rem] uppercase tracking-wide text-muted-foreground">{["Today", "Tomorrow", "Day 2", "Day 3"][d.lead] ?? `Day ${d.lead}`}</div>
+                      <div className="font-serif text-2xl">{q50 ?? "–"}</div>
+                      <div className="text-[0.7rem] text-muted-foreground">{q05 !== null && q95 !== null ? `${q05}-${q95}` : ""}</div>
+                    </div>
+                  )
+                })}
+                <div className="col-span-4 text-left text-xs text-muted-foreground">SmokeCast's tested daily forecast, µg/m³, with its 90% range. The chart below is the untested hour-by-hour pattern.</div>
+              </div>
+            )}
             <ChartContainer config={chartConfig} className="h-40 w-full">
               <ComposedChart data={series} margin={{ left: -18, right: 6, top: 6 }}>
                 <XAxis dataKey="h" tickFormatter={h => (h % 24 === 0 ? `+${h}h` : "")} tickLine={false} axisLine={false} interval={0} fontSize={11} />

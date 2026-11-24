@@ -24,13 +24,7 @@ export function PersonPanel({ data, point, which }: { data: WorldData; point: nu
       }
       return { ug, concHours, n }
     }
-    const chosen = dose(start)
-    let best = { from: start, ...chosen }
-    for (let s = 0; s + length <= data.hours; s++) {
-      const d = dose(s)
-      if (d.n === length && d.ug < best.ug) best = { from: s, ...d }
-    }
-    return { chosen, best }
+    return { chosen: dose(start) }
   }, [data, which, point, person, start, length])
 
   const cigarettes = (concHours: number) => concHours / (CIGARETTE_UG_M3_DAY * 24)
@@ -62,15 +56,10 @@ export function PersonPanel({ data, point, which }: { data: WorldData; point: nu
             1 cigarette), being outside here for these hours is like about <strong className="text-foreground">{fmt(cigarettes(result.chosen.concHours))} cigarettes</strong>.
             It compares health effects, not particles inhaled.
           </p>
-          {result.best.from !== start && result.best.ug < result.chosen.ug * 0.85 && (
-            <p className="rounded-lg bg-primary/15 p-2">
-              Cleanest {length}-hour window: starting {localTime(data, result.best.from)}, about
-              {" "}{Math.round((1 - result.best.ug / result.chosen.ug) * 100)}% less smoke.
-            </p>
-          )}
           <p className="text-xs text-muted-foreground">
-            Outdoor air at this place; indoors with windows closed is usually lower. Typical values for the group, not a
-            medical estimate for any one person.
+            Uses the hour-by-hour values at this place. Their daily level is tested; which hours are worst is not reliable,
+            so treat the time of day as rough. Outdoor air; indoors with windows closed is usually lower. Typical values for
+            the group, not a medical estimate for any one person.
           </p>
         </div>
       )}

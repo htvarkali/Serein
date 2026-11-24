@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { aqiOf, loadWorld, localTime, nearestPoint, valueAt, type WorldData } from "@/lib/world"
+import { aqiOf, loadWorld, nearestPoint, type WorldData } from "@/lib/world"
 
 const PLACES: Record<string, [number, number]> = {
   Seattle: [47.61, -122.33], Spokane: [47.66, -117.43], Portland: [45.52, -122.68], Bend: [44.06, -121.31],
@@ -14,16 +14,18 @@ const PLACES: Record<string, [number, number]> = {
 
 type Audience = "worker" | "family"
 
-function advice(peak: number, who: Audience) {
+// Advice from the tested daily forecast: the median and the top of the 90% range.
+// No hour-specific advice: the hour-to-hour pattern did not prove reliable (docs/HOURLY_ACCURACY.md).
+function advice(median: number, high: number, who: Audience) {
   if (who === "worker") {
-    if (peak >= 225.5) return "Plan indoor or filtered work. California's rule requires respirators if the current AQI tops 500."
-    if (peak >= 55.5) return "Plan for smoke: heavy work in the cleanest hours, extra rest breaks, N95s for every worker."
-    if (peak >= 35.5) return "Smoke possible: N95s on site and a plan to move work or change hours."
+    if (median >= 225.5) return "Plan indoor or filtered work. California's rule requires respirators if the current AQI tops 500."
+    if (median >= 55.5) return "Plan for smoke: lighter outdoor work, extra rest breaks and N95s for every worker."
+    if (high >= 55.5 || median >= 35.5) return "Smoke possible: N95s on site and a plan to move work or change hours if the current AQI rises."
     return "No smoke action expected. Check the current AQI at the start of each shift, as the rule requires."
   }
-  if (peak >= 125.5) return "Keep everyone inside with windows closed and an air purifier on if you have one."
-  if (peak >= 55.5) return "Move play and exercise indoors or to the cleanest hours. Keep inhalers close."
-  if (peak >= 35.5) return "People with asthma, children and older adults should shorten time outside in the smokiest hours."
+  if (median >= 125.5) return "Keep everyone inside with windows closed and an air purifier on if you have one."
+  if (median >= 55.5) return "Move play and exercise indoors. People with asthma should keep inhalers close."
+  if (high >= 35.5 || median >= 35.5) return "People with asthma, children and older adults should watch the current AQI and cut back time outside if it rises."
   return "Air looks fine for normal activities."
 }
 
@@ -34,22 +36,17 @@ export function PlanCards() {
   useEffect(() => { loadWorld("live").then(setData) }, [])
 
   const days = useMemo(() => {
-    if (!data) return []
+    if (!data?.daily) return []
     const [lat, lon] = PLACES[place]
     const p = nearestPoint(data, lon, lat)
     if (p < 0) return []
-    const groups = new Map<string, { h: number; v: number }[]>()
-    for (let h = 0; h < data.hours; h++) {
-      const v = valueAt(data, "serein", p, h)
-      if (v === null) continue
-      const key = new Date(Date.parse(data.start_utc) + h * 3600e3).toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", weekday: "long", month: "short", day: "numeric" })
-      groups.set(key, [...(groups.get(key) ?? []), { h, v }])
-    }
-    return [...groups.entries()].filter(([, xs]) => xs.length >= 6).slice(0, 4).map(([day, xs]) => {
-      const mean = xs.reduce((s, x) => s + x.v, 0) / xs.length
-      const peak = xs.reduce((m, x) => (x.v > m.v ? x : m))
-      const clean = xs.reduce((m, x) => (x.v < m.v ? x : m))
-      return { day, mean, peak, clean, hours: xs.length }
+    return data.daily.flatMap(d => {
+      const q50 = d.q50[p], q05 = d.q05[p], q95 = d.q95[p]
+      if (q50 === null || q05 === null || q95 === null) return []
+      const label = d.date
+        ? new Date(d.date + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" })
+        : `Day ${d.lead}`
+      return [{ label, q05, q50, q95 }]
     })
   }, [data, place])
 
@@ -69,30 +66,30 @@ export function PlanCards() {
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {days.map(d => {
-          const a = aqiOf(d.peak.v)
+          const a = aqiOf(d.q50)
           return (
-            <Card key={d.day}>
+            <Card key={d.label}>
               <CardHeader>
-                <CardDescription>{d.day}</CardDescription>
-                <CardTitle className="font-serif text-5xl font-normal">{Math.round(d.mean)} <span className="text-base text-muted-foreground">µg/m³ avg</span></CardTitle>
+                <CardDescription>{d.label}</CardDescription>
+                <CardTitle className="font-serif text-5xl font-normal">{d.q50} <span className="text-base text-muted-foreground">µg/m³</span></CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="size-3 rounded-sm" style={{ background: `rgb(${a.rgb.join(",")})` }} />
-                  Peak {Math.round(d.peak.v)} ({a.name}) around {data && localTime(data, d.peak.h).split(", ").pop()}
+                  {a.name} (daily average)
                 </div>
-                <div className="text-muted-foreground">Cleanest around {data && localTime(data, d.clean.h).split(", ").pop()} ({Math.round(d.clean.v)} µg/m³)</div>
-                <div className="rounded-lg bg-secondary p-3">{advice(d.peak.v, who)}</div>
+                <div className="text-muted-foreground">Likely between {d.q05} and {d.q95} µg/m³ (90% range)</div>
+                <div className="rounded-lg bg-secondary p-3">{advice(d.q50, d.q95, who)}</div>
               </CardContent>
             </Card>
           )
         })}
       </div>
       <p className="mt-6 max-w-3xl text-xs text-muted-foreground">
-        Hour-by-hour shape from NOAA's air-quality model, scaled each day to Serein's tested daily forecast; the hourly
-        detail itself has not been tested yet. Forecast squares are about 25 km. California's wildfire smoke rule
-        (Title 8, §5141.1) applies to the current AQI, so this never replaces the check at the start of each shift. Not
-        medical advice.
+        SmokeCast's tested daily forecast for the nearest forecast point (about 25 km squares). We tested whether the
+        hour-to-hour pattern can tell which hours will be worst, and it could not, so this gives no hour-specific advice.
+        California's wildfire smoke rule (Title 8, §5141.1) applies to the current AQI, so this never replaces the check at
+        the start of each shift. Not medical advice.
       </p>
     </div>
   )

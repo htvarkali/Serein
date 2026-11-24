@@ -324,7 +324,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 2 | 5 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
-| W: Smoke World | 10 | 3 | 7 | 0 |
+| W: Smoke World | 11 | 3 | 6 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -477,7 +477,7 @@ Both workflows are development diagnostics.
 | W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-11 | Daily live update: the scheduled job rebuilds the world data each morning | Open | | |
 | W-12 | Lighter version that runs on phones and slow computers | Open | | |
-| W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings | Open | | |
+| W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-15 | "Where does this data come from" panel: every source, and what is measured vs. forecast vs. estimated | Done | Aadi-Tiwari | 2026-11-23 |
 | W-16 | People layer: neighborhoods by income and how many people are under smoke each hour (data in `docs/EQUITY.md`) | Open | | |

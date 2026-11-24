@@ -305,3 +305,13 @@ Using `b16_partial` only for the lead-3 forecast: dev 2023 lead 3 RMSE 11.584 ->
 (interval -0.50 to -0.07), but the inner fold did not repeat it (10.439 -> 10.476,
 -0.18 to +0.31). The acceptance rule also needs a lead 1 or lead 2 gain, which a
 lead-3-only change cannot give. Closed.
+
+## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
+
+Full results in `docs/HOURLY_ACCURACY.md`. The Serein-scaled hourly field beats NOAA's raw
+hourly AQM on days 0-2 (2023) and 0-1 (2022), but a flat line at SmokeCast's daily median is
+as accurate or better, and neither NOAA's hourly shape nor a learned per-monitor daily rhythm
+predicts which hours of a day are worst (within-day correlations 0.04-0.30). The daily-rhythm
+idea was tried after seeing the first result and did not help (profile vs. flat within
++/-0.1 µg/m³). Consequence for the product: present the daily level as the tested forecast
+and do not give hour-specific advice from the hourly pattern.

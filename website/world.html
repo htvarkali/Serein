@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102321">
+  <meta name="description" content="Serein Smoke World: fly over the western US and watch the wildfire smoke forecast hour by hour for the next three days.">
+  <title>Smoke World | Serein</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/vendor/maplibre/maplibre-gl.css">
+  <link rel="stylesheet" href="assets/world/world.css">
+  <script src="assets/vendor/maplibre/maplibre-gl.js" defer></script>
+  <script src="assets/world/world.js" defer></script>
+</head>
+<body>
+  <div id="map" role="application" aria-label="3D map of the western United States with the smoke forecast"></div>
+
+  <header class="w-top">
+    <a class="w-brand" href="index.html">Serein</a>
+    <span class="w-title">Smoke World</span>
+    <label class="w-select">
+      <span>Forecast</span>
+      <select id="w-mode">
+        <option value="live">Live: today + 3 days</option>
+        <option value="aug2023">Example: August 2023 smoke event</option>
+      </select>
+    </label>
+    <div class="w-switch" role="group" aria-label="Which forecast">
+      <button type="button" id="w-serein" aria-pressed="true">Serein</button>
+      <button type="button" id="w-noaa" aria-pressed="false">NOAA</button>
+    </div>
+  </header>
+
+  <section class="w-time" aria-label="Time">
+    <button type="button" id="w-play" class="w-play" aria-label="Play">&#9654;</button>
+    <input type="range" id="w-hour" min="0" max="71" value="0" step="1" aria-label="Forecast hour">
+    <div class="w-clock">
+      <strong id="w-when"></strong>
+      <span id="w-offset"></span>
+    </div>
+    <label class="w-speed"><span>Speed</span>
+      <select id="w-speed"><option value="900">1x</option><option value="450" selected>2x</option><option value="200">4x</option></select>
+    </label>
+  </section>
+
+  <aside class="w-legend" aria-label="Legend">
+    <div class="w-scale">
+      <span style="--c:#4caf50">Good</span><span style="--c:#f6d32d">Moderate</span><span style="--c:#f0883e">Unhealthy for sensitive groups</span><span style="--c:#e5484d">Unhealthy</span><span style="--c:#8e4ec6">Very unhealthy</span><span style="--c:#7d1f2c">Hazardous</span>
+    </div>
+    <p id="w-note"></p>
+    <details>
+      <summary>Where this comes from</summary>
+      <p id="w-source"></p>
+      <p>Smoke detail is about 25 km: two places in the same square get the same number. Terrain, photos and buildings are shown for context only.</p>
+      <p>Map data: aerial imagery USGS The National Map (public domain); terrain AWS Terrain Tiles (USGS 3DEP and others); streets, places and buildings &copy; OpenStreetMap contributors via OpenFreeMap; map engine MapLibre GL JS.</p>
+    </details>
+  </aside>
+</body>
+</html>

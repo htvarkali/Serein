@@ -146,6 +146,45 @@ def tune_warning_threshold(p_exceed: np.ndarray, obs: np.ndarray, thr: float = 3
     return best
 
 
+def fit_probability_recalibration(p_exceed: np.ndarray, obs: np.ndarray, thr: float = 35.5):
+    """Isotonic map from raw P(>= thr) to the event frequency seen on calibration rows.
+
+    Fit on calibration rows only; it changes reported probabilities, never the point
+    forecast or the warning cut-off. Returns None when calibration has no events.
+    """
+    from sklearn.isotonic import IsotonicRegression
+
+    ok = np.isfinite(p_exceed) & np.isfinite(obs)
+    events = obs[ok] >= thr
+    if not events.any() or events.all():
+        return None
+    iso = IsotonicRegression(y_min=0.0, y_max=1.0, out_of_bounds="clip")
+    iso.fit(p_exceed[ok], events.astype(float))
+    return iso
+
+
+def cutoff_for_hit_rate(p_exceed: np.ndarray, obs: np.ndarray, target: float,
+                        thr: float = 35.5) -> float:
+    """Highest probability cut-off whose hit rate on calibration data reaches ``target``.
+
+    A more sensitive setting of the warning dial: it trades more false alarms for fewer
+    missed unhealthy days. Chosen on calibration rows only, like the CSI cut-off.
+    """
+    ok = np.isfinite(p_exceed) & np.isfinite(obs)
+    p, o = p_exceed[ok], obs[ok] >= thr
+    if not o.any():
+        return float("nan")
+    for c in np.arange(0.80, 0.0, -0.0125):
+        if np.mean(p[o] >= c) >= target:
+            return float(c)
+    return 0.0125
+
+
+DIAL_TARGETS = (0.80, 0.90)
+# Low-confidence flag: a 90% range wider (log scale) than this share of calibration rows.
+FLAG_QUANTILE = 0.90  # hit rates on calibration rows for the sensitive settings
+
+
 def warning_scores(warn: np.ndarray, obs: np.ndarray, thr: float = 35.5) -> dict:
     ok = np.isfinite(obs) & np.isfinite(warn.astype(float))
     w, o = warn[ok].astype(bool), obs[ok] >= thr
@@ -365,13 +404,28 @@ def run_backtest(study: Study, args) -> dict:
     obs_conf = conf[[f"y_L{lead}" for lead in leads]].to_numpy(dtype=float, copy=True)
     obs_conf[hidden_conf] = np.nan
     warn_test = np.zeros_like(obs, dtype=bool)
-    cutoffs = {}
+    prob_test = np.full(obs.shape, np.nan)
+    prob_cal_test = np.full(obs.shape, np.nan)
+    cutoffs, dial, recal, flag_width = {}, [], {}, {}
     for li, lead in enumerate(leads):
         pc = prob_exceed(q_conf_cal[:, li], QUANTILES)
         cut = tune_warning_threshold(pc, obs_conf[:, li])
         cutoffs[lead] = cut
         pt = prob_exceed(preds_q["smokecast"][:, li], QUANTILES)
+        prob_test[:, li] = pt
+        iso = fit_probability_recalibration(pc, obs_conf[:, li])
+        width = q_conf_cal[:, li, -1] - q_conf_cal[:, li, 0]
+        flag_width[str(lead)] = float(np.nanquantile(width, FLAG_QUANTILE))
+        if iso is not None:
+            recal[str(lead)] = {"x": iso.X_thresholds_.tolist(), "y": iso.y_thresholds_.tolist()}
+            prob_cal_test[:, li] = iso.predict(np.nan_to_num(pt, nan=0.0))
+            prob_cal_test[~np.isfinite(pt), li] = np.nan
         warn_test[:, li] = pt >= cut
+        settings = [("best_csi", cut)] + [(f"hit_rate_{t:.2f}", cutoff_for_hit_rate(pc, obs_conf[:, li], t))
+                                          for t in DIAL_TARGETS]
+        for name, c in settings:
+            dial.append({"lead": lead, "setting": name, "cutoff": c,
+                         **warning_scores(pt >= c, obs[:, li])})
         for sname, smask in subsets.items():
             rows.append({"lead": lead, "subset": sname, "model": "smokecast_warnrule",
                          **warning_scores(warn_test[smask, li], obs[smask, li])})
@@ -379,11 +433,17 @@ def run_backtest(study: Study, args) -> dict:
     met.to_csv(out_dir / "metrics.csv", index=False)
     log(f"warning cut-offs P(>=35.5) tuned on calibration: {cutoffs}")
     (out_dir / "warn_cutoffs.json").write_text(json.dumps({str(k): v for k, v in cutoffs.items()}))
+    pd.DataFrame(dial).to_csv(out_dir / "warn_dial.csv", index=False)
+    # Saved with the model so maps and the live forecast use the same calibration-row fits.
+    (out_dir / "prob_recal.json").write_text(json.dumps(recal))
+    (out_dir / "flag_width.json").write_text(json.dumps(
+        {"quantile": FLAG_QUANTILE, "log_width": flag_width}))
 
     # Head-to-head on IDENTICAL rows, with day-block bootstrap CIs.
     h2h = []
     for li, lead in enumerate(leads):
-        for b in ["noaa_best", "aqm_bc", "hrrr_smoke", "persistence", "gbm", "smokecast_nograph"]:
+        for b in ["noaa_best", "aqm_bc", "hrrr_smoke", "persistence", "persistence_morning",
+                  "gbm", "smokecast_nograph"]:
             if b not in allp:
                 continue
             ci = bootstrap_rmse_diff(allp["smokecast"][:, li], allp[b][:, li], obs[:, li], dates)
@@ -409,6 +469,8 @@ def run_backtest(study: Study, args) -> dict:
     for li, lead in enumerate(leads):
         keep[f"smokecast_lo_L{lead}"] = np.expm1(preds_q["smokecast"][:, li, 0])
         keep[f"smokecast_hi_L{lead}"] = np.expm1(preds_q["smokecast"][:, li, -1])
+        keep[f"smokecast_prob_L{lead}"] = prob_test[:, li]
+        keep[f"smokecast_probcal_L{lead}"] = prob_cal_test[:, li]
     keep.to_parquet(out_dir / "predictions.parquet", index=False)
 
     # Report

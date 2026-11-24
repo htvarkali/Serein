@@ -166,7 +166,7 @@ export default function World() {
   const now = data && picked !== null ? valueAt(data, which, picked, hour) : null
 
   return (
-    <div className="fixed inset-0 bg-background">
+    <div className="dark fixed inset-0 bg-background text-foreground">
       <div ref={mapEl} style={{ position: "absolute", inset: 0 }} role="application" aria-label="3D map of the western US with the smoke forecast" />
 
       <header className="absolute inset-x-3 top-3 z-10 flex flex-wrap items-center gap-3 rounded-2xl border bg-background/80 px-4 py-2.5 backdrop-blur">

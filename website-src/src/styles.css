@@ -7,38 +7,56 @@
 @font-face { font-family: "Instrument Serif"; src: url("/fonts/instrument.woff2") format("woff2"); font-display: swap; }
 @font-face { font-family: "Instrument Serif"; src: url("/fonts/instrument-italic.woff2") format("woff2"); font-style: italic; font-display: swap; }
 
-/* Dark-first palette: ink background, warm smoke accents, AQI colors for data. */
 :root {
-  --radius: 0.85rem;
-  --background: oklch(0.155 0.012 170);
-  --foreground: oklch(0.96 0.01 120);
-  --card: oklch(0.2 0.014 170);
-  --card-foreground: oklch(0.96 0.01 120);
-  --popover: oklch(0.2 0.014 170);
-  --popover-foreground: oklch(0.96 0.01 120);
-  --primary: oklch(0.8 0.13 65);
-  --primary-foreground: oklch(0.2 0.03 60);
-  --secondary: oklch(0.26 0.015 170);
-  --secondary-foreground: oklch(0.96 0.01 120);
-  --muted: oklch(0.24 0.012 170);
-  --muted-foreground: oklch(0.74 0.02 140);
-  --accent: oklch(0.3 0.02 170);
-  --accent-foreground: oklch(0.97 0.01 120);
-  --destructive: oklch(0.64 0.2 25);
-  --border: oklch(0.32 0.015 170);
-  --input: oklch(0.32 0.015 170);
-  --ring: oklch(0.8 0.13 65);
-  --chart-1: oklch(0.8 0.13 65);
-  --chart-2: oklch(0.72 0.05 160);
-  --chart-3: oklch(0.65 0.18 25);
-  --chart-4: oklch(0.6 0.15 300);
-  --chart-5: oklch(0.85 0.15 95);
-  --aqi-good: #4caf50;
-  --aqi-moderate: #f6d32d;
+  /* Teja's editorial palette (paper, pine, sage, amber) as shadcn tokens.
+     Light sections use :root; any element with class "dark" switches to the pine tokens. */
+  --pine: #102321; --deep: #091615; --grove: #18322d; --ink: #162d28; --muted-ink: #4b655b;
+  --mist: #eff2e8; --paper: #f8f8f0; --sage: #c4e2b9; --amber: #f2ba84; --line: #cbd5c6;
+  --radius: 0.5rem;
+  --background: var(--mist);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--grove);
+  --primary-foreground: var(--paper);
+  --secondary: #e3e9dc;
+  --secondary-foreground: var(--ink);
+  --muted: #e3e9dc;
+  --muted-foreground: var(--muted-ink);
+  --accent: #dfe8d8;
+  --accent-foreground: var(--ink);
+  --destructive: #c0392b;
+  --border: var(--line);
+  --input: var(--line);
+  --ring: #be773e;
+  --chart-1: #be773e;
+  --chart-2: #6f8f84;
+  --chart-3: #c0392b;
+  --chart-4: #18322d;
+  --chart-5: #f2ba84;
   --aqi-usg: #f0883e;
-  --aqi-unhealthy: #e5484d;
-  --aqi-very: #8e4ec6;
-  --aqi-hazardous: #7d1f2c;
+}
+.dark {
+  --background: var(--pine);
+  --foreground: var(--paper);
+  --card: var(--grove);
+  --card-foreground: var(--paper);
+  --popover: var(--grove);
+  --popover-foreground: var(--paper);
+  --primary: var(--sage);
+  --primary-foreground: var(--deep);
+  --secondary: #1f3b35;
+  --secondary-foreground: var(--paper);
+  --muted: #1f3b35;
+  --muted-foreground: #b7c9c0;
+  --accent: #24443d;
+  --accent-foreground: var(--paper);
+  --border: #2c4a43;
+  --input: #2c4a43;
+  --chart-1: var(--amber);
+  --chart-2: #9fb3ad;
 }
 
 @theme inline {
@@ -76,9 +94,10 @@
 @layer base {
   * { @apply border-border outline-ring/50; }
   html { scroll-behavior: smooth; }
-  body { @apply bg-background text-foreground antialiased; font-feature-settings: "ss01"; }
-  h1, h2 { font-family: var(--font-serif); font-weight: 400; letter-spacing: -0.02em; }
+  body { @apply bg-background text-foreground antialiased; }
+  h1, h2 { font-family: var(--font-serif); font-weight: 400; line-height: .96; letter-spacing: -0.027em; }
 }
 
 .text-balance { text-wrap: balance; }
-.smoke-glow { background: radial-gradient(60% 60% at 50% 40%, oklch(0.8 0.13 65 / 0.18), transparent 70%); }
+.eyebrow { display: flex; align-items: center; gap: .6rem; color: var(--muted-foreground); font-size: .72rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.status-dot { display: inline-block; width: .46rem; height: .46rem; border-radius: 50%; background: var(--amber); box-shadow: 0 0 11px #f2ba8480; flex: none; }

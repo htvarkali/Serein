@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Link } from "react-router-dom"
 import { Pause, Play } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Slider } from "@/components/ui/slider"
@@ -62,7 +60,7 @@ function Panel({ title, values, monitors, states, caption }: {
   )
 }
 
-export default function ReplayPage() {
+export function ReplayViewer() {
   const [data, setData] = useState<Replay | null>(null)
   const [states, setStates] = useState<Geo | null>(null)
   const [k, setK] = useState(5)
@@ -78,15 +76,8 @@ export default function ReplayPage() {
     return () => clearInterval(t)
   }, [playing, days])
   const day = days[k], d = data && day ? data.days[day] : null
-
   return (
-    <div className="mx-auto max-w-6xl px-5 pt-16">
-      <Badge variant="secondary">Real data · August 15-21, 2023</Badge>
-      <h1 className="mt-4 text-6xl md:text-7xl">Smoke replay</h1>
-      <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
-        One week of wildfire smoke over Washington, Oregon and Idaho. Each column is an EPA air monitor: height is the
-        daily average PM2.5, color the AQI level. Left and middle: forecasts made the day before. Right: what happened.
-      </p>
+    <div>
       <div className="mt-8 flex items-center gap-4">
         <Button size="icon" className="size-11 rounded-full" onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause" : "Play"}>
           {playing ? <Pause /> : <Play />}
@@ -107,11 +98,6 @@ export default function ReplayPage() {
             caption={`${d.summary.unhealthy_monitors} monitors reached unhealthy for sensitive groups or worse`} />
         </div>
       )}
-      <p className="mt-6 max-w-3xl text-sm text-muted-foreground">
-        Day-ahead forecasts from Serein's development backtest on held-out 2023 weeks (not the final 2024-25 test). NOAA's
-        forecast is its best product for each monitor. "Flagged" counts monitors whose day-ahead forecast was at or above
-        35.5 µg/m³ among those that really reached it. Want it hour by hour in 3D? <Link className="underline" to="/world?mode=aug2023">Open this event in Smoke World</Link>.
-      </p>
     </div>
   )
 }

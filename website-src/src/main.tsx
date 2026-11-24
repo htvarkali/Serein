@@ -1,15 +1,14 @@
 import { StrictMode, lazy, Suspense } from "react"
 import { createRoot } from "react-dom/client"
-import { HashRouter, Route, Routes } from "react-router-dom"
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom"
 import { SiteLayout } from "@/components/site/SiteLayout"
 import { Home } from "@/pages/Home"
 import "./styles.css"
 
 // Heavy pages load on demand so the home page stays fast.
 const World = lazy(() => import("@/pages/World"))
-const Replay = lazy(() => import("@/pages/Replay"))
-const Results = lazy(() => import("@/pages/Results"))
-const Plan = lazy(() => import("@/pages/Plan"))
+const SmokeCast = lazy(() => import("@/pages/SmokeCast"))
+const AirPlan = lazy(() => import("@/pages/AirPlan"))
 const About = lazy(() => import("@/pages/About"))
 
 function Loading() {
@@ -24,10 +23,13 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/world" element={<World />} />
           <Route element={<SiteLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/replay" element={<Replay />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/plan" element={<Plan />} />
+            <Route path="/smokecast" element={<SmokeCast />} />
+            <Route path="/airplan" element={<AirPlan />} />
             <Route path="/about" element={<About />} />
+            <Route path="/results" element={<Navigate to="/smokecast" replace />} />
+            <Route path="/replay" element={<Navigate to="/smokecast" replace />} />
+            <Route path="/plan" element={<Navigate to="/airplan" replace />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
       </Suspense>

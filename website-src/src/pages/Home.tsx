@@ -1,17 +1,30 @@
 import { Link } from "react-router-dom"
-import { ArrowRight, CloudFog, HardHat, Map, ShieldCheck, Users, Wind } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
 import { SOURCE_DEV, asset, headline, team } from "@/data/site"
 
+// Same flow as the original home page: overview, problem, project, results, next steps, team.
 function Stat({ value, label, sub }: { value: string; label: string; sub: string }) {
   return (
-    <Card className="bg-card/70">
-      <CardContent className="p-6">
-        <div className="font-serif text-6xl leading-none text-primary">{value}</div>
-        <div className="mt-3 font-medium">{label}</div>
-        <div className="mt-1 text-sm text-muted-foreground">{sub}</div>
+    <div className="border-t border-border pt-5">
+      <div className="font-serif text-[clamp(3.5rem,7vw,6rem)] leading-none text-primary">{value}</div>
+      <div className="mt-3 font-medium">{label}</div>
+      <div className="mt-1 text-sm text-muted-foreground">{sub}</div>
+    </div>
+  )
+}
+
+function ProjectCard({ eyebrow, title, text, to, cta, image }: { eyebrow: string; title: string; text: string; to: string; cta: string; image: string }) {
+  return (
+    <Card className="overflow-hidden p-0">
+      <img src={asset(image)} alt="" className="aspect-[16/10] w-full object-cover" />
+      <CardContent className="space-y-3 p-6">
+        <Eyebrow>{eyebrow}</Eyebrow>
+        <h3 className="font-serif text-4xl">{title}</h3>
+        <p className="text-muted-foreground">{text}</p>
+        <Button asChild variant="link" className="px-0 text-base font-bold"><Link to={to}>{cta} <ArrowRight /></Link></Button>
       </CardContent>
     </Card>
   )
@@ -20,111 +33,104 @@ function Stat({ value, label, sub }: { value: string; label: string; sub: string
 export function Home() {
   return (
     <>
-      <section className="relative isolate overflow-hidden">
-        <video className="absolute inset-0 -z-10 h-full w-full object-cover opacity-45" src={asset("motion/hero-smoke.mp4")}
-          autoPlay muted loop playsInline aria-hidden="true" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/30 via-background/60 to-background" />
-        <div className="mx-auto max-w-6xl px-5 pb-24 pt-28 md:pt-40">
-          <Badge variant="secondary" className="mb-6">Conrad Challenge 2026-27 · Health & Nutrition</Badge>
-          <h1 className="max-w-4xl text-balance text-6xl leading-[0.95] md:text-8xl">
-            Wildfire smoke, <em className="text-primary">three days</em> before it reaches you.
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-            Serein forecasts smoke for every neighborhood in the western US, hour by hour, and turns it into a plan
-            for the people who breathe it most. On held-out 2023 smoke days it warned a day ahead on
-            {" "}{headline.warnedSerein}% of unhealthy days. The official forecast caught {headline.warnedEpa}%.
+      <section className="dark relative isolate overflow-hidden bg-background text-foreground" id="overview">
+        <video className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60" src={asset("motion/hero-smoke.mp4")}
+          poster={asset("img/photo-hero.webp")} autoPlay muted loop playsInline aria-hidden="true" />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-background via-background/70 to-transparent" />
+        <div className="mx-auto w-[min(100%-2*clamp(1.25rem,5.5vw,6rem),82rem)] py-[clamp(6rem,14vw,12rem)]">
+          <Eyebrow dot>Wildfire smoke research</Eyebrow>
+          <h1 className="mt-4 text-[clamp(4rem,10vw,9rem)]">A clearer view of<br /><em className="text-primary">wildfire smoke.</em></h1>
+          <p className="mt-6 max-w-xl text-[clamp(1.06rem,1.6vw,1.35rem)] text-muted-foreground">
+            Serein forecasts smoke for every neighborhood in the western US, three days ahead and hour by hour, and turns
+            it into a plan for the people who breathe it most.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Button asChild size="lg"><Link to="/world">Open Smoke World <ArrowRight /></Link></Button>
-            <Button asChild size="lg" variant="secondary"><Link to="/results">See the evidence</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/smokecast">See the results</Link></Button>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5">
-        <div className="grid gap-4 md:grid-cols-3">
-          <Stat value={`${headline.warnedSerein}%`} label="Unhealthy days warned a day ahead"
-            sub={`EPA's official forecast: ${headline.warnedEpa}%, with more false alarms (${headline.falseEpa} vs ${headline.falseSerein}).`} />
-          <Stat value={`${Math.round((1 - headline.rmseSerein / headline.rmseNoaa) * 100)}%`} label="Smaller error than NOAA, next day"
-            sub={`Typical miss ${headline.rmseSerein} vs ${headline.rmseNoaa} µg/m³ (RMSE).`} />
-          <Stat value="18x" label="The monitor gap"
-            sub="People in the lowest-income neighborhoods are 18 times as likely to live 25+ km from any air monitor." />
-        </div>
-        <p className="mt-3 text-xs text-muted-foreground">{SOURCE_DEV}</p>
-      </section>
-
-      <section className="mx-auto mt-28 max-w-6xl px-5">
-        <h2 className="text-5xl md:text-6xl">How it works</h2>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {[
-            { icon: Wind, title: "Read everything at 11:30 AM", text: "NOAA's smoke and air-quality models, the weather, satellite fire detections and what 425 EPA monitors measure right now." },
-            { icon: CloudFog, title: "Correct NOAA with live sensors", text: "A graph neural network treats monitors as neighbors: if the monitor upwind just jumped, yours is next. It forecasts days 0-3 with an honest range." },
-            { icon: HardHat, title: "Turn it into a plan", text: "Hour-by-hour smoke, the chance of unhealthy air, a low-confidence flag, and what to do: move a shift, keep recess indoors, have N95s ready." },
-          ].map(({ icon: Icon, title, text }) => (
-            <Card key={title}>
-              <CardHeader>
-                <Icon className="size-6 text-primary" />
-                <CardTitle className="mt-3 text-xl">{title}</CardTitle>
-                <CardDescription className="text-base">{text}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto mt-28 max-w-6xl px-5">
-        <Card className="overflow-hidden">
-          <div className="grid md:grid-cols-[1.1fr_1fr]">
-            <div className="relative min-h-72">
-              <img src={asset("img/world-preview.png")} alt="Smoke World: 3D map of the Pacific Northwest with the August 2023 smoke forecast, wind and fires"
-                className="absolute inset-0 h-full w-full object-cover" />
-            </div>
-            <CardContent className="flex flex-col justify-center gap-4 p-8">
-              <Badge className="w-fit"><Map /> Smoke World</Badge>
-              <h3 className="font-serif text-4xl">Fly over the West. Watch the next 72 hours.</h3>
-              <p className="text-muted-foreground">
-                Real terrain and aerial imagery, the smoke forecast hour by hour, wind and live fires. Click any place for
-                its smoke curve and advice. Switch between NOAA and Serein.
-              </p>
-              <Button asChild className="w-fit"><Link to="/world">Open Smoke World <ArrowRight /></Link></Button>
-            </CardContent>
+      <Section id="problem">
+        <Split>
+          <div>
+            <Eyebrow>The problem</Eyebrow>
+            <Heading>Smoke crosses a region. Exposure varies locally.</Heading>
           </div>
-        </Card>
-      </section>
+          <div className="space-y-5">
+            <Lead>When smoke arrives, people need to decide what tomorrow looks like: recess, practice, a shift outdoors.
+              The official forecast covers whole metro areas and missed more than half of the unhealthy days in 2023.</Lead>
+            <p className="text-muted-foreground">The gap is widest where there is no air monitor at all. In the lowest-income
+              neighborhoods of the western US, 10.8% of people live 25 km or more from any EPA monitor, compared with 0.6% in
+              the highest-income neighborhoods.</p>
+          </div>
+        </Split>
+      </Section>
 
-      <section className="mx-auto mt-28 max-w-6xl px-5">
-        <h2 className="text-5xl md:text-6xl">Who it's for</h2>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {[
-            { icon: HardHat, title: "Outdoor crews", text: "California's wildfire smoke rule (Title 8, §5141.1) already tells employers to check AQI forecasts at each shift. Serein gives them three days to plan." },
-            { icon: Users, title: "Families", text: "People with asthma, children and older adults get the hours to stay inside and the hours that are safe, free." },
-            { icon: ShieldCheck, title: "Places without a monitor", text: "Rural and lower-income areas are the most likely to have no air monitor nearby. Serein still beat NOAA there, even 30-60 km from one." },
-          ].map(({ icon: Icon, title, text }) => (
-            <Card key={title} className="bg-card/60">
-              <CardHeader>
-                <Icon className="size-6 text-primary" />
-                <CardTitle className="mt-3 text-xl">{title}</CardTitle>
-                <CardDescription className="text-base">{text}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+      <Section id="project" className="pt-0">
+        <Eyebrow>The project</Eyebrow>
+        <Heading>From a forecast to a decision.</Heading>
+        <div className="mt-10 grid gap-5 lg:grid-cols-3">
+          <ProjectCard eyebrow="Forecast research" title="SmokeCast" to="/smokecast" cta="Explore the forecast" image="img/photo-research.webp"
+            text="A graph neural network that corrects NOAA's smoke forecast with live readings from 425 air monitors, 0-3 days ahead, with an honest range." />
+          <ProjectCard eyebrow="See it hour by hour" title="Smoke World" to="/world" cta="Open Smoke World" image="img/world-preview.png"
+            text="Fly over the West on real terrain and watch the next 72 hours of smoke, wind and fires. Click any place for its forecast." />
+          <ProjectCard eyebrow="Plans for people" title="AirPlan" to="/airplan" cta="Plan a day" image="img/photo-family.webp"
+            text="The forecast as a plan: the cleanest and smokiest hours for outdoor crews and families, and how much smoke a person breathes in." />
         </div>
-      </section>
+      </Section>
 
-      <section className="mx-auto mt-28 max-w-6xl px-5" id="team">
-        <h2 className="text-5xl md:text-6xl">The team</h2>
-        <p className="mt-3 text-muted-foreground">Five students at Foothill High School.</p>
-        <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {team.map(m => (
-            <Card key={m.name}>
-              <CardHeader>
-                <CardTitle className="text-lg">{m.name}</CardTitle>
-                <CardDescription>{m.grade}{m.role ? `. ${m.role}` : ""}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
+      <Section tone="dark" id="results">
+        <Eyebrow dot>Development results · 2023</Eyebrow>
+        <Heading>How well did it do?</Heading>
+        <Lead>On 2023 smoke-season weeks it never trained on, SmokeCast was compared with NOAA's best forecast and EPA's
+          official AQI forecast on the same places and days. The reserved 2024-25 test runs once, after the rules are frozen.</Lead>
+        <div className="mt-12 grid gap-8 md:grid-cols-3">
+          <Stat value={`${headline.warnedSerein}%`} label="Unhealthy days warned a day ahead" sub={`EPA's official forecast: ${headline.warnedEpa}%, with more false alarms (${headline.falseEpa} vs ${headline.falseSerein}).`} />
+          <Stat value={`${headline.rmseSerein}`} label="Next-day error, µg/m³" sub={`NOAA's best forecast: ${headline.rmseNoaa}. Lower is better.`} />
+          <Stat value={`${headline.hiddenSerein}`} label="Error where there is no monitor" sub={`At monitors hidden from the model. NOAA: ${headline.hiddenNoaa}.`} />
         </div>
-      </section>
+        <p className="mt-6 text-xs text-muted-foreground">{SOURCE_DEV}</p>
+        <Button asChild className="mt-8"><Link to="/smokecast">All results and the August 2023 replay <ArrowRight /></Link></Button>
+      </Section>
+
+      <Section id="next">
+        <Split className="items-start">
+          <div>
+            <Eyebrow>Project status</Eyebrow>
+            <Heading>What comes next.</Heading>
+          </div>
+          <div className="divide-y divide-border border-y border-border">
+            {[
+              ["The final test", "The rules are written down. On December 17 they are frozen, and the 2024-25 seasons are scored once."],
+              ["Hour-by-hour accuracy", "Smoke World shows hourly smoke. We are testing it against real hourly monitor readings before calling it a result."],
+              ["People", "Interviews with outdoor crews, farm managers and school nurses, and a review of the advice by a health professional."],
+            ].map(([t, d]) => (
+              <div key={t} className="py-6">
+                <h3 className="text-xl font-medium">{t}</h3>
+                <p className="mt-2 text-muted-foreground">{d}</p>
+              </div>
+            ))}
+          </div>
+        </Split>
+      </Section>
+
+      <Section id="team" className="pt-0">
+        <Split className="items-start">
+          <div>
+            <Eyebrow>The team</Eyebrow>
+            <Heading>Five students at Foothill High School.</Heading>
+          </div>
+          <div className="divide-y divide-border border-y border-border">
+            {team.map(m => (
+              <div key={m.name} className="py-5">
+                <h3 className="text-xl font-medium">{m.name}</h3>
+                <p className="mt-1 text-muted-foreground">{m.grade}{m.role ? `. ${m.role}.` : "."}</p>
+              </div>
+            ))}
+          </div>
+        </Split>
+      </Section>
     </>
   )
 }

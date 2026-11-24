@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -28,7 +27,7 @@ function advice(peak: number, who: Audience) {
   return "Air looks fine for normal activities."
 }
 
-export default function Plan() {
+export function PlanCards() {
   const [data, setData] = useState<WorldData | null>(null)
   const [place, setPlace] = useState("Fresno")
   const [who, setWho] = useState<Audience>("worker")
@@ -55,23 +54,18 @@ export default function Plan() {
   }, [data, place])
 
   return (
-    <div className="mx-auto max-w-6xl px-5 pt-16">
-      <Badge variant="secondary">Live forecast</Badge>
-      <h1 className="mt-4 text-6xl md:text-7xl">Plan your day</h1>
-      <p className="mt-4 max-w-3xl text-lg text-muted-foreground">
-        The next three days of smoke for a place, with the smokiest and cleanest hours and what to do about them.
-        {data && ` Forecast issued ${data.issue_date}.`}
-      </p>
-      <div className="mt-8 flex flex-wrap items-center gap-3">
+    <div>
+      <div className="flex flex-wrap items-center gap-3">
         <Select value={place} onValueChange={setPlace}>
-          <SelectTrigger className="w-56" aria-label="Place"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="w-56 bg-card" aria-label="Place"><SelectValue /></SelectTrigger>
           <SelectContent>{Object.keys(PLACES).map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
         </Select>
         <ToggleGroup type="single" variant="outline" value={who} onValueChange={v => v && setWho(v as Audience)} aria-label="For whom">
           <ToggleGroupItem value="worker" className="px-4">Outdoor crew</ToggleGroupItem>
           <ToggleGroupItem value="family" className="px-4">Family</ToggleGroupItem>
         </ToggleGroup>
-        <Button asChild variant="secondary"><Link to="/world">Pick any place on the map</Link></Button>
+        <Button asChild variant="outline"><Link to="/world">Pick any place on the map</Link></Button>
+        {data && <span className="text-sm text-muted-foreground">Live forecast issued {data.issue_date}</span>}
       </div>
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {days.map(d => {

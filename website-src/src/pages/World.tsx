@@ -96,7 +96,22 @@ export default function World() {
           "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0] } })
       map.addSource("wind", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
       map.addLayer({ id: "wind", type: "line", source: "wind", layout: { "line-cap": "round" },
-        paint: { "line-color": "#ffffff", "line-opacity": 0.65, "line-width": ["interpolate", ["linear"], ["get", "speed"], 0, 0.5, 10, 2.2] } })
+        paint: { "line-color": "#ffffff", "line-opacity": 0.22, "line-width": ["interpolate", ["linear"], ["get", "speed"], 0, 0.5, 10, 2.2] } })
+      // A dashed copy of the wind lines whose dash pattern steps forward each frame, so the wind visibly flows.
+      map.addLayer({ id: "wind-flow", type: "line", source: "wind", layout: { "line-cap": "round" },
+        paint: { "line-color": "#ffffff", "line-opacity": 0.85, "line-width": ["interpolate", ["linear"], ["get", "speed"], 0, 0.8, 10, 2.6],
+          "line-dasharray": [0, 4, 3] } })
+      const dashes = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0], [0, 0.5, 3, 3.5],
+        [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]]
+      let step = 0
+      const flow = () => {
+        if (!map.getLayer("wind-flow")) return
+        step = (step + 1) % dashes.length
+        map.setPaintProperty("wind-flow", "line-dasharray", dashes[step])
+        windTimer = window.setTimeout(() => requestAnimationFrame(flow), 70)
+      }
+      let windTimer = window.setTimeout(flow, 70)
+      map.once("remove", () => clearTimeout(windTimer))
       map.addSource("fires", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
       map.addLayer({ id: "fires", type: "circle", source: "fires",
         paint: { "circle-color": "#ff6a1a", "circle-blur": 0.6, "circle-opacity": 0.9,

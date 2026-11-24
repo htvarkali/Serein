@@ -107,7 +107,9 @@ export function nearestPoint(d: WorldData, lng: number, lat: number) {
 export function windFeatures(d: WorldData, hour: number): FeatureCollection {
   const features: Feature[] = []
   const nh = d.wind_hours.length
-  const j = d.wind_hours.findIndex(h => Math.abs(h - hour) <= 1.5)
+  // Nearest HRRR wind hour (every 3 hours), at most 2 hours away.
+  let j = -1
+  d.wind_hours.forEach((h, k) => { if (Math.abs(h - hour) <= 2 && (j < 0 || Math.abs(h - hour) < Math.abs(d.wind_hours[j] - hour))) j = k })
   if (j < 0) return { type: "FeatureCollection", features }
   for (let r = 0; r < GRID.rows; r += 2) {
     for (let c = 0; c < GRID.cols; c += 2) {

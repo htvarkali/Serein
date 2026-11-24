@@ -324,7 +324,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 2 | 5 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
-| W: Smoke World | 13 | 4 | 3 | 0 |
+| W: Smoke World | 13 | 5 | 2 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -475,7 +475,7 @@ Both workflows are development diagnostics.
 | W-8 | Click anywhere: that place's 72-hour smoke curve, chance of unhealthy air, confidence flag and advice (first version: smoke curve, advice and a breathing-dose panel; the chance of unhealthy air and the confidence flag are not in the 3D panel yet) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |
 | W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
-| W-11 | Daily live update: the scheduled job rebuilds the world data each morning | Open | | |
+| W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; first real update on the next run) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-12 | Lighter version that runs on phones and slow computers | Open | | |
 | W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |

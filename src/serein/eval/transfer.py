@@ -53,7 +53,7 @@ def run_transfer(study: Study, run_dir: Path, split: str = "test", tag: str = ""
     pred = {"smokecast": np.expm1(rows_q[..., 2]), **baselines(tab, prep, leads)}
     obs = tab[[f"y_L{lead}" for lead in leads]].to_numpy(float)
     dates = tab["issue_date"].to_numpy()
-    out = []
+    out, h2h = [], []
     for li, lead in enumerate(leads):
         valid_dates = pd.to_datetime(dates) + pd.Timedelta(days=lead)
         intervals = interval_metrics(np.expm1(rows_q[:, li, 0]),
@@ -63,13 +63,24 @@ def run_transfer(study: Study, run_dir: Path, split: str = "test", tag: str = ""
             if m == "smokecast":
                 rec.update(intervals)
             elif np.isfinite(p[:, li]).any():
-                rec.update({f"vs_smokecast_{k}": v for k, v in bootstrap_rmse_diff(
-                    pred["smokecast"][:, li], p[:, li], obs[:, li], dates).items()})
+                ci = bootstrap_rmse_diff(pred["smokecast"][:, li], p[:, li], obs[:, li], dates)
+                rec.update({f"vs_smokecast_{k}": v for k, v in ci.items()})
+                if ci:
+                    # Protocol section 5: competitors are scored on identical rows. Here
+                    # SmokeCast can be missing too (a monitor outside the points registry).
+                    ok = (np.isfinite(pred["smokecast"][:, li]) & np.isfinite(p[:, li])
+                          & np.isfinite(obs[:, li]))
+                    r_s = point_metrics(pred["smokecast"][ok, li], obs[ok, li])["rmse"]
+                    r_b = point_metrics(p[ok, li], obs[ok, li])["rmse"]
+                    h2h.append({"lead": lead, "vs": m, "n": int(ok.sum()), "rmse_smokecast": r_s,
+                                "rmse_baseline": r_b, "skill": 1 - r_s / r_b, **ci})
             out.append(rec)
     res = pd.DataFrame(out)
+    h2h = pd.DataFrame(h2h)
     out_dir = REPO_ROOT / "outputs" / "transfer" / f"{study.name}_{tag or run_dir.name}"
     out_dir.mkdir(parents=True, exist_ok=True)
     res.to_csv(out_dir / "metrics.csv", index=False)
+    h2h.to_csv(out_dir / "head_to_head.csv", index=False)
     keep = tab[["issue_date", "point_id"] + [f"y_L{lead}" for lead in leads]].copy()
     for m, p in pred.items():
         for li, lead in enumerate(leads):
@@ -79,5 +90,10 @@ def run_transfer(study: Study, run_dir: Path, split: str = "test", tag: str = ""
         print(res.pivot_table(index="model", columns="lead", values="rmse").round(2).to_string())
     else:
         print("No paired predictions and observations to score.")
+    if len(h2h):
+        print("\nHead-to-head (same rows; skill = 1 - RMSE_smokecast/RMSE_baseline; "
+              "CI = 95% day-bootstrap of RMSE diff)")
+        print(h2h[["lead", "vs", "n", "rmse_smokecast", "rmse_baseline", "skill", "ci_lo", "ci_hi"]]
+              .round(3).to_string(index=False))
     print(f"wrote {out_dir}")
     return res

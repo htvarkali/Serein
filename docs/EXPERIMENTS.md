@@ -306,6 +306,49 @@ Using `b16_partial` only for the lead-3 forecast: dev 2023 lead 3 RMSE 11.584 ->
 -0.18 to +0.31). The acceptance rule also needs a lead 1 or lead 2 gain, which a
 lead-3-only change cannot give. Closed.
 
+## 2026-11-24 B-16: smoke-cover history at the site (`build-table --plume-history`)
+
+Hypothesis: the model sees only yesterday's HMS smoke map (`hms_prev`). A plume that
+has sat over a site for several days is aged, regional smoke that tends to stay for
+days, while a plume seen for the first time yesterday is often a passing one. How long
+the site has been under smoke is a simple stand-in for plume age that HRRR does not
+give. Change: two inputs, the HMS density at the site 2 and 3 days before the issue day
+(`hms_prev2`, `hms_prev3`, same polygons and rule as `hms_prev`: 0-3, missing when that
+day's map is absent). These maps are older than the one already used, so no new
+availability question. Expected: lower RMSE at leads 1-2 on smoke days, little change
+on clean days. Tables `train_plume`, `calibrate_plume` (inner fold `train_y2021_plume`,
+`calibrate_y2022_plume`); tags `base_20261124` and `b16_plume` (dev),
+`inner_base_20261124` and `inner_b16_plume` (inner fold).
+
+Baseline check: `base_20261124` (today's code, provided tables) reproduces `dev` exactly
+(4.362 / 7.776 / 9.721 / 11.584). The new tables equal the provided ones in every other
+column, row for row; the new columns are missing only on the first issue days of each
+season (no May maps).
+
+Result, dev (`b16_plume` vs. `base_20261124`) and inner fold (`inner_b16_plume` vs.
+`inner_base_20261124`); RMSE new - current with the 95% day-bootstrap interval:
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval |
+|---|---|---|---|---|
+| 0 | 4.362 -> 4.368 | (-0.17, +0.14) | 4.040 -> 4.220 | (-0.00, +0.34) |
+| 1 | 7.776 -> 7.899 | (-0.22, +0.47) | 6.463 -> 6.546 | (-0.05, +0.22) |
+| 2 | 9.721 -> 9.586 | (-0.27, +0.04) | 8.034 -> 8.064 | (-0.07, +0.14) |
+| 3 | 11.584 -> 11.365 | (-0.60, +0.11) | 10.439 -> 10.570 | (-0.01, +0.28) |
+
+Dev smoke-day RMSE (HMS smoke over the site yesterday): 6.33 -> 6.33, 11.04 -> 11.24,
+13.83 -> 13.60, 16.71 -> 16.40. USG CSI from `metrics.csv` (dev): 0.656 -> 0.666,
+0.535 -> 0.512, 0.435 -> 0.446, 0.287 -> 0.300. 90% coverage stayed 0.89-0.91 on both
+folds. Days 2-3 moved the right way on dev but not significantly, and the inner fold
+was worse at every lead, so the dev gain does not repeat. The `--plume-history` option
+is not merged. Hidden-monitor run not made because the primary test failed.
+ACCEPTANCE: FAIL b16_plume, inner_b16_plume: no lead better with its interval below 0; inner fold worse at every lead.
+
+B-16 stays open. Three new-input tries (fire growth, partial forecast days, smoke-cover
+history) have now each moved days 2-3 slightly on dev without repeating on 2022. With
+two training seasons the model may not be able to use a weak extra signal; a real
+transport input (for example HRRR smoke beyond 48 h, which the archive does not have)
+would be needed.
+
 ## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
 
 Full results in `docs/HOURLY_ACCURACY.md`. The Serein-scaled hourly field beats NOAA's raw

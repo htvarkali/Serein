@@ -381,7 +381,7 @@ checked against main on 2026-11-23.
 | B-13 | Smoke days weighted 6x in training: day-1 forecasts reach a median 80% of the true peak (NOAA: 31%) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-14 | Places without a sensor get a base forecast from neighbors' readings | Done | Aadi-Tiwari | 2026-11-01 |
 | B-15 | Peaks still under-predicted at days 2-3. Options: add 2020 as training data (no HRRR smoke fields that year, but AQMv5 and weather exist), or a heavy-tailed output. Tried 2026-11-23 (mean-style point forecast; larger day 2-3 smoke weight): both failed, see [EXPERIMENTS.md](docs/EXPERIMENTS.md) | Open | | |
-| B-16 | Smoke-transport features HRRR lacks (plume age, fire growth rate), or drop fire inputs to simplify. Tried 2026-11-23: dropping fires is worse (Nov 2 ablation); a previous-day FRP input failed, see [EXPERIMENTS.md](docs/EXPERIMENTS.md) | Open | | |
+| B-16 | Smoke-transport features HRRR lacks (plume age, fire growth rate), or drop fire inputs to simplify. Tried 2026-11-23: dropping fires is worse (Nov 2 ablation); a previous-day FRP input failed, see [EXPERIMENTS.md](docs/EXPERIMENTS.md). Also failed: forecast hours of partly covered days (2026-11-23) and HMS smoke-cover history 2-3 days back as a plume-age stand-in (2026-11-24) | Open | | |
 
 The [neighborhood workflow](docs/NEIGHBORHOOD_MAPS.md) uses separate registries and
 NOAA caches, preserves missing tract coverage, and exports sensor support audits.

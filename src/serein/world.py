@@ -120,6 +120,10 @@ def fires(d) -> list[list[float]]:
     return []
 
 
+def ints(a) -> list:
+    return [None if not np.isfinite(x) else round(x) for x in np.asarray(a, float).ravel()]
+
+
 def build(forecast: Path, store: str = "west_us") -> dict:
     fc = pd.read_parquet(forecast)
     issue = pd.Timestamp(fc["issue_date"].iloc[0]).to_pydatetime()
@@ -139,9 +143,18 @@ def build(forecast: Path, store: str = "west_us") -> dict:
     noaa = hourly_noaa(_cache(store, "aqm_bc", issue), ids, start)
     serein = scale_to_daily(noaa, start, offsets, issue, daily)
     w_hours, u, v = wind(_cache(store, "hrrr", issue), ids, start)
-
-    def ints(a):
-        return [None if not np.isfinite(x) else round(x) for x in a.ravel()]
+    # The tested forecast: SmokeCast's daily median and 90% range per point and local day.
+    by_lead = {int(L): g.set_index("point_id").reindex(ids) for L, g in fc.groupby("lead")}
+    days = [
+        {
+            "lead": L,
+            "date": str(pd.Timestamp(g["valid_date"].dropna().iloc[0]).date()) if "valid_date" in g and g["valid_date"].notna().any() else None,
+            "q05": ints(g["q05"].to_numpy(float)),
+            "q50": ints(g["q50"].to_numpy(float)),
+            "q95": ints(g["q95"].to_numpy(float)),
+        }
+        for L, g in sorted(by_lead.items())
+    ]
 
     def wind_ints(a):
         return [None if not np.isfinite(x) else round(float(x), 1) for x in a.ravel()]
@@ -165,6 +178,7 @@ def build(forecast: Path, store: str = "west_us") -> dict:
         ],
         "noaa": ints(noaa),
         "serein": ints(serein),
+        "daily": days,
         "wind_hours": w_hours,
         "u": wind_ints(u),
         "v": wind_ints(v),

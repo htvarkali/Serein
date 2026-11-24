@@ -324,7 +324,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 2 | 5 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
-| W: Smoke World | 13 | 5 | 2 | 0 |
+| W: Smoke World | 14 | 4 | 2 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -470,7 +470,7 @@ Both workflows are development diagnostics.
 | W-3 | Satellite imagery on the terrain, state lines and city names | Done | Aadi-Tiwari | 2026-11-23 |
 | W-4 | Smoke haze over the land by AQI color, changing every hour for 72 hours | Done | Aadi-Tiwari | 2026-11-23 |
 | W-5 | Time controls: play, pause, speed, hour 0-72 slider, local date and time on screen | Done | Aadi-Tiwari | 2026-11-23 |
-| W-6 | Moving wind arrows; stop after hour 48 where NOAA's wind forecast ends, with a note (static wind lines work; animated streaks are not done) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-6 | Moving wind arrows; stop after hour 48 where NOAA's wind forecast ends, with a note | Done | Aadi-Tiwari | 2026-11-23 |
 | W-7 | Fire points sized by fire strength | Done | Aadi-Tiwari | 2026-11-23 |
 | W-8 | Click anywhere: that place's 72-hour smoke curve, chance of unhealthy air, confidence flag and advice (first version: smoke curve, advice and a breathing-dose panel; the chance of unhealthy air and the confidence flag are not in the 3D panel yet) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |

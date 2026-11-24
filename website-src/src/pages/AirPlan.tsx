@@ -69,8 +69,8 @@ export default function AirPlan() {
           <Card><CardHeader>
             <CardTitle className="text-xl">Families</CardTitle>
             <CardDescription className="text-base">EPA's AQI guidance tells sensitive groups (people with asthma, children,
-              older adults) to cut back outdoor activity as levels rise. AirPlan points to the hours when that matters and the
-              cleaner hours when it doesn't. It is general guidance, not medical advice.</CardDescription>
+              older adults) to cut back outdoor activity as levels rise. AirPlan says which of the next days that is likely to
+              matter on, so plans can change early. It is general guidance, not medical advice.</CardDescription>
           </CardHeader></Card>
         </div>
       </Section>

@@ -5,6 +5,8 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 WEBSITE = Path(__file__).resolve().parents[1] / "website"
+SPA_ROUTES = {"/", "/smokecast", "/airplan", "/about", "/world", "/results", "/replay", "/plan"}
+LEGACY_ROUTES = {"research.html": "./#/smokecast", "airplan.html": "./#/airplan"}
 
 
 class PageLinks(HTMLParser):
@@ -35,6 +37,11 @@ def validate_website(root: Path) -> list[str]:
         pages[path] = page
 
     errors = []
+    for filename, destination in LEGACY_ROUTES.items():
+        page = pages.get(root / filename)
+        if page is None or not any(reference == destination for _, reference in page.references):
+            errors.append(f"{filename}: missing link to {destination!r}")
+
     for path, page in pages.items():
         for line, reference in page.references:
             location = f"{path.relative_to(root)}:{line}"
@@ -57,8 +64,11 @@ def validate_website(root: Path) -> list[str]:
                 target /= "index.html"
             if not target.is_file():
                 errors.append(f"{location}: missing file for {reference!r}")
-            elif link.fragment and target in pages and unquote(link.fragment) not in pages[target].ids:
-                errors.append(f"{location}: missing anchor for {reference!r}")
+            elif link.fragment and target in pages:
+                fragment = unquote(link.fragment)
+                is_spa_route = target == index and fragment.split("#", 1)[0] in SPA_ROUTES
+                if not is_spa_route and fragment not in pages[target].ids:
+                    errors.append(f"{location}: missing anchor for {reference!r}")
     return errors
 
 

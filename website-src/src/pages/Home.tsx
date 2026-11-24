@@ -1,135 +1,164 @@
 import { Link } from "react-router-dom"
-import { ArrowRight } from "lucide-react"
+import { ArrowDown, ArrowRight, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
-import { SOURCE_DEV, asset, headline, team } from "@/data/site"
+import { SOURCE_DEV, asset, headline, rmseByLead, team } from "@/data/site"
 
-// Same flow as the original home page: overview, problem, project, results, next steps, team.
-function Stat({ value, label, sub }: { value: string; label: string; sub: string }) {
-  return (
-    <div className="border-t border-border pt-5">
-      <div className="font-serif text-[clamp(3.5rem,7vw,6rem)] leading-none text-primary">{value}</div>
-      <div className="mt-3 font-medium">{label}</div>
-      <div className="mt-1 text-sm text-muted-foreground">{sub}</div>
-    </div>
-  )
-}
+const threeDay = rmseByLead[3]
 
-function ProjectCard({ eyebrow, title, text, to, cta, image }: { eyebrow: string; title: string; text: string; to: string; cta: string; image: string }) {
+const projects = [
+  {
+    title: "SmokeCast",
+    to: "/smokecast",
+    image: "img/photo-research.webp",
+    description: "Compare Serein’s daily forecasts with public benchmarks, including at withheld monitor locations.",
+    action: "See the research",
+  },
+  {
+    title: "Forecast map",
+    to: "/world",
+    image: "img/world-preview.webp",
+    description: "Choose a place to see its daily estimate and range, or explore a recorded smoke event.",
+    action: "Explore the map",
+  },
+  {
+    title: "AirPlan",
+    to: "/airplan",
+    image: "img/photo-family.webp",
+    description: "See how families and outdoor crews could use a forecast to plan ahead. Family examples use simulated histories.",
+    action: "See planning examples",
+  },
+]
+
+function ProjectCard({ project }: { project: (typeof projects)[number] }) {
   return (
-    <Card className="overflow-hidden p-0">
-      <img src={asset(image)} alt="" className="aspect-[16/10] w-full object-cover" />
-      <CardContent className="space-y-3 p-6">
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h3 className="font-serif text-4xl">{title}</h3>
-        <p className="text-muted-foreground">{text}</p>
-        <Button asChild variant="link" className="px-0 text-base font-bold"><Link to={to}>{cta} <ArrowRight /></Link></Button>
-      </CardContent>
-    </Card>
+    <Link to={project.to} className="project-tile group flex min-w-0 flex-col rounded-xl border bg-card text-foreground">
+      <div className="overflow-hidden rounded-t-[inherit]">
+        <img src={asset(project.image)} alt="" loading="lazy" decoding="async"
+          className="aspect-[16/10] w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+      </div>
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
+        <h3 className="font-serif text-4xl leading-none">{project.title}</h3>
+        <p className="mt-3 mb-5 text-muted-foreground">{project.description}</p>
+        <span className="mt-auto inline-flex items-center gap-2 text-sm font-semibold">
+          {project.action} <ArrowUpRight aria-hidden="true" size={16} />
+        </span>
+      </div>
+    </Link>
   )
 }
 
 export function Home() {
   return (
     <>
-      <section className="dark relative isolate overflow-hidden bg-background text-foreground" id="overview">
-        <video className="absolute inset-0 -z-10 h-full w-full object-cover opacity-60" src={asset("motion/hero-smoke.mp4")}
-          poster={asset("img/photo-hero.webp")} autoPlay muted loop playsInline aria-hidden="true" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-background via-background/70 to-transparent" />
-        <div className="mx-auto w-[min(100%-2*clamp(1.25rem,5.5vw,6rem),82rem)] py-[clamp(6rem,14vw,12rem)]">
-          <Eyebrow dot>Wildfire smoke research</Eyebrow>
-          <h1 className="mt-4 text-[clamp(4rem,10vw,9rem)]">A clearer view of<br /><em className="text-primary">wildfire smoke.</em></h1>
-          <p className="mt-6 max-w-xl text-[clamp(1.06rem,1.6vw,1.35rem)] text-muted-foreground">
-            Serein forecasts smoke for every neighborhood in the western US, three days ahead and hour by hour, and turns
-            it into a plan for the people who breathe it most.
+      <section className="serein-hero dark relative isolate flex items-center overflow-hidden bg-background text-foreground" id="overview">
+        <img className="serein-hero-photo absolute inset-0 -z-20 size-full object-cover"
+          src={asset("img/photo-hero.webp")} alt="" fetchPriority="high" decoding="async" width={1920} height={958} />
+        <div className="serein-hero-shade absolute inset-0 -z-10" />
+        <div className="site-width relative py-[clamp(4.75rem,9vw,9rem)]">
+          <p className="serein-hero-label">Student research <span aria-hidden="true">/</span> Wildfire smoke</p>
+          <h1 className="mt-6 text-[clamp(3.45rem,8.15vw,8rem)]">
+            Plan ahead for <em className="block text-primary">wildfire smoke.</em>
+          </h1>
+          <p className="mt-6 max-w-lg text-[clamp(1.04rem,1.7vw,1.3rem)] leading-relaxed text-muted-foreground">
+            Serein estimates daily air pollution up to three days ahead, with a range that shows how uncertain each forecast is.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild size="lg"><Link to="/world">Open Smoke World <ArrowRight /></Link></Button>
-            <Button asChild size="lg" variant="outline"><Link to="/smokecast">See the results</Link></Button>
+            <Button asChild size="lg" className="min-h-12 rounded-full px-6">
+              <Link to="/world">Explore the forecast <ArrowRight aria-hidden="true" /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="min-h-12 rounded-full bg-background/80 px-6">
+              <Link to="/#results">See the evidence <ArrowDown aria-hidden="true" /></Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      <Section id="problem">
-        <Split>
+      <Section id="problem" className="!py-[clamp(3.25rem,7vw,6rem)]">
+        <Split className="items-start">
           <div>
-            <Eyebrow>The problem</Eyebrow>
-            <Heading>Smoke crosses a region. Exposure varies locally.</Heading>
+            <Eyebrow>Why we built Serein</Eyebrow>
+            <Heading className="max-w-[14ch] text-[clamp(2.9rem,5vw,5.35rem)]">A little more time to prepare</Heading>
           </div>
-          <div className="space-y-5">
-            <Lead>When smoke arrives, people need to decide what tomorrow looks like: recess, practice, a shift outdoors.
-              The official forecast covers whole metro areas and missed more than half of the unhealthy days in 2023.</Lead>
-            <p className="text-muted-foreground">The gap is widest where there is no air monitor at all. In the lowest-income
-              neighborhoods of the western US, 10.8% of people live 25 km or more from any EPA monitor, compared with 0.6% in
-              the highest-income neighborhoods.</p>
+          <div className="max-w-xl space-y-4 md:pt-8">
+            <Lead>When smoke could affect a practice, a shift, or a family’s plans, advance notice gives people time to prepare an alternative.</Lead>
+            <p className="text-muted-foreground">SmokeCast learns from recent monitor readings and existing forecasts. We test how well it estimates pollution when nearby readings are limited.</p>
           </div>
         </Split>
       </Section>
 
-      <Section id="project" className="pt-0">
-        <Eyebrow>The project</Eyebrow>
-        <Heading>From a forecast to a decision.</Heading>
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          <ProjectCard eyebrow="Forecast research" title="SmokeCast" to="/smokecast" cta="Explore the forecast" image="img/photo-research.webp"
-            text="A graph neural network that corrects NOAA's smoke forecast with live readings from 425 air monitors, 0-3 days ahead, with an honest range." />
-          <ProjectCard eyebrow="See it hour by hour" title="Smoke World" to="/world" cta="Open Smoke World" image="img/world-preview.png"
-            text="Fly over the West on real terrain and watch the next 72 hours of smoke, wind and fires. Click any place for its forecast." />
-          <ProjectCard eyebrow="Plans for people" title="AirPlan" to="/airplan" cta="Plan a day" image="img/photo-family.webp"
-            text="The forecast as a plan for outdoor crews and families: what each of the next days looks like, what to do, and how much smoke a person breathes in." />
+      <Section id="project" className="!pt-0 !pb-[clamp(3.5rem,7vw,7rem)]">
+        <div className="grid gap-5 md:grid-cols-3">
+          {projects.map(project => <ProjectCard key={project.to} project={project} />)}
         </div>
       </Section>
 
-      <Section tone="dark" id="results">
-        <Eyebrow dot>Development results · 2023</Eyebrow>
-        <Heading>How well did it do?</Heading>
-        <Lead>On 2023 smoke-season weeks it never trained on, SmokeCast was compared with NOAA's best forecast and EPA's
-          official AQI forecast on the same places and days. The reserved 2024-25 test runs once, after the rules are frozen.</Lead>
-        <div className="mt-12 grid gap-8 md:grid-cols-3">
-          <Stat value={`${headline.warnedSerein}%`} label="Unhealthy days warned a day ahead" sub={`EPA's official forecast: ${headline.warnedEpa}%, with more false alarms (${headline.falseEpa} vs ${headline.falseSerein}).`} />
-          <Stat value={`${headline.rmseSerein}`} label="Next-day error, µg/m³" sub={`NOAA's best forecast: ${headline.rmseNoaa}. Lower is better.`} />
-          <Stat value={`${headline.hiddenSerein}`} label="Error where there is no monitor" sub={`At monitors hidden from the model. NOAA: ${headline.hiddenNoaa}.`} />
+      <Section tone="dark" id="results" className="!py-[clamp(3.5rem,7vw,7rem)]">
+        <Eyebrow>Development backtest · 2023</Eyebrow>
+        <Heading className="max-w-none text-[clamp(3rem,6vw,6rem)]">What the forecasts got right</Heading>
+        <Lead>SmokeCast estimated daily fine particulate matter (PM₂.₅) at matched places and dates. The warning comparison uses official reporting-area forecasts.</Lead>
+        <div className="mt-9 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
+          <article className="result-tile bg-background p-[clamp(1.5rem,3vw,2.75rem)]">
+            <p className="text-sm font-semibold text-muted-foreground">Three days ahead</p>
+            <p className="result-number mt-3">{threeDay.serein}<span className="ml-1 text-lg text-muted-foreground">µg/m³</span></p>
+            <h3 className="mt-3 font-semibold">Forecast error (RMSE)</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Versus {threeDay.noaa} for the AQM → HRRR → persistence baseline. Lower is better.</p>
+          </article>
+          <article className="result-tile bg-background p-[clamp(1.5rem,3vw,2.75rem)]">
+            <p className="text-sm font-semibold text-muted-foreground">One day ahead</p>
+            <p className="result-number mt-3">{headline.warnedSerein}%</p>
+            <h3 className="mt-3 font-semibold">High-pollution area-days warned</h3>
+            <p className="mt-2 text-sm text-muted-foreground">The official forecast warned on {headline.warnedEpa}%. False alarms were {headline.falseSerein} vs. {headline.falseEpa}.</p>
+          </article>
+          <article className="result-tile bg-background p-[clamp(1.5rem,3vw,2.75rem)]">
+            <p className="text-sm font-semibold text-muted-foreground">One day ahead · withheld monitors</p>
+            <p className="result-number mt-3">{headline.hiddenSerein}<span className="ml-1 text-lg text-muted-foreground">µg/m³</span></p>
+            <h3 className="mt-3 font-semibold">Forecast error (RMSE)</h3>
+            <p className="mt-2 text-sm text-muted-foreground">Versus {headline.hiddenNoaa} for the same fallback baseline at withheld monitor locations.</p>
+          </article>
         </div>
-        <p className="mt-6 text-xs text-muted-foreground">{SOURCE_DEV}</p>
-        <Button asChild className="mt-8"><Link to="/smokecast">All results and the August 2023 replay <ArrowRight /></Link></Button>
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+          <p className="max-w-xl text-sm text-muted-foreground">{SOURCE_DEV}</p>
+          <Button asChild variant="outline" className="min-h-11 rounded-full"><Link to="/smokecast">See all results <ArrowRight aria-hidden="true" /></Link></Button>
+        </div>
       </Section>
 
-      <Section id="next">
+      <Section id="next" className="!py-[clamp(3.5rem,7vw,7rem)]">
         <Split className="items-start">
           <div>
             <Eyebrow>Project status</Eyebrow>
-            <Heading>What comes next.</Heading>
+            <Heading className="text-[clamp(2.9rem,5vw,5.35rem)]">What we’re testing next</Heading>
           </div>
-          <div className="divide-y divide-border border-y border-border">
+          <dl className="divide-y divide-border border-y border-border">
             {[
-              ["The final test", "The rules are written down. On December 17 they are frozen, and the 2024-25 seasons are scored once."],
-              ["Hour by hour", "Tested against real hourly readings: the correction beats NOAA hour by hour, but no forecast we tried can tell which hours of a day will be worst, so we only give advice for the day."],
-              ["People", "Interviews with outdoor crews, farm managers and school nurses, and a review of the advice by a health professional."],
-            ].map(([t, d]) => (
-              <div key={t} className="py-6">
-                <h3 className="text-xl font-medium">{t}</h3>
-                <p className="mt-2 text-muted-foreground">{d}</p>
+              ["Reserved seasons", "The team is preparing a final evaluation on the 2024–25 fire seasons. We’ll publish the results after the evaluation rules are frozen."],
+              ["Timing of smoke spikes", "In development tests, the daily estimates were more useful than the hourly pattern for anticipating pollution levels. Precise arrival times need more research."],
+              ["Use in practice", "We’re exploring how families and people who schedule outdoor activities could use a daily outlook alongside current air-quality information."],
+            ].map(([term, description]) => (
+              <div key={term} className="py-5">
+                <dt className="text-lg font-semibold">{term}</dt>
+                <dd className="mt-2 text-muted-foreground">{description}</dd>
               </div>
             ))}
-          </div>
+          </dl>
         </Split>
       </Section>
 
-      <Section id="team" className="pt-0">
-        <Split className="items-start">
-          <div>
-            <Eyebrow>The team</Eyebrow>
-            <Heading>Five students at Foothill High School.</Heading>
-          </div>
-          <div className="divide-y divide-border border-y border-border">
-            {team.map(m => (
-              <div key={m.name} className="py-5">
-                <h3 className="text-xl font-medium">{m.name}</h3>
-                <p className="mt-1 text-muted-foreground">{m.grade}{m.role ? `. ${m.role}.` : "."}</p>
-              </div>
+      <Section id="team" className="!pt-0 !pb-[clamp(3.5rem,7vw,6rem)]">
+        <div className="border-t pt-9">
+          <Eyebrow>Falcon Devs</Eyebrow>
+          <Heading className="max-w-none text-[clamp(2.9rem,5vw,5.35rem)]">The team behind Serein</Heading>
+          <p className="text-muted-foreground">Five students at Foothill High School.</p>
+          <ul className="mt-7 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            {team.map(member => (
+              <li key={member.name} className="rounded-xl border bg-card p-5">
+                <h3 className="text-base font-semibold">{member.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{member.grade}</p>
+                {member.role && <p className="mt-3 text-sm text-muted-foreground">{member.role}</p>}
+              </li>
             ))}
-          </div>
-        </Split>
+          </ul>
+        </div>
       </Section>
     </>
   )

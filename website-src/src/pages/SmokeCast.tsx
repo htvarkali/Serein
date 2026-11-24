@@ -1,112 +1,158 @@
 import { Link } from "react-router-dom"
-import { ArrowRight } from "lucide-react"
+import { ArrowDown, ArrowRight, BookOpen, Network, Radar, SlidersHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EquityChart, HiddenChart, RmseChart, WarningsChart } from "@/components/site/ResultCharts"
 import { ReplayViewer } from "@/components/site/ReplayViewer"
 import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
-import { SOURCE_DEV, asset, headline } from "@/data/site"
+import { SOURCE_DEV, asset, headline, rmseByLead } from "@/data/site"
 
-// Same order as the original SmokeCast page: introduction, results, how it works,
-// what remains to test, then a link onward. The August 2023 replay is new.
+const docs = "https://github.com/htvarkali/Serein/blob/main/docs"
+
+const steps = [
+  { icon: Radar, title: "Start with official forecasts", description: "Use NOAA’s forecasts, weather, and satellite smoke information to set the starting point." },
+  { icon: Network, title: "Learn from nearby monitors", description: "A graph neural network learns how recent readings at neighboring monitors can correct that starting forecast." },
+  { icon: SlidersHorizontal, title: "Estimate a range", description: "Average five trained models and calibrate their forecast range with development data. Use the range to see how much uncertainty remains." },
+]
+
+const review = [
+  { title: "The reserved test", description: "The protocol reserves the 2024–25 fire seasons for evaluation after the methods are frozen. The results above come from development runs.", link: "BACKTEST_PROTOCOL.md", label: "Read the evaluation protocol" },
+  { title: "Daily averages and hourly timing", description: "In development, scaling NOAA’s hourly values improved some comparisons with NOAA. Repeating SmokeCast’s daily estimate across every hour was as accurate or better than using the scaled hourly pattern. SmokeCast’s primary forecast is the daily average.", link: "HOURLY_ACCURACY.md", label: "Read the hourly study" },
+  { title: "What the experiments taught us", description: "Several changes to the training data and model failed the team’s checks. Recalibration improved estimated warning probabilities in development without changing the point forecast.", link: "EXPERIMENTS.md", label: "Read the experiment log" },
+]
+
 export default function SmokeCast() {
+  const dayThree = rmseByLead.find(row => row.lead === "Day 3")
+
   return (
     <>
       <Section>
         <Split>
-          <div>
-            <Eyebrow>The forecast model</Eyebrow>
-            <h1 className="mt-3 mb-4 text-[clamp(4rem,10vw,9rem)]">SmokeCast</h1>
-            <Lead className="max-w-[30ch]">A local view of how smoke may move over the next three days.</Lead>
-            <p className="mt-4 text-muted-foreground">
-              SmokeCast uses readings from air monitors to correct NOAA's forecasts. It estimates fine particle pollution,
-              called PM2.5, for each day and gives a range of likely values.
+          <div className="min-w-0">
+            <Eyebrow>Forecast research</Eyebrow>
+            <h1 className="mt-3 mb-5 text-[clamp(3.6rem,10vw,9rem)]">SmokeCast</h1>
+            <Lead className="max-w-[32ch]">A daily outlook for wildfire smoke, up to three days ahead.</Lead>
+            <p className="mt-4 max-w-prose text-muted-foreground">
+              SmokeCast learns from air-monitor readings and NOAA forecasts to estimate daily fine particle pollution
+              (PM₂.₅). Each estimate comes with a range so people can plan around uncertainty.
             </p>
-            <Button asChild className="mt-6"><a href="#results">Explore the results ↓</a></Button>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Button asChild size="lg"><Link to="/smokecast#results">Compare forecasts <ArrowDown aria-hidden="true" /></Link></Button>
+              <Button asChild variant="outline" size="lg"><Link to="/smokecast#replay">Replay a smoke week</Link></Button>
+            </div>
           </div>
           <figure>
-            <img src={asset("img/world-preview.png")} alt="Smoke World view of the August 2023 Pacific Northwest smoke forecast"
-              className="w-full rounded-lg border shadow-xl" />
-            <figcaption className="mt-3 text-sm text-muted-foreground">August 2023 Pacific Northwest smoke event in Smoke World.</figcaption>
+            <img src={asset("img/photo-research.webp")} alt="Smoke rising from the Hayes Fire over a forested mountain valley"
+              width={1440} height={1080} className="aspect-[4/3] w-full rounded-xl border object-cover shadow-sm" />
+            <figcaption className="mt-3 text-sm text-muted-foreground">Hayes Fire, Olympic National Park. Courtesy of the National Park Service.</figcaption>
           </figure>
         </Split>
       </Section>
 
       <Section tone="dark" id="results">
-        <Eyebrow>Development results · 2023</Eyebrow>
-        <Heading>How far ahead can we see?</Heading>
-        <Lead>Compare SmokeCast with NOAA's best forecast and EPA's official forecast at the same places and dates.</Lead>
-        <Tabs defaultValue="error" className="mt-10">
-          <TabsList className="flex h-auto flex-wrap">
-            <TabsTrigger value="error">Forecast error</TabsTrigger>
-            <TabsTrigger value="warnings">Warnings vs. EPA</TabsTrigger>
-            <TabsTrigger value="hidden">No monitor nearby</TabsTrigger>
-            <TabsTrigger value="equity">Who lacks a monitor</TabsTrigger>
+        <Eyebrow>2023 development results</Eyebrow>
+        <Heading>What changes across three days?</Heading>
+        <Lead>See how daily pollution estimates and warning performance compare on matched locations and dates.</Lead>
+
+        <Tabs defaultValue="error" className="mt-8">
+          <TabsList aria-label="Choose a development result" className="grid h-auto! w-full grid-cols-2 gap-1 p-1 sm:max-w-3xl sm:grid-cols-4">
+            <TabsTrigger value="error" className="min-h-11 whitespace-normal px-2">Forecast error</TabsTrigger>
+            <TabsTrigger value="warnings" className="min-h-11 whitespace-normal px-2">Warnings</TabsTrigger>
+            <TabsTrigger value="hidden" className="min-h-11 whitespace-normal px-2">Hidden monitors</TabsTrigger>
+            <TabsTrigger value="equity" className="min-h-11 whitespace-normal px-2">Monitor access</TabsTrigger>
           </TabsList>
-          <Card className="mt-4">
-            <TabsContent value="error"><CardHeader><CardTitle>Typical miss (RMSE, µg/m³), lower is better</CardTitle>
-              <CardDescription>Next day: {headline.rmseSerein} vs. {headline.rmseNoaa} for NOAA's best forecast.</CardDescription></CardHeader>
-              <CardContent><RmseChart /></CardContent></TabsContent>
-            <TabsContent value="warnings"><CardHeader><CardTitle>Unhealthy days warned ahead (%)</CardTitle>
-              <CardDescription>False alarms a day ahead: SmokeCast {headline.falseSerein}, EPA {headline.falseEpa}. Two days ahead SmokeCast warns more and has more false alarms (48 vs. 36), a real tradeoff.</CardDescription></CardHeader>
-              <CardContent><WarningsChart /></CardContent></TabsContent>
-            <TabsContent value="hidden"><CardHeader><CardTitle>Error at monitors hidden from the model</CardTitle>
-              <CardDescription>By distance to the nearest monitor it could see, next day. The 60+ km group has only 3 sites and is left out.</CardDescription></CardHeader>
-              <CardContent><HiddenChart /></CardContent></TabsContent>
-            <TabsContent value="equity"><CardHeader><CardTitle>People living far from any monitor (%)</CardTitle>
-              <CardDescription>By neighborhood income, 6 western states, about 56 million people (Census ACS 2019-2023).</CardDescription></CardHeader>
-              <CardContent><EquityChart /></CardContent></TabsContent>
+          <Card className="mt-2 min-w-0">
+            <TabsContent value="error" className="min-w-0">
+              <CardHeader className="px-4 sm:px-6">
+                <h3 className="text-lg font-semibold">Daily PM₂.₅ forecast error</h3>
+                <CardDescription>
+                  Lower root mean square error (RMSE) is better. Three days ahead, SmokeCast scored {dayThree?.serein.toFixed(1)}
+                  {" "}vs. {dayThree?.noaa.toFixed(1)} µg/m³ for the benchmark. The benchmark uses AQM, then HRRR,
+                  then the previous day’s level when both forecasts are unavailable.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6"><RmseChart /></CardContent>
+            </TabsContent>
+            <TabsContent value="warnings" className="min-w-0">
+              <CardHeader className="px-4 sm:px-6">
+                <h3 className="text-lg font-semibold">High-pollution days caught</h3>
+                <CardDescription>
+                  One day ahead, SmokeCast caught {headline.warnedSerein}% of days with unhealthy conditions for sensitive groups
+                  or worse, versus {headline.warnedEpa}% for the official AirNow forecast, with {headline.falseSerein} versus
+                  {" "}{headline.falseEpa} false alarms. At two days, SmokeCast caught more events and raised more false alarms
+                  (48 versus 36).
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6"><WarningsChart /></CardContent>
+            </TabsContent>
+            <TabsContent value="hidden" className="min-w-0">
+              <CardHeader className="px-4 sm:px-6">
+                <h3 className="text-lg font-semibold">Next-day error at hidden monitors</h3>
+                <CardDescription>
+                  Monitors are grouped by distance to the nearest visible monitor. In the 30–60 km group, SmokeCast scored
+                  7.8 vs. 12.3 µg/m³ for the benchmark across 21 sites. The group beyond 60 km had three sites and is omitted here.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6"><HiddenChart /></CardContent>
+            </TabsContent>
+            <TabsContent value="equity" className="min-w-0">
+              <CardHeader className="px-4 sm:px-6">
+                <h3 className="text-lg font-semibold">Who lives far from an EPA monitor?</h3>
+                <CardDescription>
+                  This coverage study groups census tracts by household income across the six-state study area.
+                  The figures count regulatory PM₂.₅ monitors and exclude community sensors such as PurpleAir.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="px-3 sm:px-6"><EquityChart /></CardContent>
+            </TabsContent>
           </Card>
         </Tabs>
-        <p className="mt-4 text-xs text-muted-foreground">{SOURCE_DEV}</p>
+        <p className="mt-4 text-sm text-muted-foreground">{SOURCE_DEV}</p>
       </Section>
 
       <Section id="replay">
-        <Eyebrow>Real data · August 15-21, 2023</Eyebrow>
+        <Eyebrow>August 15–21, 2023</Eyebrow>
         <Heading>Replay a smoke week.</Heading>
-        <Lead>Each column is an EPA air monitor in Washington, Oregon or Idaho: height is the daily PM2.5, color the AQI
-          level. Left and middle are forecasts made the day before; right is what happened.</Lead>
-        <div className="mt-8"><ReplayViewer /></div>
+        <Lead>Compare the forecasts made the day before with the next day’s monitor readings in the Pacific Northwest.</Lead>
+        <ReplayViewer />
         <p className="mt-4 max-w-3xl text-sm text-muted-foreground">
-          "Flagged" counts monitors whose day-ahead forecast was at or above 35.5 µg/m³ among those that really reached it.{" "}
-          <Link className="underline" to="/world?mode=aug2023">See this week hour by hour in Smoke World</Link>.
+          Each column is an EPA monitor. Height shows daily PM₂.₅ and color shows the daily AQI category.
+          A forecast flags a monitor when its daily estimate reaches 35.5 µg/m³.
         </p>
+        <Button asChild variant="outline" className="mt-5"><Link to="/world?mode=aug2023">Open the archived map <ArrowRight aria-hidden="true" /></Link></Button>
       </Section>
 
       <Section className="pt-0">
-        <Eyebrow>How it works</Eyebrow>
-        <Heading>From nearby readings to a local forecast.</Heading>
-        <Lead>SmokeCast brings air-quality observations, weather forecasts and satellite smoke information into one model.</Lead>
-        <ol className="mt-10 grid gap-5 md:grid-cols-3">
-          {[
-            ["Begin with NOAA forecasts", "The model starts from NOAA's smoke and air-quality forecasts and learns how to adjust them using recent observations."],
-            ["Connect nearby monitors", "A graph neural network lets each location use what nearby monitors see. It trains with some readings hidden, so it can forecast where there is no monitor."],
-            ["Show the uncertainty", "Five copies of the model are averaged and every forecast has a range calibrated to hold the true value about 90% of the time."],
-          ].map(([t, d], i) => (
-            <li key={t}><Card className="h-full"><CardHeader>
-              <span className="font-serif text-5xl text-muted-foreground">{i + 1}</span>
-              <CardTitle className="mt-2 text-xl">{t}</CardTitle>
-              <CardDescription className="text-base">{d}</CardDescription>
-            </CardHeader></Card></li>
+        <Heading>How SmokeCast works.</Heading>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {steps.map(({ icon: Icon, title, description }) => (
+            <Card key={title} className="h-full">
+              <CardHeader>
+                <Icon aria-hidden="true" className="mb-2 size-6 text-primary" />
+                <h3 className="text-xl font-semibold">{title}</h3>
+                <CardDescription className="text-base">{description}</CardDescription>
+              </CardHeader>
+            </Card>
           ))}
-        </ol>
+        </div>
       </Section>
 
       <Section id="evaluation" className="pt-0">
         <Split className="items-start">
           <div>
-            <Eyebrow>Evaluation</Eyebrow>
-            <Heading>What remains to test.</Heading>
+            <Heading>What the model still needs to prove.</Heading>
+            <Lead>Reliable warnings at longer leads are the next challenge. Heavy pollution peaks still tend to be underestimated.</Lead>
           </div>
           <div className="divide-y divide-border border-y border-border">
-            {[
-              ["The final test", "The 2024-25 seasons have never been scored. The rules are written down in advance and run once after the December 17 freeze, including where SmokeCast loses."],
-              ["What did not work", "Nine attempts to improve accuracy failed our fixed test: bigger models, more seasons, fire and satellite inputs, and five ways of blending forecasters. Each is in the public experiment log."],
-              ["What did", "Warning probabilities recalibrated so that 60% really means about 60%, and a low-confidence flag that marks the days with the largest misses."],
-              ["Hour by hour", "Against real hourly readings, the corrected hourly values beat NOAA's, but neither tells which hours of a day will be worst. A flat daily value is as accurate, so advice is given per day."],
-            ].map(([t, d]) => (
-              <div key={t} className="py-6"><h3 className="text-xl font-medium">{t}</h3><p className="mt-2 text-muted-foreground">{d}</p></div>
+            {review.map(({ title, description, link, label }) => (
+              <div key={title} className="py-5">
+                <h3 className="text-xl font-medium">{title}</h3>
+                <p className="mt-2 text-muted-foreground">{description}</p>
+                <a href={`${docs}/${link}`} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4">
+                  <BookOpen aria-hidden="true" className="size-4" />{label}
+                </a>
+              </div>
             ))}
           </div>
         </Split>
@@ -114,13 +160,10 @@ export default function SmokeCast() {
 
       <Section tone="dark">
         <Split>
-          <div>
-            <Eyebrow>For people</Eyebrow>
-            <Heading>What could a forecast mean for your day?</Heading>
-          </div>
+          <Heading>Use the forecast to plan ahead.</Heading>
           <div className="space-y-5">
-            <Lead>AirPlan turns the forecast into a plan for each of the next days, for outdoor crews and families.</Lead>
-            <Button asChild><Link to="/airplan">Explore AirPlan <ArrowRight /></Link></Button>
+            <Lead>See the expected daily pollution and uncertainty for a selected location in AirPlan.</Lead>
+            <Button asChild size="lg"><Link to="/airplan">Open AirPlan <ArrowRight aria-hidden="true" /></Link></Button>
           </div>
         </Split>
       </Section>

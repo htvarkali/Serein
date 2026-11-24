@@ -33,23 +33,52 @@ export const AQI = [
 ] as const
 export const aqiOf = (v: number) => AQI[Math.max(0, AQI.findIndex(a => v <= a.hi))]
 
-const cache = new Map<string, Promise<WorldData>>()
+async function fetchData<T>(file: string, cache: RequestCache = "default"): Promise<T> {
+  const controller = new AbortController()
+  const timer = window.setTimeout(() => controller.abort(), 15_000)
+  try {
+    const response = await fetch(`${import.meta.env.BASE_URL}data/${file}.json`, { signal: controller.signal, cache })
+    if (!response.ok) throw new Error(`Forecast data request failed (${response.status})`)
+    return await response.json() as T
+  } finally {
+    window.clearTimeout(timer)
+  }
+}
+
+const cache = new Map<string, { request: Promise<WorldData>; started: number }>()
 export function loadWorld(mode: string): Promise<WorldData> {
-  if (!cache.has(mode)) {
-    cache.set(mode, fetch(`${import.meta.env.BASE_URL}data/${mode}.json`).then(r => r.json()).then((d: WorldData) => {
+  const existing = cache.get(mode)
+  if (existing && (mode !== "live" || Date.now() - existing.started < 120_000)) return existing.request
+
+  const request: Promise<WorldData> = fetchData<WorldData>(mode, mode === "live" ? "no-cache" : "default")
+    .then(d => {
+      if (!Array.isArray(d.points) || !d.points.length || !Number.isInteger(d.hours) || d.hours < 1 ||
+          !Number.isFinite(Date.parse(d.start_utc)) || !Array.isArray(d.fires) ||
+          !Array.isArray(d.wind_hours) || !Array.isArray(d.u) || !Array.isArray(d.v) ||
+          ![d.noaa, d.serein].every(values => Array.isArray(values) && values.length === d.points.length * d.hours)) {
+        throw new Error("Forecast data is incomplete")
+      }
       d.grid = new Int32Array(GRID.rows * GRID.cols).fill(-1)
       d.points.forEach(([lat, lon, kind], i) => {
         if (kind !== 0) return
-        const r = Math.round((lat - GRID.lat0) / GRID.step), c = Math.round((lon - GRID.lon0) / GRID.step)
+        const r = Math.round((lat - GRID.lat0) / GRID.step)
+        const c = Math.round((lon - GRID.lon0) / GRID.step)
         if (r >= 0 && r < GRID.rows && c >= 0 && c < GRID.cols) d.grid[r * GRID.cols + c] = i
       })
       return d
-    }))
-  }
-  return cache.get(mode)!
+    }).catch(error => {
+      if (cache.get(mode)?.request === request) cache.delete(mode)
+      throw error
+    })
+  cache.set(mode, { request, started: Date.now() })
+  return request
 }
 
-export const valueAt = (d: WorldData, which: Which, p: number, h: number) => d[which][p * d.hours + h] ?? null
+export function valueAt(d: WorldData, which: Which, p: number, h: number): number | null {
+  if (p < 0 || p >= d.points.length || h < 0 || h >= d.hours) return null
+  const value = d[which][p * d.hours + h]
+  return typeof value === "number" && Number.isFinite(value) ? value : null
+}
 
 // ---- smoke image: rows spaced in Web Mercator so the image lines up with the map ----
 const SCALE = 8
@@ -62,7 +91,8 @@ export function makeSmokeCanvas() {
 }
 let rowLat: Float64Array | null = null
 export function drawSmoke(canvas: HTMLCanvasElement, d: WorldData, which: Which, hour: number) {
-  const ctx = canvas.getContext("2d")!
+  const ctx = canvas.getContext("2d")
+  if (!ctx) return
   if (!rowLat || rowLat.length !== canvas.height) {
     rowLat = new Float64Array(canvas.height)
     for (let y = 0; y < canvas.height; y++) {
@@ -72,19 +102,16 @@ export function drawSmoke(canvas: HTMLCanvasElement, d: WorldData, which: Which,
   }
   const img = ctx.createImageData(canvas.width, canvas.height)
   const px = img.data, W = canvas.width
-  const g = (r: number, c: number) => {
-    const p = d.grid[r * GRID.cols + c]
-    return p === undefined || p < 0 ? null : valueAt(d, which, p, hour)
-  }
+  const field = Float32Array.from(d.grid, p => valueAt(d, which, p, hour) ?? NaN)
   for (let y = 0; y < canvas.height; y++) {
     const fr = Math.min(Math.max((rowLat[y] - GRID.lat0) / GRID.step, 0), GRID.rows - 1)
     const r0 = Math.min(Math.floor(fr), GRID.rows - 2), ty = fr - r0
     for (let x = 0; x < W; x++) {
       const fc = x / SCALE, c0 = Math.min(Math.floor(fc), GRID.cols - 2), tx = fc - c0
-      const a = g(r0, c0), b = g(r0, c0 + 1), c = g(r0 + 1, c0), e = g(r0 + 1, c0 + 1)
-      if (a === null || b === null || c === null || e === null) continue
+      const i = r0 * GRID.cols + c0
+      const a = field[i], b = field[i + 1], c = field[i + GRID.cols], e = field[i + GRID.cols + 1]
       const v = (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + e * tx) * ty
-      if (v < 6) continue // clean air stays see-through
+      if (!(v >= 6)) continue // Missing values and low concentrations stay transparent.
       const { rgb } = aqiOf(v)
       const k = (y * W + x) * 4
       px[k] = rgb[0]; px[k + 1] = rgb[1]; px[k + 2] = rgb[2]
@@ -116,7 +143,7 @@ export function windFeatures(d: WorldData, hour: number): FeatureCollection {
       const p = d.grid[r * GRID.cols + c]
       if (p < 0) continue
       const u = d.u[p * nh + j], v = d.v[p * nh + j]
-      if (u === null || v === null) continue
+      if (typeof u !== "number" || typeof v !== "number" || !Number.isFinite(u) || !Number.isFinite(v)) continue
       const [lat, lon] = d.points[p]
       const s = 0.035
       features.push({ type: "Feature", properties: { speed: Math.hypot(u, v), bearing: (Math.atan2(u, v) * 180) / Math.PI },
@@ -148,7 +175,10 @@ export function sampleAt(d: WorldData, which: Which, hour: number, lat: number, 
 
 export type People = { source: string; tracts: [number, number, number, number, number][] } // lat, lon, population, income quintile (0 lowest), km to monitor
 let peopleCache: Promise<People> | null = null
-export const loadPeople = () => (peopleCache ??= fetch(`${import.meta.env.BASE_URL}data/people.json`).then(r => r.json()))
+export const loadPeople = () => (peopleCache ??= fetchData<People>("people").catch(error => {
+  peopleCache = null
+  throw error
+}))
 
 // People living where this hour's smoke is at or above each level.
 export function peopleUnderSmoke(d: WorldData, which: Which, hour: number, people: People) {
@@ -156,7 +186,7 @@ export function peopleUnderSmoke(d: WorldData, which: Which, hour: number, peopl
   for (const [lat, lon, pop, , km] of people.tracts) {
     const v = sampleAt(d, which, hour, lat, lon)
     if (v === null) continue
-    if (v >= 35.5) { usg += pop; if (km > 25) farUsg += pop }
+    if (v >= 35.5) { usg += pop; if (km >= 25) farUsg += pop }
     if (v >= 55.5) unhealthy += pop
   }
   return { usg, unhealthy, farUsg }

@@ -1,336 +1,286 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Link } from "react-router-dom"
-import maplibregl from "maplibre-gl"
-import "maplibre-gl/dist/maplibre-gl.css"
-import { Info, Pause, Play, X } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { Link, useSearchParams } from "react-router-dom"
+import { ArrowLeft, Info, Pause, Play } from "lucide-react"
 import { Area, ComposedChart, Line, ReferenceLine, XAxis, YAxis } from "recharts"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import ForecastMap from "@/components/site/ForecastMap"
 import { PersonPanel } from "@/components/site/PersonPanel"
 import { Wordmark } from "@/components/site/SiteLayout"
-import { AQI, BOX, aqiOf, drawSmoke, loadPeople, loadWorld, localTime, makeSmokeCanvas, nearestPoint, peopleUnderSmoke, valueAt, windFeatures,
-  type People, type Which, type WorldData } from "@/lib/world"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Switch } from "@/components/ui/switch"
+import { AQI, loadPeople, loadWorld, localTime, nearestPoint, peopleUnderSmoke, valueAt,
+  type People, type Which, type WorldData } from "@/lib/world"
 
-const MODES = { live: "Live: today + 3 days", aug2023: "Example: August 2023 smoke event" } as const
-type Mode = keyof typeof MODES
-
+const PLACES = {
+  seattle: { name: "Seattle area", coordinates: [-122.32, 47.60] },
+  portland: { name: "Portland area", coordinates: [-122.69, 45.52] },
+  sacramento: { name: "Sacramento area", coordinates: [-121.49, 38.57] },
+  eastBay: { name: "East Bay", coordinates: [-122.17, 37.74] },
+} satisfies Record<string, { name: string; coordinates: [number, number] }>
+type Place = keyof typeof PLACES
+type Coordinates = [number, number]
+type Mode = "live" | "aug2023"
+const LEADS = ["Issue day", "Day 1", "Day 2", "Day 3"]
+const COLORS = ["≤ 9.0", "9.1–35.4", "35.5–55.4", "55.5–125.4", "125.5–225.4", "> 225.4"]
+const selectClass = "min-h-11 w-full rounded-lg border bg-card px-3 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary [color-scheme:dark]"
+const shortDate = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric" })
+const issueDate = new Intl.DateTimeFormat("en-US", { timeZone: "UTC", month: "short", day: "numeric", year: "numeric" })
+const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 })
 const chartConfig = {
-  serein: { label: "Serein", color: "var(--chart-1)" },
+  serein: { label: "Serein-scaled", color: "var(--chart-1)" },
   noaa: { label: "NOAA", color: "var(--chart-2)" },
 } satisfies ChartConfig
 
-function initialMode(): Mode {
-  const m = new URLSearchParams(window.location.hash.split("?")[1] ?? "").get("mode")
-  return m === "aug2023" ? "aug2023" : "live"
+type ForecastState = { mode: Mode; attempt: number; data?: WorldData; failed?: boolean }
+
+function ForecastDetails({ data, picked, label, which, hour }: {
+  data: WorldData; picked: number; label: string; which: Which; hour: number;
+}) {
+  const [showHourly, setShowHourly] = useState(false)
+  const [lat, lng, kind] = data.points[picked]
+  const days = data.daily ?? []
+  const selected = valueAt(data, which, picked, hour)
+  const series = useMemo(() => showHourly ? Array.from({ length: data.hours }, (_, h) => ({
+    h, label: localTime(data, h), serein: valueAt(data, "serein", picked, h), noaa: valueAt(data, "noaa", picked, h),
+  })) : [], [data, picked, showHourly])
+
+  return <>
+    <h2 className="text-3xl">{label}</h2>
+    <p className="mt-1 text-sm text-muted-foreground">
+      {kind === 1 ? "Forecast at an EPA monitor" : "Forecast grid point, about 25 km apart"} · {lat.toFixed(2)}°, {lng.toFixed(2)}°
+    </p>
+    <h3 className="mt-6 font-semibold">SmokeCast daily outlook</h3>
+    <p className="mt-1 text-sm text-muted-foreground">Daily average PM₂.₅ and 90% forecast range, in µg/m³.</p>
+    {days.length ? (
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {days.map(day => {
+          const date = new Date(`${day.date}T00:00:00Z`)
+          const median = day.q50[picked], low = day.q05[picked], high = day.q95[picked]
+          return <div key={day.lead} className="rounded-xl border bg-background/55 p-3">
+            <p className="text-xs font-medium text-muted-foreground">
+              {LEADS[day.lead] ?? `Day ${day.lead}`}
+              {Number.isFinite(date.getTime()) ? ` · ${shortDate.format(date)}` : ""}
+            </p>
+            <p className="mt-2 font-serif text-3xl leading-none">{median ?? <span className="font-sans text-sm">No data</span>}</p>
+            {typeof low === "number" && typeof high === "number" && <p className="mt-1 text-xs text-muted-foreground">Range {low}–{high}</p>}
+          </div>
+        })}
+      </div>
+    ) : <p className="mt-3 text-sm text-muted-foreground">Daily outlook unavailable for this run.</p>}
+
+    <details className="mt-6 rounded-xl border bg-background/40" onToggle={event => setShowHourly(event.currentTarget.open)}>
+      <summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-primary">Explore hourly estimates</summary>
+      <div className="space-y-3 px-4 pb-4 text-sm">
+        <p className="text-muted-foreground">{localTime(data, hour)} · {which === "serein" ? "Serein-scaled NOAA pattern" : "NOAA forecast"}</p>
+        <p className="font-serif text-3xl leading-none">{selected === null ? "No hourly value" : `${selected} µg/m³`}</p>
+        {showHourly && <ChartContainer config={chartConfig} className="h-40 w-full">
+          <ComposedChart data={series} margin={{ left: -24, right: 4, top: 6 }}>
+            <XAxis dataKey="h" tickFormatter={h => `+${h}h`} ticks={[0, 24, 48].filter(h => h < data.hours)} tickLine={false} axisLine={false} fontSize={11} />
+            <YAxis tickLine={false} axisLine={false} fontSize={11} />
+            <ReferenceLine x={hour} stroke="var(--foreground)" />
+            <Area dataKey="serein" type="linear" fill="var(--color-serein)" fillOpacity={0.16} stroke="var(--color-serein)" strokeWidth={2} isAnimationActive={false} />
+            <Line dataKey="noaa" type="linear" stroke="var(--color-noaa)" strokeWidth={1.5} dot={false} isAnimationActive={false} />
+            <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, payload) => (payload?.[0]?.payload as { label?: string } | undefined)?.label} />} />
+          </ComposedChart>
+        </ChartContainer>}
+        <p className="text-xs text-muted-foreground">Hourly concentrations are illustrative. The daily outlook is the evaluated planning forecast.</p>
+      </div>
+    </details>
+    <PersonPanel data={data} point={picked} which={which} />
+  </>
 }
 
 export default function World() {
-  const mapEl = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
-  const canvas = useMemo(() => makeSmokeCanvas(), [])
-  const [mode, setMode] = useState<Mode>(initialMode)
+  const [search, setSearch] = useSearchParams()
+  const mode: Mode = search.get("mode") === "aug2023" ? "aug2023" : "live"
   const [which, setWhich] = useState<Which>("serein")
   const [hour, setHour] = useState(0)
   const [playing, setPlaying] = useState(false)
-  const [speed, setSpeed] = useState("450")
-  const [data, setData] = useState<WorldData | null>(null)
-  const [ready, setReady] = useState(false)
-  const [picked, setPicked] = useState<number | null>(null)
+  const [speed, setSpeed] = useState("900")
+  const [result, setResult] = useState<ForecastState | null>(null)
+  const [attempt, setAttempt] = useState(0)
+  const [place, setPlace] = useState<Place | Coordinates>("seattle")
+  const [focus, setFocus] = useState<Coordinates | null>(null)
   const [people, setPeople] = useState<People | null>(null)
+  const [peopleFailed, setPeopleFailed] = useState(false)
   const [showPeople, setShowPeople] = useState(false)
   const [farOnly, setFarOnly] = useState(false)
-  useEffect(() => { loadPeople().then(setPeople) }, [])
 
-  // ---- map, once ----
-  useEffect(() => {
-    if (!mapEl.current) return
-    const map = new maplibregl.Map({
-      container: mapEl.current,
-      center: [-120.6, 41.2], zoom: 5.1, pitch: 52, bearing: -8, maxPitch: 80,
-      // Smoother loading: keep many tiles in memory, fade instead of popping in,
-      // and fetch lower-zoom tiles ahead so there is always something to show.
-      maxTileCacheSize: 4000, fadeDuration: 180, refreshExpiredTiles: false,
-      attributionControl: { compact: true },
-      style: {
-        version: 8,
-        glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-        sources: {
-          photo: { type: "raster", tileSize: 256, maxzoom: 16,
-            tiles: ["https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}"],
-            attribution: "Imagery: USGS The National Map" },
-          dem: { type: "raster-dem", encoding: "terrarium", tileSize: 256, maxzoom: 15,
-            tiles: ["https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"],
-            attribution: "Terrain: AWS Terrain Tiles (USGS 3DEP and others)" },
-          omt: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenStreetMap contributors, OpenFreeMap" },
-        },
-        layers: [
-          { id: "bg", type: "background", paint: { "background-color": "#1d2a26" } },
-          { id: "photo", type: "raster", source: "photo", paint: { "raster-fade-duration": 250, "raster-saturation": -0.1 } },
-        ],
-        sky: { "sky-color": "#9ec6e6", "horizon-color": "#e9e3cf", "fog-color": "#d7d2c4", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.6, "fog-ground-blend": 0.35 },
-      },
-    })
-    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right")
-    map.addControl(new maplibregl.ScaleControl({ unit: "imperial" }), "bottom-left")
-    map.on("load", () => {
-      map.setTerrain({ source: "dem", exaggeration: 1.4 })
-      map.addSource("smoke", { type: "canvas", canvas, animate: true,
-        coordinates: [[BOX.west, BOX.north], [BOX.east, BOX.north], [BOX.east, BOX.south], [BOX.west, BOX.south]] })
-      map.addLayer({ id: "smoke", type: "raster", source: "smoke", paint: { "raster-opacity": 0.85, "raster-resampling": "linear" } })
-      map.addLayer({ id: "states", type: "line", source: "omt", "source-layer": "boundary",
-        filter: ["all", ["==", ["get", "admin_level"], 4], ["!=", ["get", "maritime"], 1]],
-        paint: { "line-color": "#ffffff", "line-opacity": 0.5, "line-width": 1.2 } })
-      map.addLayer({ id: "roads", type: "line", source: "omt", "source-layer": "transportation", minzoom: 9,
-        filter: ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary"]]],
-        paint: { "line-color": "#f4efe4", "line-opacity": 0.45, "line-width": ["interpolate", ["linear"], ["zoom"], 9, 0.6, 14, 2.5] } })
-      map.addLayer({ id: "buildings", type: "fill-extrusion", source: "omt", "source-layer": "building", minzoom: 13,
-        paint: { "fill-extrusion-color": "#e3ddd0", "fill-extrusion-opacity": 0.9,
-          "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0] } })
-      map.addSource("wind", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
-      map.addLayer({ id: "wind", type: "line", source: "wind", layout: { "line-cap": "round" },
-        paint: { "line-color": "#ffffff", "line-opacity": 0.22, "line-width": ["interpolate", ["linear"], ["get", "speed"], 0, 0.5, 10, 2.2] } })
-      // A dashed copy of the wind lines whose dash pattern steps forward each frame, so the wind visibly flows.
-      map.addLayer({ id: "wind-flow", type: "line", source: "wind", layout: { "line-cap": "round" },
-        paint: { "line-color": "#ffffff", "line-opacity": 0.85, "line-width": ["interpolate", ["linear"], ["get", "speed"], 0, 0.8, 10, 2.6],
-          "line-dasharray": [0, 4, 3] } })
-      const dashes = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0], [0, 0.5, 3, 3.5],
-        [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]]
-      let step = 0
-      const flow = () => {
-        if (!map.getLayer("wind-flow")) return
-        step = (step + 1) % dashes.length
-        map.setPaintProperty("wind-flow", "line-dasharray", dashes[step])
-        windTimer = window.setTimeout(() => requestAnimationFrame(flow), 70)
-      }
-      let windTimer = window.setTimeout(flow, 70)
-      map.once("remove", () => clearTimeout(windTimer))
-      map.addSource("fires", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
-      map.addLayer({ id: "fires", type: "circle", source: "fires",
-        paint: { "circle-color": "#ff6a1a", "circle-blur": 0.6, "circle-opacity": 0.9,
-          "circle-radius": ["interpolate", ["linear"], ["sqrt", ["max", ["get", "frp"], 0]], 0, 2, 30, 10] } })
-      map.addSource("monitors", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
-      map.addLayer({ id: "monitors", type: "circle", source: "monitors", minzoom: 6,
-        paint: { "circle-radius": 3.5, "circle-color": "#ffffff", "circle-stroke-color": "#102321", "circle-stroke-width": 1 } })
-      map.addSource("people", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
-      map.addLayer({ id: "people", type: "circle", source: "people", layout: { visibility: "none" },
-        paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, ["*", 0.04, ["sqrt", ["get", "pop"]]], 10, ["*", 0.12, ["sqrt", ["get", "pop"]]]],
-          "circle-color": ["match", ["get", "q"], 0, "#f2ba84", 1, "#e8c9a0", 2, "#d8d8c0", 3, "#b9d6c4", 4, "#8fc3b0", "#cccccc"],
-          "circle-opacity": 0.75,
-          "circle-stroke-color": ["case", [">", ["get", "km"], 25], "#ff3b6b", "rgba(0,0,0,0)"],
-          "circle-stroke-width": ["case", [">", ["get", "km"], 25], 1.6, 0],
-        } })
-      map.addLayer({ id: "poi", type: "circle", source: "omt", "source-layer": "poi", minzoom: 11,
-        filter: ["in", ["get", "class"], ["literal", ["school", "college", "hospital"]]],
-        paint: { "circle-radius": 5, "circle-color": ["match", ["get", "class"], "hospital", "#ff5a5f", "#5b8def"],
-          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.2 } })
-      map.addLayer({ id: "poi-labels", type: "symbol", source: "omt", "source-layer": "poi", minzoom: 13,
-        filter: ["in", ["get", "class"], ["literal", ["school", "college", "hospital"]]],
-        layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 11, "text-offset": [0, 1.1], "text-anchor": "top" },
-        paint: { "text-color": "#ffffff", "text-halo-color": "#091615", "text-halo-width": 1.2 } })
-      map.addLayer({ id: "places", type: "symbol", source: "omt", "source-layer": "place",
-        filter: ["in", ["get", "class"], ["literal", ["city", "town", "village"]]],
-        layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"],
-          "text-size": ["interpolate", ["linear"], ["zoom"], 5, 11, 10, 15] },
-        paint: { "text-color": "#ffffff", "text-halo-color": "#091615", "text-halo-width": 1.4 } })
-      setReady(true)
-    })
-    mapRef.current = map
-    return () => { map.remove(); mapRef.current = null }
-  }, [canvas])
+  const active = result?.mode === mode && result.attempt === attempt ? result : null
+  const data = active?.data ?? null
+  const selectedHour = Math.min(hour, (data?.hours ?? 1) - 1)
+  const coords = typeof place === "string" ? PLACES[place].coordinates : place
+  const placeName = typeof place === "string" ? PLACES[place].name : "Selected location"
+  const picked = useMemo(() => data ? nearestPoint(data, coords[0], coords[1]) : -1, [data, coords])
+  const mapPoint = useMemo<Coordinates | null>(() => {
+    if (!data || picked < 0) return null
+    const [lat, lng] = data.points[picked]
+    return [lng, lat]
+  }, [data, picked])
+  const counts = useMemo(() => data && people && showPeople ? peopleUnderSmoke(data, which, selectedHour, people) : null,
+    [data, people, showPeople, which, selectedHour])
+  const start = data ? Date.parse(data.start_utc) : 0
+  const expired = mode === "live" && data && Date.now() >= start + data.hours * 3_600_000
+  const stale = mode === "live" && data && Date.now() - start >= 36 * 3_600_000
+  const issued = data ? issueDate.format(new Date(start)) : ""
+  const time = data ? localTime(data, selectedHour) : ""
 
-  // ---- data for the mode ----
+  useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }) }, [])
+
   useEffect(() => {
     let cancelled = false
-    loadWorld(mode).then(d => { if (!cancelled) { setData(d); setHour(h => Math.min(h, d.hours - 1)) } })
+    loadWorld(mode).then(loaded => {
+      if (!cancelled) setResult({ mode, attempt, data: loaded })
+    }).catch(() => {
+      if (!cancelled) setResult({ mode, attempt, failed: true })
+    })
     return () => { cancelled = true }
-  }, [mode])
+  }, [mode, attempt])
 
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !ready || !data) return
-    ;(map.getSource("fires") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection", features: data.fires.map(([lat, lon, frp]) => (
-      { type: "Feature", properties: { frp }, geometry: { type: "Point", coordinates: [lon, lat] } })) })
-    ;(map.getSource("monitors") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection", features: data.points.flatMap(([lat, lon, kind], i) => (
-      kind === 1 ? [{ type: "Feature" as const, properties: { i }, geometry: { type: "Point" as const, coordinates: [lon, lat] } }] : [])) })
-  }, [ready, data])
-
-  // ---- people layer ----
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !ready || !people) return
-    ;(map.getSource("people") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection",
-      features: people.tracts.filter(t => !farOnly || t[4] > 25).map(([lat, lon, pop, q, km]) => (
-        { type: "Feature" as const, properties: { pop, q, km }, geometry: { type: "Point" as const, coordinates: [lon, lat] } })) })
-    map.setLayoutProperty("people", "visibility", showPeople ? "visible" : "none")
-  }, [ready, people, showPeople, farOnly])
-  const counts = useMemo(() => (data && people ? peopleUnderSmoke(data, which, hour, people) : null), [data, people, which, hour])
-
-  // ---- redraw smoke and wind for the hour ----
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map || !ready || !data) return
-    drawSmoke(canvas, data, which, hour)
-    ;(map.getSource("wind") as maplibregl.GeoJSONSource).setData(windFeatures(data, hour))
-  }, [ready, data, which, hour, canvas])
-
-  // ---- play ----
   useEffect(() => {
     if (!playing || !data) return
-    const t = setInterval(() => setHour(h => (h + 1) % data.hours), Number(speed))
-    return () => clearInterval(t)
+    const timer = window.setInterval(() => {
+      if (!document.hidden) setHour(value => (value + 1) % data.hours)
+    }, Number(speed))
+    return () => window.clearInterval(timer)
   }, [playing, speed, data])
 
-  // ---- click a place ----
-  const onClick = useCallback((e: maplibregl.MapMouseEvent) => {
-    if (!data) return
-    const p = nearestPoint(data, e.lngLat.lng, e.lngLat.lat)
-    setPicked(p >= 0 ? p : null)
-  }, [data])
-  useEffect(() => {
-    const map = mapRef.current
-    if (!map) return
-    map.on("click", onClick)
-    return () => { map.off("click", onClick) }
-  }, [onClick])
+  const pickMapLocation = useCallback((lng: number, lat: number) => { setPlace([lng, lat]); setFocus(null) }, [])
 
-  const changeMode = (m: Mode) => {
-    setMode(m); setHour(0); setPicked(null)
-    if (m === "aug2023") mapRef.current?.flyTo({ center: [-121.5, 45.6], zoom: 5.8, pitch: 55, bearing: -10, duration: 2500 })
+  function changeMode(next: Mode) {
+    setPlaying(false)
+    setHour(0)
+    setSearch(next === "aug2023" ? { mode: "aug2023" } : {})
   }
 
-  const series = useMemo(() => {
-    if (!data || picked === null) return []
-    return Array.from({ length: data.hours }, (_, h) => ({
-      h, label: localTime(data, h), serein: valueAt(data, "serein", picked, h), noaa: valueAt(data, "noaa", picked, h) }))
-  }, [data, picked])
-  const now = data && picked !== null ? valueAt(data, which, picked, hour) : null
+  function togglePeople(enabled: boolean) {
+    setShowPeople(enabled)
+    if (!enabled || people) return
+    setPeopleFailed(false)
+    loadPeople().then(setPeople).catch(() => setPeopleFailed(true))
+  }
 
   return (
-    <div className="dark fixed inset-0 bg-background text-foreground">
-      <div ref={mapEl} style={{ position: "absolute", inset: 0 }} role="application" aria-label="3D map of the western US with the smoke forecast" />
-
-      <header className="absolute inset-x-3 top-3 z-10 flex flex-wrap items-center gap-3 rounded-2xl border bg-background/80 px-4 py-2.5 backdrop-blur">
-        <Wordmark className="text-2xl text-primary" />
-        <span className="font-medium">Smoke World</span>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <Select value={mode} onValueChange={v => changeMode(v as Mode)}>
-            <SelectTrigger className="w-[260px]" aria-label="Forecast"><SelectValue /></SelectTrigger>
-            <SelectContent>{Object.entries(MODES).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}</SelectContent>
-          </Select>
-          <ToggleGroup type="single" value={which} onValueChange={v => v && setWhich(v as Which)} variant="outline" aria-label="Which forecast">
-            <ToggleGroupItem value="serein" className="px-4">Serein</ToggleGroupItem>
-            <ToggleGroupItem value="noaa" className="px-4">NOAA</ToggleGroupItem>
-          </ToggleGroup>
-          <Popover>
-            <PopoverTrigger asChild><Button variant="ghost" size="icon" aria-label="About this map"><Info /></Button></PopoverTrigger>
-            <PopoverContent className="w-96 text-sm">
-              <p className="font-medium">Where this comes from</p>
-              <p className="mt-2 text-muted-foreground">{data?.source}</p>
-              <p className="mt-2 text-muted-foreground">Smoke detail is about 25 km: two places in the same square get the same number. The daily level is SmokeCast's tested forecast; the hour-to-hour movement is NOAA's pattern, which did not prove reliable at saying which hours are worst. Terrain, photos, roads and buildings are context only.</p>
-              <p className="mt-2 text-muted-foreground">Map: imagery USGS The National Map; terrain AWS Terrain Tiles (USGS 3DEP and others); places, roads and buildings © OpenStreetMap contributors via OpenFreeMap; engine MapLibre GL JS.</p>
-              <Button asChild variant="link" className="mt-1 px-0"><Link to="/about">All sources and methods</Link></Button>
-            </PopoverContent>
-          </Popover>
-          <Button asChild variant="secondary" size="sm"><Link to="/">Back to site</Link></Button>
+    <div className="dark min-h-screen bg-background text-foreground">
+      <header className="border-b border-white/10 bg-deep/60">
+        <div className="mx-auto flex max-w-[91rem] items-center justify-between gap-4 px-4 py-4 sm:px-7">
+          <Wordmark className="text-3xl text-primary" />
+          <Button asChild variant="ghost"><Link to="/"><ArrowLeft aria-hidden="true" /> Back to site</Link></Button>
         </div>
       </header>
 
-      <Card className="absolute right-3 top-20 z-10 hidden w-64 bg-background/80 backdrop-blur md:block">
-        <CardContent className="space-y-1.5 p-4 text-sm">
-          {AQI.map(a => (
-            <div key={a.name} className="flex items-center gap-2">
-              <span className="size-3 rounded-sm" style={{ background: `rgb(${a.rgb.join(",")})` }} />{a.name}
-            </div>
-          ))}
-          {counts && (
-            <div className="mt-3 rounded-lg border p-3">
-              <div className="text-xs text-muted-foreground">People under smoke this hour ({which === "serein" ? "Serein" : "NOAA"})</div>
-              <div className="font-serif text-3xl">{(counts.usg / 1e6).toFixed(1)}M</div>
-              <div className="text-xs text-muted-foreground">at unhealthy-for-sensitive levels or worse; {(counts.unhealthy / 1e6).toFixed(1)}M unhealthy;
-                {" "}{(counts.farUsg / 1e3).toFixed(0)}k of them live 25+ km from any monitor.</div>
-            </div>
-          )}
-          <div className="mt-3 flex items-center justify-between gap-2"><Label htmlFor="people-sw">Neighborhoods</Label>
-            <Switch id="people-sw" checked={showPeople} onCheckedChange={setShowPeople} /></div>
-          <div className="flex items-center justify-between gap-2"><Label htmlFor="far-sw">Only 25+ km from a monitor</Label>
-            <Switch id="far-sw" checked={farOnly} onCheckedChange={v => { setFarOnly(v); if (v) setShowPeople(true) }} /></div>
-          {showPeople && <p className="text-xs text-muted-foreground">Dot size: population. Color: income, from orange (lowest fifth) to green (highest). Red ring: 25+ km from any monitor. Zoom in for schools (blue) and hospitals (red).</p>}
-          <p className="pt-2 text-xs text-muted-foreground">
-            {mode === "live" ? `Live forecast issued ${data?.issue_date ?? ""}. Click anywhere for that place.` : "Forecast issued Aug 18, 2023, during a major Pacific Northwest smoke event."}
-          </p>
-        </CardContent>
-      </Card>
-
-      {picked !== null && data && (
-        <Card className="absolute bottom-28 left-3 top-20 z-10 w-[min(400px,calc(100%-24px))] overflow-y-auto bg-background/90 backdrop-blur">
-          <CardContent className="space-y-4 p-5">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <Badge variant="secondary">{data.points[picked][2] === 1 ? "EPA air monitor" : "Forecast square, about 25 km"}</Badge>
-                <div className="mt-1 text-xs text-muted-foreground">{data.points[picked][0].toFixed(2)}, {data.points[picked][1].toFixed(2)}</div>
-              </div>
-              <Button variant="ghost" size="icon" onClick={() => setPicked(null)} aria-label="Close"><X /></Button>
-            </div>
-            <div>
-              <div className="font-serif text-5xl">{now === null ? "No data" : `${now} µg/m³`}</div>
-              <div className="text-sm text-muted-foreground">{now === null ? "" : aqiOf(now).name} · {localTime(data, hour)} · {which === "serein" ? "Serein" : "NOAA"}</div>
-            </div>
-            {data.daily && (
-              <div className="grid grid-cols-4 gap-2 rounded-xl border p-3 text-center">
-                {data.daily.map(d => {
-                  const q50 = d.q50[picked], q05 = d.q05[picked], q95 = d.q95[picked]
-                  return (
-                    <div key={d.lead}>
-                      <div className="text-[0.7rem] uppercase tracking-wide text-muted-foreground">{["Today", "Tomorrow", "Day 2", "Day 3"][d.lead] ?? `Day ${d.lead}`}</div>
-                      <div className="font-serif text-2xl">{q50 ?? "–"}</div>
-                      <div className="text-[0.7rem] text-muted-foreground">{q05 !== null && q95 !== null ? `${q05}-${q95}` : ""}</div>
-                    </div>
-                  )
-                })}
-                <div className="col-span-4 text-left text-xs text-muted-foreground">SmokeCast's tested daily forecast, µg/m³, with its 90% range. The chart below is the untested hour-by-hour pattern.</div>
-              </div>
-            )}
-            <ChartContainer config={chartConfig} className="h-40 w-full">
-              <ComposedChart data={series} margin={{ left: -18, right: 6, top: 6 }}>
-                <XAxis dataKey="h" tickFormatter={h => (h % 24 === 0 ? `+${h}h` : "")} tickLine={false} axisLine={false} interval={0} fontSize={11} />
-                <YAxis tickLine={false} axisLine={false} fontSize={11} />
-                <ReferenceLine y={35.5} stroke="var(--aqi-usg)" strokeDasharray="4 3" />
-                <ReferenceLine x={hour} stroke="#fff" />
-                <Area dataKey="serein" type="monotone" fill="var(--color-serein)" fillOpacity={0.18} stroke="var(--color-serein)" strokeWidth={2.5} connectNulls />
-                <Line dataKey="noaa" type="monotone" stroke="var(--color-noaa)" strokeWidth={1.5} dot={false} connectNulls />
-                <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, p) => (p?.[0]?.payload as { label: string })?.label} />} />
-              </ComposedChart>
-            </ChartContainer>
-            <p className="text-xs text-muted-foreground">Dashed line: unhealthy for sensitive groups (35.5 µg/m³).</p>
-            <PersonPanel data={data} point={picked} which={which} />
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="absolute bottom-4 left-1/2 z-10 flex w-[min(940px,calc(100%-24px))] -translate-x-1/2 items-center gap-4 rounded-2xl border bg-background/85 px-4 py-3 backdrop-blur">
-        <Button size="icon" className="size-11 rounded-full" onClick={() => setPlaying(p => !p)} aria-label={playing ? "Pause" : "Play"}>
-          {playing ? <Pause /> : <Play />}
-        </Button>
-        <Slider className="flex-1" min={0} max={(data?.hours ?? 72) - 1} step={1} value={[hour]}
-          onValueChange={([v]) => { setPlaying(false); setHour(v) }} aria-label="Forecast hour" />
-        <div className="min-w-44 text-right">
-          <div className="font-medium">{data ? localTime(data, hour) : ""}</div>
-          <div className="text-xs text-muted-foreground">Hour {hour + 1} of {data?.hours ?? 72}{hour > 48 ? " · no wind after hour 48" : ""}</div>
+      <main className="mx-auto max-w-[91rem] px-4 py-7 sm:px-7 lg:py-10">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-5">
+          <div>
+            <h1 className="text-5xl sm:text-6xl">Forecast explorer</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">Choose a place to compare four daily SmokeCast outlooks and explore the hourly map.</p>
+          </div>
+          <label className="grid w-full max-w-xs gap-1.5 text-sm font-medium">
+            Forecast run
+            <select className={selectClass} value={mode} onChange={event => changeMode(event.target.value as Mode)}>
+              <option value="live">Latest published forecast</option>
+              <option value="aug2023">August 2023: Pacific Northwest</option>
+            </select>
+          </label>
         </div>
-        <Select value={speed} onValueChange={setSpeed}>
-          <SelectTrigger className="w-20" aria-label="Speed"><SelectValue /></SelectTrigger>
-          <SelectContent><SelectItem value="900">1x</SelectItem><SelectItem value="450">2x</SelectItem><SelectItem value="200">4x</SelectItem></SelectContent>
-        </Select>
-      </div>
+
+        {data && <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-primary/25 bg-primary/7 px-4 py-3 text-sm" role="status">
+          <span className="font-semibold text-primary">{mode === "aug2023" ? "Archived example" : expired ? "Forecast period ended" : stale ? "Older forecast" : "Latest published run"}</span>
+          <span className="text-muted-foreground">Issued {issued}{expired || stale ? " · Check current conditions on AirNow." : ""}</span>
+          {(expired || stale) && <a className="text-primary underline underline-offset-4" href="https://www.airnow.gov/">Open AirNow</a>}
+        </div>}
+        {active?.failed && <div className="mb-4 rounded-lg border border-[#f2ba84]/35 bg-[#f2ba84]/8 p-4 text-sm">
+          <p role="alert">The forecast file couldn’t load. Try again or choose an archived example.</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => setAttempt(value => value + 1)}>Retry forecast</Button>
+            {mode === "live" && <Button variant="secondary" onClick={() => changeMode("aug2023")}>Open archived example</Button>}
+          </div>
+        </div>}
+
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,23rem)]">
+          <aside className="min-w-0 rounded-2xl border bg-card p-4 sm:p-5 lg:col-start-2 lg:row-start-1" aria-label="Location forecast">
+            <label className="mb-5 grid gap-1.5 text-sm font-medium">
+              Location
+              <select className={selectClass} value={typeof place === "string" ? place : "map"} onChange={event => {
+                const next = event.target.value as Place
+                setPlace(next)
+                setFocus(PLACES[next].coordinates)
+              }}>
+                {typeof place !== "string" && <option value="map" disabled>Selected on the map</option>}
+                {Object.entries(PLACES).map(([k, v]) => <option key={k} value={k}>{v.name}</option>)}
+              </select>
+            </label>
+            {data && picked >= 0 ? <ForecastDetails data={data} picked={picked} label={placeName} which={which} hour={selectedHour} /> :
+              <p className="text-sm text-muted-foreground" role="status">{data ? "No forecast covers that spot. Choose a location or select another point on the map." : active?.failed ? "Location forecasts will appear when the run loads." : "Loading location forecasts…"}</p>}
+          </aside>
+
+          <section className="min-w-0 overflow-hidden rounded-2xl border bg-card lg:col-start-1 lg:row-start-1" aria-labelledby="hourly-map-heading">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3 sm:px-5">
+              <div>
+                <h2 id="hourly-map-heading" className="font-sans text-base font-semibold tracking-normal">Illustrative hourly map</h2>
+                <p className="mt-1 text-xs text-muted-foreground">Select a point for its daily outlook.</p>
+              </div>
+              <div className="flex rounded-lg border p-1" role="group" aria-label="Hourly map source">
+                {(["serein", "noaa"] as const).map(source => (
+                  <Button key={source} type="button" size="sm" variant={which === source ? "secondary" : "ghost"} aria-pressed={which === source}
+                    onClick={() => setWhich(source)}>{source === "serein" ? "Serein-scaled" : "NOAA"}</Button>
+                ))}
+              </div>
+            </div>
+            <ForecastMap data={data} which={which} hour={selectedHour} playing={playing} people={people} showPeople={showPeople} farOnly={farOnly}
+              point={mapPoint} focus={focus} onPick={pickMapLocation} />
+            <div className="space-y-4 border-t px-4 py-4 sm:px-5">
+              <div className="flex flex-wrap items-end gap-3">
+                <Button type="button" className="min-h-11" disabled={!data || data.hours < 2} onClick={() => setPlaying(value => !value)}>
+                  {playing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}{playing ? "Pause" : "Play"}
+                </Button>
+                <label className="grid min-w-[min(100%,11rem)] flex-1 gap-1 text-sm font-medium">
+                  {data ? time : "Forecast hour"}
+                  <input type="range" className="h-7 w-full accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" min={0}
+                    max={(data?.hours ?? 1) - 1} disabled={!data || data.hours < 2} value={selectedHour} aria-label="Forecast hour" aria-valuetext={time || undefined}
+                    onChange={event => { setPlaying(false); setHour(Number(event.target.value)) }} />
+                </label>
+                <label className="grid w-24 gap-1 text-xs text-muted-foreground">
+                  Speed
+                  <select className={selectClass} value={speed} onChange={event => setSpeed(event.target.value)}>
+                    <option value="900">1×</option><option value="450">2×</option><option value="225">4×</option>
+                  </select>
+                </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground" aria-label="Map color scale">
+                <span className="font-semibold text-foreground">PM₂.₅, µg/m³</span>
+                {AQI.map((category, index) => <span key={category.name} className="inline-flex items-center gap-1">
+                  <span aria-hidden="true" className="size-2.5 rounded-sm" style={{ background: `rgb(${category.rgb.join(",")})` }} /> {COLORS[index]}
+                </span>)}
+              </div>
+              <p className="text-xs leading-relaxed text-muted-foreground">The hourly map shows NOAA’s modeled pattern, optionally adjusted to SmokeCast’s daily forecast. A clear map can reflect low concentrations or missing coverage.</p>
+              <div className="border-t pt-3 text-sm">
+                <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <label className="flex items-center gap-2"><Switch checked={showPeople} onCheckedChange={togglePeople} /> Population overlay</label>
+                  {showPeople && <label className="flex items-center gap-2"><Switch checked={farOnly} onCheckedChange={setFarOnly} /> Only 25+ km from a monitor</label>}
+                </div>
+                {showPeople && (peopleFailed ? <p className="mt-3 text-xs text-muted-foreground">Population data could not load. <button className="text-primary underline" onClick={() => togglePeople(true)}>Retry</button></p> : people ? <>
+                  <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Dot size shows population. Color shows tract income quintile, from orange to green. A red ring marks tracts 25 km or farther from a monitor.</p>
+                  {counts && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    About <strong className="text-foreground">{compact.format(farOnly ? counts.farUsg : counts.usg)}</strong> residents live in the {farOnly ? "selected distant tracts" : "tracts"} where this hourly illustration exceeds 35.5 µg/m³. This estimate uses census tract centers and outdoor concentrations.
+                  </p>}
+                </> : <p className="mt-3 text-xs text-muted-foreground" role="status">Loading population data…</p>)}
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <details className="mt-4 rounded-xl border bg-card/45 text-sm">
+          <summary className="flex cursor-pointer list-none items-center gap-2 rounded-xl px-4 py-3 font-semibold focus-visible:outline-2 focus-visible:outline-primary">
+            <Info className="size-4" aria-hidden="true" /> Map sources and limitations
+          </summary>
+          <div className="space-y-2 px-4 pb-4 leading-relaxed text-muted-foreground">
+            <p>{data?.source}</p>
+            <p>Smoke values are estimates at monitor or grid locations. Buildings, terrain, and roads are geographic context. Use the daily outlook for advance planning and <a href="https://www.airnow.gov/" className="text-primary underline">AirNow</a> for current air quality.</p>
+            <Link className="inline-block text-primary underline" to="/about">See data sources and methods</Link>
+          </div>
+        </details>
+      </main>
     </div>
   )
 }

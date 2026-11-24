@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils"
 export function Section({ tone = "light", id, className, children }: {
   tone?: "light" | "dark"; id?: string; className?: string; children: ReactNode }) {
   return (
-    <section id={id} className={cn("scroll-mt-20 py-[clamp(4rem,9vw,9rem)]", tone === "dark" ? "dark bg-background text-foreground" : "bg-background", className)}>
-      <div className="mx-auto w-[min(100%-2*clamp(1.25rem,5.5vw,6rem),82rem)]">{children}</div>
+    <section id={id} tabIndex={id ? -1 : undefined} className={cn("scroll-mt-20 focus:outline-none py-[clamp(4rem,9vw,9rem)]", tone === "dark" ? "dark bg-background text-foreground" : "bg-background", className)}>
+      <div className="site-width">{children}</div>
     </section>
   )
 }

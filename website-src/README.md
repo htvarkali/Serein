@@ -1,26 +1,21 @@
-# Website islands
+# Serein website
 
-React components (built with shadcn/ui on Radix) that enhance a few parts of
-the static site in `website/`. The HTML in `website/` stays the source of
-truth: each island reads its content from the page, and the page works the
-same without JavaScript.
+Edit the React app in `src/` and static assets in `public/`. GitHub Pages publishes
+`website/` at `/Serein/`, so the build uses relative asset URLs and hash routes.
+The HTML redirects in `public/` preserve older research and AirPlan links.
 
-Current islands:
+From `website-src/`, use Node.js 24 to install the locked dependencies and start
+local development:
 
-- Every `[data-switcher]` block becomes accessible tabs (arrow keys move
-  between options).
-- On the SmokeCast page, the horizon tabs also show a bar comparison of
-  SmokeCast and fallback RMSE on one shared scale.
-
-Build after changing anything in `src/`:
-
-```
-npm install
-npm run build
+```sh
+npm ci
+npm run dev
 ```
 
-This writes `website/assets/islands/islands.js` and `islands.css`. Commit
-them, because GitHub Pages publishes `website/` without a build step.
+Build the deployable site with `npm run build`. This type-checks the app and
+regenerates `../website/`. Use `npm run preview` to inspect the built version.
+From the repository root, run `python3 scripts/check_website.py` to check the
+output's links. Commit both the source and generated site when publishing.
 
-Tailwind's base reset is left out on purpose so it cannot restyle the rest of
-the site; `website/assets/site.css` owns the base styles.
+Use `scripts/build_website.sh` from the repository root if you also want to
+refresh available research figures and the live forecast export before building.

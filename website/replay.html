@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102321">
+  <meta name="description" content="Replay of the August 2023 Pacific Northwest smoke event: what NOAA forecast, what SmokeCast forecast, and what monitors measured.">
+  <title>Smoke replay, August 2023 | Serein</title>
+  <link rel="icon" href="assets/favicon.png" type="image/png">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="preload" href="assets/fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="assets/site.js" defer></script>
+  <script src="assets/replay/replay.js" defer></script>
+  <style>
+    .replay-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .replay-panel { background: var(--deep); border-radius: 14px; padding: .9rem; color: var(--mist); }
+    .replay-panel h3 { font-size: 1.05rem; margin-bottom: .2rem; }
+    .replay-panel p { font-size: .85rem; color: var(--sage); min-height: 2.6em; }
+    .replay-panel canvas { width: 100%; height: auto; display: block; }
+    .replay-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+    .replay-controls input[type=range] { flex: 1 1 18rem; }
+    .replay-day { font-family: var(--serif); font-size: clamp(2rem, 4vw, 3.2rem); }
+    .replay-legend { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1rem; font-size: .85rem; }
+    .replay-legend span::before { content: ""; display: inline-block; width: .8rem; height: .8rem; margin-right: .35rem; border-radius: 2px; background: var(--c); vertical-align: -1px; }
+    .replay-note { margin-top: 1rem; font-size: .85rem; color: var(--muted); max-width: 70ch; }
+    @media (max-width: 900px) { .replay-grid { grid-template-columns: minmax(0, 1fr); } }
+  </style>
+</head>
+<body class="interior-page research-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-row">
+      <a class="wordmark" href="index.html" aria-label="Serein home"><span class="brand-mark" aria-hidden="true"></span>Serein</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span>Menu</span><span class="menu-icon" aria-hidden="true"></span></button>
+    </div>
+    <nav class="site-menu" id="site-menu" aria-label="Primary">
+      <div class="shell menu-grid">
+        <p class="menu-intro">Wildfire smoke research for families.</p>
+        <div class="menu-links">
+          <a href="index.html">Home</a>
+          <a href="research.html">SmokeCast</a>
+          <a href="replay.html" aria-current="page">Smoke replay</a>
+          <a href="airplan.html">AirPlan</a>
+          <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="section interior-hero light">
+      <div class="shell">
+        <p class="eyebrow">Real data, August 15-21, 2023</p>
+        <h1>Smoke replay</h1>
+        <p class="lead">One week of wildfire smoke over Washington, Oregon and Idaho. Each column is an EPA air monitor; its height is the daily average PM<sub>2.5</sub> and its color the AQI level.</p>
+        <div class="replay-controls">
+          <button class="button button-primary" type="button" id="replay-play">Play</button>
+          <input type="range" id="replay-slider" min="0" max="6" value="0" step="1" aria-label="Day">
+          <div class="replay-day" id="replay-day" aria-live="polite"></div>
+        </div>
+        <div class="replay-grid">
+          <figure class="replay-panel">
+            <h3>NOAA's forecast, made the day before</h3>
+            <p id="replay-noaa"></p>
+            <canvas id="canvas-noaa" width="560" height="420" role="img" aria-label="NOAA day-ahead forecast at each monitor"></canvas>
+          </figure>
+          <figure class="replay-panel">
+            <h3>Serein's forecast, made the day before</h3>
+            <p id="replay-serein"></p>
+            <canvas id="canvas-serein" width="560" height="420" role="img" aria-label="Serein day-ahead forecast at each monitor"></canvas>
+          </figure>
+          <figure class="replay-panel">
+            <h3>What the monitors measured</h3>
+            <p id="replay-observed"></p>
+            <canvas id="canvas-observed" width="560" height="420" role="img" aria-label="Measured daily PM2.5 at each monitor"></canvas>
+          </figure>
+        </div>
+        <div class="replay-legend" aria-label="AQI colors">
+          <span style="--c:#4caf50">Good</span><span style="--c:#f6d32d">Moderate</span><span style="--c:#f0883e">Unhealthy for sensitive groups</span><span style="--c:#e5484d">Unhealthy</span><span style="--c:#8e4ec6">Very unhealthy</span><span style="--c:#7d1f2c">Hazardous</span>
+        </div>
+        <p class="replay-note">Forecasts are the day-ahead forecasts from Serein's development backtest on held-out 2023 weeks (not the final 2024-25 test). NOAA's forecast is its best available product for each monitor (bias-corrected AQM, else HRRR-Smoke). "Flagged" counts monitors whose day-ahead forecast was at or above the unhealthy-for-sensitive-groups level (35.5 µg/m³) among those that really reached it. Data: <a href="assets/replay/aug2023.json">aug2023.json</a>.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer dark">
+    <div class="shell footer-grid">
+      <div>
+        <a class="footer-brand" href="index.html">Serein</a>
+        <p>Student research for the Conrad Challenge.</p>
+      </div>
+      <nav aria-label="Explore Serein">
+        <a href="research.html">SmokeCast</a>
+        <a href="replay.html" aria-current="page">Smoke replay</a>
+        <a href="airplan.html">AirPlan</a>
+        <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

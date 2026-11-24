@@ -14,8 +14,10 @@ import { Slider } from "@/components/ui/slider"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { PersonPanel } from "@/components/site/PersonPanel"
 import { Wordmark } from "@/components/site/SiteLayout"
-import { AQI, BOX, aqiOf, drawSmoke, loadWorld, localTime, makeSmokeCanvas, nearestPoint, valueAt, windFeatures,
-  type Which, type WorldData } from "@/lib/world"
+import { AQI, BOX, aqiOf, drawSmoke, loadPeople, loadWorld, localTime, makeSmokeCanvas, nearestPoint, peopleUnderSmoke, valueAt, windFeatures,
+  type People, type Which, type WorldData } from "@/lib/world"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 
 const MODES = { live: "Live: today + 3 days", aug2023: "Example: August 2023 smoke event" } as const
 type Mode = keyof typeof MODES
@@ -42,6 +44,10 @@ export default function World() {
   const [data, setData] = useState<WorldData | null>(null)
   const [ready, setReady] = useState(false)
   const [picked, setPicked] = useState<number | null>(null)
+  const [people, setPeople] = useState<People | null>(null)
+  const [showPeople, setShowPeople] = useState(false)
+  const [farOnly, setFarOnly] = useState(false)
+  useEffect(() => { loadPeople().then(setPeople) }, [])
 
   // ---- map, once ----
   useEffect(() => {
@@ -98,6 +104,23 @@ export default function World() {
       map.addSource("monitors", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
       map.addLayer({ id: "monitors", type: "circle", source: "monitors", minzoom: 6,
         paint: { "circle-radius": 3.5, "circle-color": "#ffffff", "circle-stroke-color": "#102321", "circle-stroke-width": 1 } })
+      map.addSource("people", { type: "geojson", data: { type: "FeatureCollection", features: [] } })
+      map.addLayer({ id: "people", type: "circle", source: "people", layout: { visibility: "none" },
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, ["*", 0.04, ["sqrt", ["get", "pop"]]], 10, ["*", 0.12, ["sqrt", ["get", "pop"]]]],
+          "circle-color": ["match", ["get", "q"], 0, "#f2ba84", 1, "#e8c9a0", 2, "#d8d8c0", 3, "#b9d6c4", 4, "#8fc3b0", "#cccccc"],
+          "circle-opacity": 0.75,
+          "circle-stroke-color": ["case", [">", ["get", "km"], 25], "#ff3b6b", "rgba(0,0,0,0)"],
+          "circle-stroke-width": ["case", [">", ["get", "km"], 25], 1.6, 0],
+        } })
+      map.addLayer({ id: "poi", type: "circle", source: "omt", "source-layer": "poi", minzoom: 11,
+        filter: ["in", ["get", "class"], ["literal", ["school", "college", "hospital"]]],
+        paint: { "circle-radius": 5, "circle-color": ["match", ["get", "class"], "hospital", "#ff5a5f", "#5b8def"],
+          "circle-stroke-color": "#ffffff", "circle-stroke-width": 1.2 } })
+      map.addLayer({ id: "poi-labels", type: "symbol", source: "omt", "source-layer": "poi", minzoom: 13,
+        filter: ["in", ["get", "class"], ["literal", ["school", "college", "hospital"]]],
+        layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 11, "text-offset": [0, 1.1], "text-anchor": "top" },
+        paint: { "text-color": "#ffffff", "text-halo-color": "#091615", "text-halo-width": 1.2 } })
       map.addLayer({ id: "places", type: "symbol", source: "omt", "source-layer": "place",
         filter: ["in", ["get", "class"], ["literal", ["city", "town", "village"]]],
         layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"],
@@ -124,6 +147,17 @@ export default function World() {
     ;(map.getSource("monitors") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection", features: data.points.flatMap(([lat, lon, kind], i) => (
       kind === 1 ? [{ type: "Feature" as const, properties: { i }, geometry: { type: "Point" as const, coordinates: [lon, lat] } }] : [])) })
   }, [ready, data])
+
+  // ---- people layer ----
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready || !people) return
+    ;(map.getSource("people") as maplibregl.GeoJSONSource).setData({ type: "FeatureCollection",
+      features: people.tracts.filter(t => !farOnly || t[4] > 25).map(([lat, lon, pop, q, km]) => (
+        { type: "Feature" as const, properties: { pop, q, km }, geometry: { type: "Point" as const, coordinates: [lon, lat] } })) })
+    map.setLayoutProperty("people", "visibility", showPeople ? "visible" : "none")
+  }, [ready, people, showPeople, farOnly])
+  const counts = useMemo(() => (data && people ? peopleUnderSmoke(data, which, hour, people) : null), [data, people, which, hour])
 
   // ---- redraw smoke and wind for the hour ----
   useEffect(() => {
@@ -202,6 +236,19 @@ export default function World() {
               <span className="size-3 rounded-sm" style={{ background: `rgb(${a.rgb.join(",")})` }} />{a.name}
             </div>
           ))}
+          {counts && (
+            <div className="mt-3 rounded-lg border p-3">
+              <div className="text-xs text-muted-foreground">People under smoke this hour ({which === "serein" ? "Serein" : "NOAA"})</div>
+              <div className="font-serif text-3xl">{(counts.usg / 1e6).toFixed(1)}M</div>
+              <div className="text-xs text-muted-foreground">at unhealthy-for-sensitive levels or worse; {(counts.unhealthy / 1e6).toFixed(1)}M unhealthy;
+                {" "}{(counts.farUsg / 1e3).toFixed(0)}k of them live 25+ km from any monitor.</div>
+            </div>
+          )}
+          <div className="mt-3 flex items-center justify-between gap-2"><Label htmlFor="people-sw">Neighborhoods</Label>
+            <Switch id="people-sw" checked={showPeople} onCheckedChange={setShowPeople} /></div>
+          <div className="flex items-center justify-between gap-2"><Label htmlFor="far-sw">Only 25+ km from a monitor</Label>
+            <Switch id="far-sw" checked={farOnly} onCheckedChange={v => { setFarOnly(v); if (v) setShowPeople(true) }} /></div>
+          {showPeople && <p className="text-xs text-muted-foreground">Dot size: population. Color: income, from orange (lowest fifth) to green (highest). Red ring: 25+ km from any monitor. Zoom in for schools (blue) and hospitals (red).</p>}
           <p className="pt-2 text-xs text-muted-foreground">
             {mode === "live" ? `Live forecast issued ${data?.issue_date ?? ""}. Click anywhere for that place.` : "Forecast issued Aug 18, 2023, during a major Pacific Northwest smoke event."}
           </p>

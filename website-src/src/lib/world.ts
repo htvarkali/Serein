@@ -128,3 +128,34 @@ export function localTime(d: WorldData, hour: number) {
   const t = new Date(Date.parse(d.start_utc) + hour * 3600e3)
   return t.toLocaleString("en-US", { timeZone: "America/Los_Angeles", weekday: "short", month: "short", day: "numeric", hour: "numeric" }) + " PT"
 }
+
+// Smoke at any location, by bilinear interpolation on the 0.25 degree grid (null outside it).
+export function sampleAt(d: WorldData, which: Which, hour: number, lat: number, lon: number): number | null {
+  const fr = (lat - GRID.lat0) / GRID.step, fc = (lon - GRID.lon0) / GRID.step
+  if (fr < 0 || fc < 0 || fr > GRID.rows - 1 || fc > GRID.cols - 1) return null
+  const r0 = Math.min(Math.floor(fr), GRID.rows - 2), c0 = Math.min(Math.floor(fc), GRID.cols - 2)
+  const ty = fr - r0, tx = fc - c0
+  const g = (r: number, c: number) => {
+    const p = d.grid[r * GRID.cols + c]
+    return p < 0 ? null : valueAt(d, which, p, hour)
+  }
+  const a = g(r0, c0), b = g(r0, c0 + 1), c = g(r0 + 1, c0), e = g(r0 + 1, c0 + 1)
+  if (a === null || b === null || c === null || e === null) return null
+  return (a * (1 - tx) + b * tx) * (1 - ty) + (c * (1 - tx) + e * tx) * ty
+}
+
+export type People = { source: string; tracts: [number, number, number, number, number][] } // lat, lon, population, income quintile (0 lowest), km to monitor
+let peopleCache: Promise<People> | null = null
+export const loadPeople = () => (peopleCache ??= fetch(`${import.meta.env.BASE_URL}data/people.json`).then(r => r.json()))
+
+// People living where this hour's smoke is at or above each level.
+export function peopleUnderSmoke(d: WorldData, which: Which, hour: number, people: People) {
+  let usg = 0, unhealthy = 0, farUsg = 0
+  for (const [lat, lon, pop, , km] of people.tracts) {
+    const v = sampleAt(d, which, hour, lat, lon)
+    if (v === null) continue
+    if (v >= 35.5) { usg += pop; if (km > 25) farUsg += pop }
+    if (v >= 55.5) unhealthy += pop
+  }
+  return { usg, unhealthy, farUsg }
+}

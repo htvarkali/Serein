@@ -181,3 +181,137 @@ training. The 2020 caches stay in the development worktree only.
 ACCEPTANCE: FAIL b15_2020, inner_b15_2020: no lead better with its interval below 0.
 
 B-15 stays open; every listed option has now been tried once.
+
+## 2026-11-23 Phase 1 product ideas (diagnostics; no model change)
+
+### Blending forecasters (not built)
+
+Question: does a fixed weighted average of SmokeCast with the boosted-tree model,
+NOAA's best, persistence and the no-graph model beat SmokeCast alone? Cross-fitted on
+the dev predictions: weights fit on alternate pairs of scoring weeks, applied to the
+other half, convex weights (nonnegative, sum to 1). Result: worse at every lead
+(for example SmokeCast + trees: lead 1 RMSE 7.776 -> 8.547, interval +0.05 to +1.53;
+lead 2 9.721 -> 10.840, +0.15 to +1.94). NOAA and persistence got weight near 0; the
+trees got about 0.4 in one half and hurt in the other, because the two halves contain
+different smoke episodes. Not built.
+
+### Warning probabilities and a sensitivity dial (built as outputs only)
+
+The backtest now saves `smokecast_prob_L<lead>`, P(daily PM2.5 >= 35.5), and writes
+`warn_dial.csv`: hit rate and false alarms on the scoring rows for the CSI-best cut-off
+and for cut-offs chosen on calibration rows to reach an 80% or 90% hit rate. Dev 2023:
+the 80% and 90% settings collapse to cut-offs near 0.01 at leads 1-3 (false-alarm ratio
+about 0.98), so a more sensitive dial is not useful beyond day 0; at day 0 the 90%
+setting catches 90% of unhealthy site-days with a false-alarm ratio of 0.35 (vs. 78%
+and 0.18 at the CSI-best cut-off). The CSI-best rule stays the default.
+
+Reliability on dev 2023 (lead 1): Brier 0.0095 vs. 0.0175 for always predicting the
+base rate. Probabilities are too high in the middle: forecasts near 0.39 verified 0.16,
+near 0.59 verified 0.39, near 0.81 verified 0.64; near 0.95 verified 0.95. Lead 2 is
+similar. Recalibrating them on calibration rows is the next step.
+
+### Low-confidence flag (diagnostic)
+
+Flag = the 10% of site-days with the widest 90% interval (log scale). Dev 2023 lead 1:
+mean absolute error 10.6 on flagged rows vs. 1.8 on the rest, 39% of all error on 10%
+of rows; lead 2: 13.1 vs. 2.1, 41%. Inner fold 2022: 9.3 vs. 1.8 (36%) and 12.6 vs. 2.4
+(37%). Within the same forecast level (quintiles of the point forecast), flagged rows
+still have 1.2-5x the error of the rest on both folds, so the flag is not only a proxy
+for smoky days. Disagreement between SmokeCast and NOAA's best is a weaker flag (28-29%
+of error on dev). The interval-width flag will be used in the product, with its
+threshold taken from calibration rows.
+
+### Recalibrated warning probabilities (accepted as an output change)
+
+Isotonic regression from the raw P(PM2.5 >= 35.5) to the event frequency on calibration
+rows only (`smokecast_probcal_L<lead>`); point forecasts, intervals and the warning
+cut-off are unchanged. Brier score, raw -> recalibrated, with the 95% day-bootstrap
+interval of the difference:
+
+| Lead | Dev 2023 | Interval | Inner 2022 | Interval |
+|---|---|---|---|---|
+| 0 | 0.0053 -> 0.0048 | (-0.0008, -0.0002) | 0.0059 -> 0.0048 | (-0.0014, -0.0007) |
+| 1 | 0.0095 -> 0.0081 | (-0.0018, -0.0008) | 0.0091 -> 0.0078 | (-0.0019, -0.0008) |
+| 2 | 0.0118 -> 0.0102 | (-0.0027, -0.0004) | 0.0144 -> 0.0105 | (-0.0053, -0.0026) |
+| 3 | 0.0153 -> 0.0136 | (-0.0032, -0.0002) | 0.0212 -> 0.0148 | (-0.0090, -0.0041) |
+
+Reliability, lead 1 dev: stated 0.40 verified 0.34, 0.57 verified 0.52, 0.83 verified
+0.69 (raw: 0.39/0.16, 0.59/0.39, 0.81/0.64). Better at every lead on both folds. Note:
+this rule (Brier interval below 0 at every lead on both folds) was written after the
+first dev run, so the result is reported as development evidence; the final test
+scores both versions.
+PROBABILITY ACCEPTANCE: PASS dev, inner_base (Brier); RMSE unchanged by construction.
+
+### Blending, second look (2026-11-23, after a literature review)
+
+The literature explains the first result: estimated combination weights often lose to
+the best single forecaster when the effective sample is small (the "forecast
+combination puzzle"; Smith and Wallis 2009, doi:10.1111/j.1468-0084.2008.00541.x;
+Claeskens et al. 2016, doi:10.1016/j.ijforecast.2015.12.005). Here the effective sample
+is a handful of smoke episodes, and the members share inputs: SmokeCast and the boosted
+trees have error correlations of 0.79, 0.90, 0.91 and 0.92 at leads 0-3 (dev 2023).
+NOAA's forecasts and persistence are already SmokeCast inputs, which is why they get
+weight near 0.
+
+More variants, all cross-fitted or tuned on another season, all compared with
+SmokeCast alone on dev 2023 (RMSE change, 95% day-bootstrap interval):
+
+| Variant | Lead 1 | Lead 2 |
+|---|---|---|
+| Equal weights, SmokeCast + trees | +0.32 (-0.16, +0.82) | +0.39 (-0.27, +0.91) |
+| Convex weights in log space | +0.67 (-0.07, +1.44) | +0.63 (-0.14, +1.28) |
+| Separate weights on smoke / no-smoke days (with NOAA) | +0.79 (+0.03, +1.59) | +1.29 (+0.14, +2.25) |
+| Online exponentially weighted aggregation (Mallet et al. 2009, doi:10.1029/2008JD009978), learning rate chosen on 2022, weights from past errors only | +0.34 (-0.03, +0.83) | +0.97 (+0.04, +1.74) |
+
+None is better at any lead. Blending is closed for this model; the 5-seed ensemble
+inside SmokeCast is already an equal-weight combination.
+
+## 2026-11-23 New information: GOES-West satellite smoke haze (AOD)
+
+Hypothesis: every failed attempt so far reused the same information (NOAA forecasts,
+monitors, fire detections, HMS plumes). GOES-West measures aerosol optical depth over
+the whole West every few minutes, including places with no monitor, so it adds
+independent evidence of smoke that is present now and upwind. Inputs: mean and max of
+quality-0 AOD within about 10 km of each monitor over the first scan of each hour
+14-17 UTC on the issue day (before the 18:30 UTC issue time), plus how many hours had
+a clear view (`build-table --goes-aod`; GOES-17 through 2023-01-03, GOES-18 after).
+Expected: lower RMSE at leads 0-1 on smoke days and at hidden monitors; possibly lead 2.
+Same acceptance rule; tags `goes_aod` (dev) and `inner_goes_aod` (2021/2022).
+
+Not possible: NASA's GEOS-FP forecasts as an independent forecast input. Its public
+forecast archive holds only 2026 (checked 2026-11-23), so 2021-2025 cannot be trained
+or tested.
+
+Result. Point AOD covered 63% of site-days (clouds, early-morning sun angle; 4 of 459
+days had no scans). It tracks smoke: median AOD 0.06 under no HMS smoke, 0.08 light,
+0.16 medium, 0.41 heavy; Spearman 0.29 with morning PM2.5 and 0.19 with next-day PM2.5.
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.278 | (-0.24, +0.04) | 4.040 -> 4.028 | (-0.13, +0.10) | 6.92 -> 6.72 |
+| 1 | 7.776 -> 8.021 | (-0.22, +0.81) | 6.463 -> 6.457 | (-0.14, +0.15) | 8.39 -> 8.51 |
+| 2 | 9.721 -> 9.994 | (-0.06, +0.61) | 8.034 -> 8.157 | (-0.05, +0.32) | 9.90 -> 10.26 |
+| 3 | 11.584 -> 11.401 | (-0.46, +0.10) | 10.439 -> 10.672 | (+0.04, +0.41) | 11.38 -> 11.50 |
+
+Satellite haze helps only the same-day forecast (lead 0, not significant) and does
+not help the forecast days, also not at hidden monitors. Lead 3 is worse on the inner
+fold with its interval above 0. Not merged; the extraction code is kept on branch
+`conrad/goes-aod` for possible same-day use.
+ACCEPTANCE: FAIL goes_aod, inner_goes_aod: no lead 1-2 gain; inner lead 3 worse.
+
+### Day-3-only use of the partial-day inputs (closed without a new run)
+
+Using `b16_partial` only for the lead-3 forecast: dev 2023 lead 3 RMSE 11.584 -> 11.342
+(interval -0.50 to -0.07), but the inner fold did not repeat it (10.439 -> 10.476,
+-0.18 to +0.31). The acceptance rule also needs a lead 1 or lead 2 gain, which a
+lead-3-only change cannot give. Closed.
+
+## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
+
+Full results in `docs/HOURLY_ACCURACY.md`. The Serein-scaled hourly field beats NOAA's raw
+hourly AQM on days 0-2 (2023) and 0-1 (2022), but a flat line at SmokeCast's daily median is
+as accurate or better, and neither NOAA's hourly shape nor a learned per-monitor daily rhythm
+predicts which hours of a day are worst (within-day correlations 0.04-0.30). The daily-rhythm
+idea was tried after seeing the first result and did not help (profile vs. flat within
++/-0.1 µg/m³). Consequence for the product: present the daily level as the tested forecast
+and do not give hour-specific advice from the hourly pattern.

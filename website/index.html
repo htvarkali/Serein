@@ -4,153 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102321">
-  <meta name="description" content="Serein is a student research project testing local wildfire smoke forecasts and exploring how families could use them to plan ahead.">
-  <title>Serein | Wildfire Smoke Forecasting</title>
-  <link rel="icon" href="assets/favicon.png" type="image/png">
-  <link rel="stylesheet" href="assets/site.css">
-  <link rel="preload" href="assets/fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
-  <script src="assets/site.js" defer></script>
+  <meta name="description" content="Serein forecasts wildfire smoke for every neighborhood in the western US, three days ahead, and beats the official forecast.">
+  <title>Serein: wildfire smoke, three days ahead</title>
+  <link rel="icon" href="./favicon.png" type="image/png">
+  <link rel="preload" href="./fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./fonts/instrument.woff2" as="font" type="font/woff2" crossorigin>
+  <script type="module" crossorigin src="./assets/index-BFAymzER.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-BzCBZXHF.css">
 </head>
-<body class="home-page">
-  <a class="skip-link" href="#main">Skip to content</a>
-  <header class="site-header">
-    <div class="shell header-row">
-      <a class="wordmark" href="index.html" aria-label="Serein home"><span class="brand-mark" aria-hidden="true"></span>Serein</a>
-      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-menu"><span>Menu</span><span class="menu-icon" aria-hidden="true"></span></button>
-    </div>
-    <nav class="site-menu" id="site-menu" aria-label="Primary">
-      <div class="shell menu-grid">
-        <p class="menu-intro">Wildfire smoke research for families.</p>
-        <div class="menu-links">
-          <a href="index.html" aria-current="page">Home</a>
-          <a href="research.html">SmokeCast</a>
-          <a href="airplan.html">AirPlan</a>
-          <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <nav class="chapter-nav" aria-label="On this page">
-    <a href="#overview" aria-label="Overview" aria-current="location"><span aria-hidden="true">Overview</span></a>
-    <a href="#problem" aria-label="The problem"><span aria-hidden="true">The problem</span></a>
-    <a href="#project" aria-label="The project"><span aria-hidden="true">The project</span></a>
-    <a href="#results" aria-label="Results"><span aria-hidden="true">Results</span></a>
-  </nav>
-
-  <main id="main">
-    <section class="home-hero dark" id="overview">
-      <img class="hero-photo" src="assets/photo-hero.webp" alt="" width="1920" height="958" fetchpriority="high">
-      <canvas class="hero-atmosphere" aria-hidden="true"></canvas>
-      <div class="shell hero-content">
-        <div class="hero-heading">
-          <p class="eyebrow"><span class="status-dot"></span> Wildfire smoke research</p>
-          <h1>A clearer view of<br><em>wildfire smoke.</em></h1>
-        </div>
-        <div class="hero-copy">
-          <p>Serein is a student research project testing local smoke forecasts up to three days ahead and exploring how families could use them to plan.</p>
-          <a class="button button-primary" href="#project">Explore the project <span aria-hidden="true">↓</span></a>
-        </div>
-      </div>
-      <div class="shell hero-meta">
-        <a href="https://commons.wikimedia.org/wiki/File:Hidden_Peak_Fire_Lookout_at_sunset,_with_smokey_haze_from_nearby_fires.jpg">Hidden Peak lookout, Washington <span aria-hidden="true">↗</span></a>
-        <span>Conrad Challenge</span>
-      </div>
-    </section>
-
-    <section class="section light" id="problem">
-      <div class="shell split problem-split">
-        <div>
-          <p class="eyebrow">The problem</p>
-          <h2 class="section-heading">Smoke crosses a region. Exposure varies locally.</h2>
-          <p class="lead">When smoke arrives, families need to decide what tomorrow looks like. Regional forecasts can miss differences between places, even within the same metro area.</p>
-          <p>SmokeCast tests whether recent air monitor readings can improve those forecasts. AirPlan explores how to present the result to families with children who have asthma.</p>
-        </div>
-        <figure class="figure-frame field-photo">
-          <img src="assets/photo-research.webp" alt="Smoke from the Hayes Fire rises above an evergreen valley in Olympic National Park" width="1440" height="1080" loading="lazy">
-          <figcaption>Hayes Fire, Olympic National Park. <a href="https://npgallery.nps.gov/AssetDetail/b58cb24b-4938-4997-a887-32ed73561691">Courtesy U.S. National Parks</a>.</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section class="section light project-section" id="project">
-      <div class="shell">
-        <p class="eyebrow">The project</p>
-        <h2 class="section-heading">From a forecast to a family decision.</h2>
-        <div class="project-grid">
-          <a class="project-card" href="research.html">
-            <div class="project-image project-image-map">
-              <img src="assets/map_20230818.png" alt="" loading="lazy">
-            </div>
-            <div class="project-card-body">
-              <p class="eyebrow">Forecast research</p>
-              <h3>SmokeCast</h3>
-              <p>See how NOAA forecasts and nearby monitor readings combine to estimate where smoke might reach.</p>
-              <span class="project-action">Explore the research <span aria-hidden="true">↗</span></span>
-            </div>
-          </a>
-          <a class="project-card" id="plan" href="airplan.html">
-            <div class="project-image project-image-lake">
-              <img src="assets/photo-family.webp" alt="" width="1440" height="1080" loading="lazy">
-            </div>
-            <div class="project-card-body">
-              <p class="eyebrow">Family demo</p>
-              <h3>AirPlan</h3>
-              <p>Explore a fictional family’s smoke outlook and see how the same example reads in English or Spanish.</p>
-              <span class="project-action">Try the demo <span aria-hidden="true">↗</span></span>
-            </div>
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section dark results-band" id="results">
-      <div class="shell results-grid">
-        <div>
-          <p class="eyebrow"><span class="status-dot"></span> Historical development results</p>
-          <h2 class="section-heading">How well did it do?</h2>
-          <p class="lead">On paired next-day forecasts in 2023, SmokeCast had lower forecast error than the AQM-first fallback. The reserved 2024–25 evaluation is still pending.</p>
-          <a class="button button-outline" href="research.html#results">See the model comparisons <span aria-hidden="true">↗</span></a>
-        </div>
-        <div>
-          <dl class="comparison">
-            <div><dt>SmokeCast</dt><dd>7.9</dd></div>
-            <div><dt>AQM-first fallback</dt><dd>11.0</dd></div>
-          </dl>
-          <p class="caption">Next-day RMSE in µg/m³. Lower is better.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section light safety-section" id="safety">
-      <div class="shell split">
-        <div>
-          <p class="eyebrow">Project status</p>
-          <h2 class="section-heading">What comes next.</h2>
-        </div>
-        <div class="rule-list">
-          <div><h3>Forecast evaluation</h3><p>The team plans to rerun development experiments with the revised pipeline, then freeze the protocol before scoring the reserved seasons.</p></div>
-          <div><h3>Family research</h3><p>AirPlan uses simulated symptom histories. Real-family research would require consent and clinical review.</p></div>
-          <a class="text-link" href="https://github.com/htvarkali/Serein/blob/main/docs/NEXT_STEPS.md">Read the project plan <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer dark">
-    <div class="shell footer-grid">
-      <div>
-        <a class="footer-brand" href="index.html">Serein</a>
-        <p>Student research for the Conrad Challenge.</p>
-      </div>
-      <nav aria-label="Explore Serein">
-        <a href="research.html">SmokeCast</a>
-        <a href="airplan.html">AirPlan</a>
-        <a href="https://github.com/htvarkali/Serein/graphs/contributors">Contributors <span aria-hidden="true">↗</span></a>
-        <a href="https://github.com/htvarkali/Serein">GitHub <span aria-hidden="true">↗</span></a>
-      </nav>
-      <p class="credits">Photo credits: <a href="https://commons.wikimedia.org/wiki/File:Hidden_Peak_Fire_Lookout_at_sunset,_with_smokey_haze_from_nearby_fires.jpg">Nick Archibald, Hidden Peak Fire Lookout at sunset</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a> (resized, shown under an overlay). <a href="https://npgallery.nps.gov/AssetDetail/55e40441-11c9-4839-b2cb-4715c01f46f4">Lake photo: NPS/USGS/Collin Eagles-Smith</a>.</p>
-    </div>
-  </footer>
+<body>
+  <div id="root"></div>
+  <noscript>Serein's website needs JavaScript. The code and results are on <a href="https://github.com/htvarkali/Serein">GitHub</a>.</noscript>
 </body>
 </html>

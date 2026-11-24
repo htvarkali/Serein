@@ -324,6 +324,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 2 | 5 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
+| W: Smoke World | 14 | 4 | 2 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -456,10 +457,34 @@ Both workflows are development diagnostics.
 | S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; 4 `[TEAM]` slots left; Q7 alternative paragraph in the draft file) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
-| S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). The public page links to the repository and draft pilot protocol. Team bios and a dedicated contact address are still pending. | In progress | AbhinavGGarg | 2026-11-18 |
+| S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). Rebuilt 2026-11-23 as one React and shadcn/ui app (`website-src/`) in the original page structure: Home, SmokeCast (results, August 2023 replay), Smoke World (3D, hour by hour), AirPlan (live plans, breathing rates), Data and methods; team section included. A dedicated contact address is still pending. | In progress | Aadi-Tiwari | 2026-11-23 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
 | S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)). Draft 3 (2026-11-23): all 61 references checked, titles, DOIs and dead links fixed; the [TEAM] items and the 2 attachments (best after the final test) are left | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid; submit everything in the portal | Open | | |
+
+### W: Smoke World (3D, hour by hour; plan in [docs/SMOKE_WORLD_PLAN.md](docs/SMOKE_WORLD_PLAN.md))
+| ID | Task | Status | Owner | Date |
+|---|---|---|---|---|
+| W-1 | Hour-by-hour smoke data for the whole West, 72 hours ahead: NOAA's hourly forecast plus the Serein-corrected version, wind and live fires (`serein.world`) | Done | Aadi-Tiwari | 2026-11-23 |
+| W-2 | 3D map in the browser with terrain that gets sharper as you zoom (free AWS Terrain Tiles); flying anywhere in the West | Done | Aadi-Tiwari | 2026-11-23 |
+| W-3 | Satellite imagery on the terrain, state lines and city names | Done | Aadi-Tiwari | 2026-11-23 |
+| W-4 | Smoke haze over the land by AQI color, changing every hour for 72 hours | Done | Aadi-Tiwari | 2026-11-23 |
+| W-5 | Time controls: play, pause, speed, hour 0-72 slider, local date and time on screen | Done | Aadi-Tiwari | 2026-11-23 |
+| W-6 | Moving wind arrows; stop after hour 48 where NOAA's wind forecast ends, with a note | Done | Aadi-Tiwari | 2026-11-23 |
+| W-7 | Fire points sized by fire strength | Done | Aadi-Tiwari | 2026-11-23 |
+| W-8 | Click anywhere: that place's 72-hour smoke curve, chance of unhealthy air, confidence flag and advice (first version: smoke curve, advice and a breathing-dose panel; the chance of unhealthy air and the confidence flag are not in the 3D panel yet) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |
+| W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; first real update on the next run) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-12 | Lighter version that runs on phones and slow computers | Open | | |
+| W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
+| W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |
+| W-15 | "Where does this data come from" panel: every source, and what is measured vs. forecast vs. estimated | Done | Aadi-Tiwari | 2026-11-23 |
+| W-16 | People layer: neighborhoods by income and how many people are under smoke each hour (data in `docs/EQUITY.md`) | Done | Aadi-Tiwari | 2026-11-23 |
+| W-17 | Places that matter: schools, hospitals, farms and work sites under unhealthy smoke each hour (schools and hospitals shown from OpenStreetMap; not counted yet; farms and work sites not added) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-18 | Highlight places more than 25 km from any air monitor | Done | Aadi-Tiwari | 2026-11-23 |
+| W-19 | **(non-code)** Watch 5 people use the 3D world for the first time and note where they get stuck | Open | | |
+| W-20 | **(non-code)** Credit every data source on the website (several licenses require it) | Done | Aadi-Tiwari | 2026-11-23 |
 
 ### Q: Code quality
 | ID | Task | Status | Owner | Date |

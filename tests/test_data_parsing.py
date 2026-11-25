@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from serein.aqi import pm25_to_aqi, pm25_to_category
+from serein.aqi import aqi_to_category, pm25_to_aqi, pm25_to_category
 from serein.data.airnow import parse_hourly_aqobs, parse_reportingarea
 from serein.data.availability import Availability
 from serein.data.hrrr import parse_idx, smoke_to_ugm3
@@ -52,6 +52,19 @@ def test_aqi_old_scale_before_may_2024():
     assert pm25_to_category([10.0], date(2024, 8, 1))[0] == 1  # Moderate under 2024 scale
     assert pm25_to_category([140.0], old)[0] == 3
     assert pm25_to_category([140.0], date(2024, 8, 1))[0] == 4
+
+
+def test_aqi_categories_take_a_single_number():
+    for pm in [0.0, 9.0, 9.1, 12.0, 12.1, 35.45, 55.5, 140.0, 225.5, 600.0]:
+        for on in (None, date(2023, 8, 1)):
+            assert float(pm25_to_category(pm, on)) == pm25_to_category([pm], on)[0], (pm, on)
+    assert np.isnan(pm25_to_category(np.nan))
+    edges = [0, 50, 51, 100, 101, 150, 151, 200, 201, 300, 301, 500]
+    assert list(aqi_to_category(edges)) == [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5]
+    for a in edges:
+        assert float(aqi_to_category(a)) == aqi_to_category([a])[0], a
+    assert np.isnan(aqi_to_category(np.nan))
+    assert float(aqi_to_category(pm25_to_aqi(40.0))) == float(pm25_to_category(40.0)) == 2
 
 
 def test_purpleair_correction_is_continuous():

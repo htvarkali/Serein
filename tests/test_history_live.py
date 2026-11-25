@@ -180,6 +180,25 @@ def test_live_scoreboard_reports_fire_season_and_off_season_apart(tmp_path, monk
     assert "## Off-season" in text and "## Fire season" not in text
 
 
+def test_live_scoreboard_shows_n_a_for_a_lead_with_no_noaa_forecast(tmp_path, monkeypatch):
+    from serein import live
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    (tmp_path / "test").mkdir()
+    # Lead 2's only monitor-day has no NOAA forecast (that day's download failed).
+    s = pd.DataFrame({
+        "lead": [1, 1, 2], "issue_date": date(2026, 11, 3),
+        "valid_date": [date(2026, 11, 4), date(2026, 11, 4), date(2026, 11, 5)],
+        "obs": [40.0, 20.0, 8.0], "smokecast": [38.0, 21.0, 9.0],
+        "noaa_best": [30.0, 25.0, np.nan], "aqm_bc": np.nan, "persistence": np.nan,
+        "warn": False})
+    live._write_board(SimpleNamespace(name="test"), s, pd.DataFrame(), 1)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "| 1 | 2 | 1.58 | 7.91 | +80% | 1 | 0 / 0 | 0 / 0 |" in text
+    assert "| 2 | 0 | n/a | n/a | n/a | 0 | 0 / 0 | 0 / 0 |" in text
+    assert "nan" not in text
+
+
 def test_model_fingerprint_changes_when_the_run_is_retrained_in_place(tmp_path):
     from serein.live import model_fingerprint
 
@@ -386,3 +405,196 @@ def test_live_epa_comparison_is_split_by_the_day_forecast(tmp_path, monkeypatch)
     epa_tables = [i for i in range(len(text)) if text.startswith("Official EPA", i)]
     assert len(epa_tables) == 2 and fire < epa_tables[0] < off < epa_tables[1]
     assert "both seasons together" not in text
+
+
+def test_live_score_downloads_the_epa_files_each_lead_needs(tmp_path, monkeypatch):
+    from serein import live
+
+    # The observed area AQI for day v is in the file for v + 1, so a lead-2 forecast
+    # issued Nov 3 needs the Nov 6 file even when no forecast was issued Nov 4 or 5.
+    # The Oct 22 file is both an old observation file and an issue-day file.
+    rows = [(date(2026, 10, 20), 1), (date(2026, 10, 22), 1), (date(2026, 11, 3), 1),
+            (date(2026, 11, 3), 2)]
+    fc = pd.DataFrame({
+        "issue_date": [d for d, _ in rows], "lead": [lead for _, lead in rows],
+        "valid_date": [d + timedelta(days=lead) for d, lead in rows], "point_id": "A",
+        "kind": "epa", "on_time": True, "smokecast": 10.0, "warn": False,
+        "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0})
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 7, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+    fc.to_parquet(saved / "20261103.parquet", index=False)
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    # No monitor reading on Nov 4: the EPA comparison still scores that day's area AQI.
+    monkeypatch.setattr(live, "_observed", lambda *args: fc[["point_id", "valid_date"]].assign(
+        valid_date=lambda f: pd.to_datetime(f["valid_date"]).dt.date, obs=10.0)
+        .query("valid_date != @date(2026, 11, 4)"))
+    calls = []
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day",
+                        lambda d, overwrite=False: calls.append((d, overwrite)))
+    monkeypatch.setattr(live, "compare_with_epa", lambda *args: pd.DataFrame())
+
+    live.score(SimpleNamespace(name="test"), log=lambda *args: None)
+
+    # Issue-day files are refreshed; observation files only within 4 days of the newest day.
+    assert calls == [(date(2026, 10, 20), True), (date(2026, 10, 22), True),
+                     (date(2026, 10, 24), False), (date(2026, 11, 3), True),
+                     (date(2026, 11, 5), True),
+                     (date(2026, 11, 6), True)]
+
+
+def test_live_score_writes_the_board_when_an_epa_download_fails(tmp_path, monkeypatch):
+    import requests
+
+    from serein import live
+
+    fc = pd.DataFrame({
+        "issue_date": [date(2026, 11, 3)], "lead": [1], "valid_date": [date(2026, 11, 4)],
+        "point_id": "A", "kind": "epa", "on_time": True, "smokecast": 10.0, "warn": False,
+        "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0})
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 7, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+    fc.to_parquet(saved / "20261103.parquet", index=False)
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    monkeypatch.setattr(live, "_observed", lambda *args: pd.DataFrame(
+        {"point_id": ["A"], "valid_date": [date(2026, 11, 4)], "obs": [12.0]}))
+
+    def unavailable(d, overwrite=False):
+        raise requests.HTTPError("503 Server Error")
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day", unavailable)
+    lines = []
+
+    scored = live.score(SimpleNamespace(name="test"), log=lambda *args: lines.append(" ".join(map(str, args))))
+
+    # The EPA comparison is optional, so a failed AirNow download only skips it.
+    assert len(scored) == 1
+    assert (tmp_path / "test" / "SCOREBOARD.md").exists()
+    assert any(line.startswith("EPA comparison skipped") for line in lines)
+
+
+def test_live_forecasts_are_grouped_by_the_model_that_made_them(tmp_path):
+    from serein.live import model_parts
+
+    made_by = {"20261103": ("west_us_dev", None), "20261119": ("west_us_dev", "aaa"),
+               "20261120": ("west_us_dev", "aaa"), "20261121": ("west_us_dev", "bbb"),
+               "20261123": ("west_us_live_v1", "ccc"), "20261124": ("west_us_live_v1", "ccc")}
+    for stem, (run, sha) in made_by.items():
+        (tmp_path / f"{stem}.parquet").write_bytes(b"")
+        meta = {"model_run": run} | ({"model_sha256": sha} if sha else {})
+        (tmp_path / f"{stem}.json").write_text(json.dumps(meta), encoding="utf-8")
+    # A record that is missing or unreadable keeps the forecast with the model before it.
+    (tmp_path / "20261125.parquet").write_bytes(b"")
+    (tmp_path / "20261126.parquet").write_bytes(b"")
+    (tmp_path / "20261126.json").write_text("", encoding="utf-8")
+    (tmp_path / "20261127.parquet").write_bytes(b"")
+    (tmp_path / "20261127.json").write_text(json.dumps({"model_run": "west_us_dev"}), encoding="utf-8")
+    parts = model_parts(sorted(tmp_path.glob("*.parquet"), reverse=True))
+    # Fingerprints started on Nov 19, so Nov 3 stays with west_us_dev; Nov 21 was a retrain.
+    assert {f.stem: part for f, part in parts.items()} == {
+        "20261103": ("west_us_dev", "2026-11-03"), "20261119": ("west_us_dev", "2026-11-03"),
+        "20261120": ("west_us_dev", "2026-11-03"), "20261121": ("west_us_dev", "2026-11-21"),
+        "20261123": ("west_us_live_v1", "2026-11-23"),
+        "20261124": ("west_us_live_v1", "2026-11-23"),
+        "20261125": ("west_us_live_v1", "2026-11-23"),
+        "20261126": ("west_us_live_v1", "2026-11-23"), "20261127": ("west_us_dev", "2026-11-27")}
+    (tmp_path / "20261103.json").unlink()
+    assert model_parts([tmp_path / "20261103.parquet"]) == {
+        tmp_path / "20261103.parquet": ("not recorded", "2026-11-03")}
+
+    # Without a record, the fingerprint saved in the forecast file decides.
+    switch = tmp_path / "switch"
+    switch.mkdir()
+    for stem, record, saved_sha in (("20261120", {"model_run": "west_us_dev", "model_sha256": "aaa"}, "aaa"),
+                                    ("20261121", None, "aaa"), ("20261122", {"model_sha256": "bbb"}, "bbb"),
+                                    ("20261123", None, "ccc"),
+                                    ("20261124", {"model_run": "west_us_live_v1", "model_sha256": "ccc"}, "ccc")):
+        pd.DataFrame({"point_id": ["A"], "model_sha256": [saved_sha]}).to_parquet(switch / f"{stem}.parquet")
+        if record:
+            (switch / f"{stem}.json").write_text(json.dumps(record), encoding="utf-8")
+    assert {f.stem: part for f, part in model_parts(sorted(switch.glob("*.parquet"))).items()} == {
+        "20261120": ("west_us_dev", "2026-11-20"), "20261121": ("west_us_dev", "2026-11-20"),
+        "20261122": ("not recorded", "2026-11-22"), "20261123": ("not recorded", "2026-11-23"),
+        "20261124": ("west_us_live_v1", "2026-11-24")}
+
+
+def test_live_scoreboard_scores_each_trained_model_separately(tmp_path, monkeypatch):
+    from serein import live
+
+    monkeypatch.setattr(live, "LIVE", tmp_path)
+    monkeypatch.setattr(live, "datetime",
+                        SimpleNamespace(now=lambda tz=None: datetime(2026, 11, 27, tzinfo=UTC)))
+    saved = tmp_path / "test" / "forecasts"
+    saved.mkdir(parents=True)
+
+    def save(day, leads, smokecast, run, sha=None):
+        pd.DataFrame({
+            "issue_date": day, "lead": leads, "valid_date": [day + timedelta(days=k) for k in leads],
+            "point_id": "A", "kind": "epa", "on_time": True, "smokecast": smokecast, "warn": False,
+            "noaa_best": 10.0, "aqm_bc": 10.0, "persistence": 10.0,
+        }).to_parquet(saved / f"{day:%Y%m%d}.parquet", index=False)
+        meta = {"model_run": run} | ({"model_sha256": sha} if sha else {})
+        (saved / f"{day:%Y%m%d}.json").write_text(json.dumps(meta), encoding="utf-8")
+
+    # The new model's forecast has only lead 1 so far.
+    save(date(2026, 11, 21), [1, 2], 12.0, "west_us_dev")
+    save(date(2026, 11, 23), [1], 14.0, "west_us_live_v1")
+    monkeypatch.setattr(live, "load_points", lambda name: pd.DataFrame({"point_id": ["A"]}))
+    monkeypatch.setattr(live, "_observed", lambda *args: pd.DataFrame({
+        "point_id": "A", "valid_date": [date(2026, 11, 22), date(2026, 11, 23), date(2026, 11, 24)],
+        "obs": 10.0}))
+    monkeypatch.setattr(live.airnow, "download_reportingarea_day", lambda *args, **kwargs: None)
+    monkeypatch.setattr(live, "compare_with_epa", lambda study, keys, pm, leads, pts, warn: pd.DataFrame(
+        {"lead": leads, "issue_day": str(keys["issue_date"].iloc[0])}))
+    lines = []
+
+    scored = live.score(SimpleNamespace(name="test"), log=lines.append)
+
+    assert not lines
+    assert scored.groupby("model_run")["lead"].count().to_dict() == {"west_us_dev": 2, "west_us_live_v1": 1}
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "The trained model was replaced, so each model's forecasts are scored separately" in text
+    old, new = text.split("## Model west_us_live_v1, forecasts issued 2026-11-23 to 2026-11-23")
+    assert "## Model west_us_dev, forecasts issued 2026-11-21 to 2026-11-21" in old
+    assert "### Off-season (November-May)" in old and "### Off-season (November-May)" in new
+    assert "| 1 | 1 | 2.00 | 0.00 |" in old and "| 2 | 1 | 2.00 | 0.00 |" in old
+    assert "| 1 | 1 | 4.00 | 0.00 |" in new and "| 2 |" not in new
+    old_epa, new_epa = old.split("Official EPA")[1], new.split("Official EPA")[1]
+    assert "2026-11-21" in old_epa and "2026-11-23" not in old_epa
+    assert "2026-11-23" in new_epa and "2026-11-21" not in new_epa
+    assert "model_from" not in text and "\n## Off-season" not in text
+    board = pd.read_csv(tmp_path / "test" / "scoreboard.csv")
+    assert board.columns[0] == "season"
+    assert board.groupby("model_from")["lead"].apply(list).to_dict() == {
+        "2026-11-21": [1, 2], "2026-11-23": [1]}
+    assert set(board["model_run"]) == {"west_us_dev", "west_us_live_v1"}
+
+    # Until the new model has a scored monitor-day, the board and the EPA comparison show only the old one.
+    observed = live._observed
+    monkeypatch.setattr(live, "_observed", lambda *args: observed(*args).iloc[:2])
+    live.score(SimpleNamespace(name="test"), log=lines.append)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Model" not in text and "2026-11-21" in text.split("Official EPA")[1]
+    assert "2026-11-23" not in text.split("Official EPA")[1]
+    monkeypatch.setattr(live, "_observed", observed)
+
+    # A retrain under the same run name is a new model too.
+    save(date(2026, 11, 21), [1, 2], 12.0, "west_us_dev", sha="aaa")
+    save(date(2026, 11, 23), [1], 14.0, "west_us_dev", sha="bbb")
+    live.score(SimpleNamespace(name="test"), log=lines.append)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Model west_us_dev, forecasts issued 2026-11-21 to 2026-11-21" in text
+    assert "## Model west_us_dev, forecasts issued 2026-11-23 to 2026-11-23" in text
+    assert pd.read_csv(tmp_path / "test" / "scoreboard.csv")["model_from"].nunique() == 2
+    assert not lines
+
+    # With one model the board keeps its single set of tables.
+    (saved / "20261123.json").write_text(json.dumps({"model_run": "west_us_dev"}), encoding="utf-8")
+    live.score(SimpleNamespace(name="test"), log=lines.append)
+    text = (tmp_path / "test" / "SCOREBOARD.md").read_text(encoding="utf-8")
+    assert "## Model" not in text and "\n## Off-season (November-May)" in text
+    assert "model_run" not in pd.read_csv(tmp_path / "test" / "scoreboard.csv")

@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.skipif(os.name == "nt", reason="POSIX shell scripts")
+
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 STEPS = ["dev", "figures", "impact", "map", "dev_holdout", "abl_full", "abl_no_wind",
          "abl_no_hrrr", "abl_no_aqm", "abl_no_fires", "abl_no_hms", "abl_no_sensors"]

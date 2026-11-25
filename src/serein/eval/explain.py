@@ -109,10 +109,12 @@ def explain_point(study: Study, day: date, run_dir: Path, point_id: str, lead: i
     groups: dict = {}
     for name, a in zip(inp.feat_names, attr, strict=True):
         groups[feature_group(name)] = groups.get(feature_group(name), 0.0) + float(a)
-    # IG is exact only in the limit; spread the small leftover proportionally.
+    # IG is exact only in the limit. Spread the small leftover by each group's size, so
+    # groups that pull in opposite directions keep their direction.
     gap, s = y - y0, sum(groups.values())
-    if abs(s) > 1e-9:
-        groups = {k: v * gap / s for k, v in groups.items()}
+    size = sum(abs(v) for v in groups.values())
+    if size > 1e-9:
+        groups = {k: v + (gap - s) * abs(v) / size for k, v in groups.items()}
     neighbors = []
     if att is not None:
         e = np.where(g.dst == i)[0]

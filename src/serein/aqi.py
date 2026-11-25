@@ -68,8 +68,7 @@ def aqi_to_category(aqi):
     a = np.asarray(aqi, dtype=float)
     bins = [50, 100, 150, 200, 300]
     cat = np.digitize(a, bins, right=True).astype(float)
-    cat[np.isnan(a)] = np.nan
-    return cat
+    return np.where(np.isnan(a), np.nan, cat)
 
 
 def pm25_to_category(conc, on: date | None = None):
@@ -80,8 +79,7 @@ def pm25_to_category(conc, on: date | None = None):
     upper = [hi for _, hi, _, _ in table][:5]
     cat = np.digitize(c, upper, right=True).astype(float)
     cat = np.minimum(cat, 5)
-    cat[np.isnan(np.asarray(conc, dtype=float))] = np.nan
-    return cat
+    return np.where(np.isnan(np.asarray(conc, dtype=float)), np.nan, cat)
 
 
 def category_from_name(name: str) -> float:

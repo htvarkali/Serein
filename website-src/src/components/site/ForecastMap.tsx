@@ -137,6 +137,9 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
           current.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "bottom-right")
           current.addControl(new maplibre.ScaleControl({ unit: "imperial" }), "bottom-left")
           current.getCanvas().style.cursor = "crosshair"
+          // On a phone the open credits box covers about a fifth of the map. Start it
+          // closed there; the (i) button still opens it.
+          if (container.offsetWidth < 480) container.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show")
           setPhase("ready")
         } catch {
           fail()

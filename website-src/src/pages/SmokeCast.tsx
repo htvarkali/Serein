@@ -134,7 +134,7 @@ export default function SmokeCast() {
               <div key={title} className="py-5">
                 <h3 className="text-xl font-medium">{title}</h3>
                 <p className="mt-2 text-muted-foreground">{description}</p>
-                <a href={`${docs}/${link}`} className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4">
+                <a href={`${docs}/${link}`} className="mt-1.5 inline-flex items-center gap-2 py-1.5 text-sm font-medium text-primary underline underline-offset-4">
                   <BookOpen aria-hidden="true" className="size-4" />{label}
                 </a>
               </div>

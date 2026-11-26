@@ -40,10 +40,10 @@ export default function AirPlan() {
             </Card>
           ))}
         </div>
-        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium">
-          <a href="https://www.airnow.gov/" className="underline underline-offset-4">Check current AQI on AirNow</a>
-          <a href="https://www.airnow.gov/aqi/aqi-basics/using-air-quality-index/" className="underline underline-offset-4">Learn how AQI works</a>
-          <a href="https://www.dir.ca.gov/title8/5141_1.html" className="underline underline-offset-4">California workplace smoke guidance</a>
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-1 text-sm font-medium">
+          <a href="https://www.airnow.gov/" className="py-1.5 underline underline-offset-4">Check current AQI on AirNow</a>
+          <a href="https://www.airnow.gov/aqi/aqi-basics/using-air-quality-index/" className="py-1.5 underline underline-offset-4">Learn how AQI works</a>
+          <a href="https://www.dir.ca.gov/title8/5141_1.html" className="py-1.5 underline underline-offset-4">California workplace smoke guidance</a>
         </div>
       </Section>
 

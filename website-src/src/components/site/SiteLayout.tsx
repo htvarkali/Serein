@@ -19,10 +19,13 @@ const DOCS = `${REPO}/blob/main/docs`
 /** Logo: a small tilted pill (the team name) over the project name. */
 export function Wordmark({ className, onClick }: { className?: string; onClick?: () => void; tagline?: boolean }) {
   return (
-    <Link to="/" onClick={onClick} className={cn("inline-flex flex-col items-start leading-none", className)} aria-label="Serein home">
+    <Link to="/" onClick={onClick} className={cn("inline-flex flex-col items-start leading-none", className)}>
+      {/* The link's name is its own text ("Falcon Devs Serein home"), so voice control
+          users can say what they see. */}
       <span className="-rotate-6 rounded-full bg-current px-2 py-0.5 text-[0.55rem] font-semibold tracking-[0.06em] uppercase">
-        <span className="pill-text text-[#0a0a0a]">Falcon Devs</span></span>
+        <span className="pill-text text-[#0a0a0a]">Falcon Devs</span></span>{" "}
       <span className="-mt-0.5 text-[1.55rem] font-semibold tracking-[-0.03em] uppercase">Serein</span>
+      <span className="sr-only">home</span>
     </Link>
   )
 }
@@ -85,7 +88,7 @@ export function SiteLayout() {
         <div className="flex items-start justify-between px-[clamp(1.125rem,3vw,2.5rem)] pt-5">
           <div className="pointer-events-auto flex items-center gap-4">
             <Wordmark className={cn("transition-colors duration-300", onLight ? "text-[#0a0a0a] [&_.pill-text]:text-white" : "text-white")} />
-            <Link to="/world" className={cn("inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-[#0a0a0a] shadow-lg transition-all duration-500 hover:bg-[#5b6cf6] hover:text-white",
+            <Link to="/world" tabIndex={scrolled ? undefined : -1} aria-hidden={!scrolled} className={cn("inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 max-sm:hidden text-sm font-medium text-[#0a0a0a] shadow-lg transition-all duration-500 hover:bg-[#5b6cf6] hover:text-white",
               scrolled ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-3 opacity-0")}>
               See tomorrow’s forecast <span className="status-dot" />
             </Link>
@@ -134,7 +137,7 @@ export function SiteLayout() {
         <div className="site-width grid gap-14 pt-[clamp(6rem,12vw,11rem)] pb-10 lg:grid-cols-[1fr_2fr]">
           <div>
             <Wordmark className="text-white" />
-            <p className="mt-6 max-w-xs text-[0.95rem]">Student research for the 2026–27 Conrad Challenge. The forecast map updates each morning from the latest run.</p>
+            <p className="mt-6 max-w-xs text-[0.95rem]">Student research for the 2026–27 Conrad Challenge. The forecast map updates each day around midday Pacific from the latest run.</p>
             <div className="mt-6 flex flex-col items-start gap-3">
               <Button asChild className="h-12 bg-[#5b6cf6]! px-6 text-white!"><Link to="/world">Open the forecast map</Link></Button>
               <Button asChild variant="outline" className="h-12 px-6"><a href={REPO}>Code on GitHub</a></Button>
@@ -153,9 +156,9 @@ export function SiteLayout() {
               ].map(([title, links]) => (
                 <div key={title as string}>
                   <p className="text-muted-foreground">{title as string}</p>
-                  <ul className="mt-4 space-y-2.5 font-medium">
+                  <ul className="mt-4 space-y-1 font-medium">
                     {(links as string[][]).map(([label, href]) => <li key={label}>
-                      {href.startsWith("http") ? <a className="hover:text-[#8f9bff]" href={href}>{label}</a> : <Link className="hover:text-[#8f9bff]" to={href}>{label}</Link>}
+                      {href.startsWith("http") ? <a className="inline-block py-1.5 hover:text-[#8f9bff]" href={href}>{label}</a> : <Link className="inline-block py-1.5 hover:text-[#8f9bff]" to={href}>{label}</Link>}
                     </li>)}
                   </ul>
                 </div>
@@ -165,8 +168,8 @@ export function SiteLayout() {
         </div>
         <div className="site-width flex flex-wrap items-center justify-between gap-4 border-t border-white/10 py-7 text-sm font-medium">
           <p>2026 Falcon Devs · Foothill High School</p>
-          <p className="rounded-full bg-white/8 px-4 py-1.5 font-mono text-[0.62rem] tracking-[0.18em] text-muted-foreground uppercase">Conrad Challenge 2026–27</p>
-          <p className="text-muted-foreground">Forecasts support planning. Check current conditions on <a className="text-white underline-offset-4 hover:underline" href="https://www.airnow.gov/">AirNow</a>.</p>
+          <p className="rounded-full bg-white/8 px-4 py-1.5 font-mono text-[0.7rem] tracking-[0.18em] text-muted-foreground uppercase">Conrad Challenge 2026–27</p>
+          <p className="text-muted-foreground">Forecasts support planning. Check current conditions on <a className="text-white underline underline-offset-4" href="https://www.airnow.gov/">AirNow</a>.</p>
         </div>
       </footer>
     </div>

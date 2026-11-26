@@ -32,12 +32,12 @@ export function PersonPanel({ data, point, which }: { data: WorldData; point: nu
         </label>
         <label className="grid gap-1">
           Start · {localTime(data, firstHour)}
-          <input type="range" className="w-full accent-primary" min={0} max={data.hours - duration} value={firstHour}
+          <input type="range" className="h-7 w-full accent-primary" min={0} max={data.hours - duration} value={firstHour}
             aria-label="Exposure start hour" aria-valuetext={localTime(data, firstHour)} onChange={event => setStart(Number(event.target.value))} />
         </label>
         <label className="grid gap-1">
           Time outdoors · {duration} {duration === 1 ? "hour" : "hours"}
-          <input type="range" className="w-full accent-primary" min={1} max={Math.min(8, data.hours)} value={duration}
+          <input type="range" className="h-7 w-full accent-primary" min={1} max={Math.min(8, data.hours)} value={duration}
             aria-label="Exposure duration in hours" onChange={event => setLength(Number(event.target.value))} />
         </label>
         {available < duration ? <p className="text-xs text-muted-foreground">Data is available for {available} of {duration} hours. Choose a window with complete data for an estimate.</p> : (

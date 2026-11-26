@@ -2,7 +2,7 @@ import { useMemo, useState, type CSSProperties } from "react"
 import { Link } from "react-router-dom"
 import { ArrowDown, ArrowRight, ArrowUp, ArrowUpRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Eyebrow, Heading, Lead, Marquee, Script, Section, Split, WordReveal } from "@/components/site/Section"
+import { BackgroundVideo, Eyebrow, Heading, Lead, Marquee, Script, Section, Split, WordReveal } from "@/components/site/Section"
 import { ForecastCompare, useLive } from "@/components/site/LiveForecast"
 import { ForecastDial } from "@/components/site/ForecastDial"
 import { BOX } from "@/lib/world"
@@ -64,7 +64,7 @@ function StatCarousel() {
       <div key={i} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
         <p className="text-[clamp(4.5rem,9vw,8rem)] leading-none font-normal tracking-[-0.06em]">{s.big}<span className="ml-2 text-2xl tracking-normal opacity-80">{s.unit}</span></p>
         <p className="mt-3 max-w-md text-white/85">{s.note}</p>
-        <p className="mt-5 font-mono text-[0.62rem] tracking-[0.16em] text-white/70 uppercase">{i + 1} / {stats.length} · Development backtest, 2023</p>
+        <p className="mt-5 font-mono text-[0.7rem] tracking-[0.16em] text-white/70 uppercase">{i + 1} / {stats.length} · Development backtest, 2023</p>
       </div>
     </div>
   )
@@ -74,9 +74,8 @@ export function Home() {
   return (
     <>
       {/* Hero: smoke video, a status pill, a giant title scrolling sideways, then the statement. */}
-      <section className="dark band-dark relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden text-white" id="overview">
-        <video className="absolute inset-0 -z-30 size-full object-cover" src={asset("motion/hero-smoke.mp4")} poster={asset("img/photo-hero.webp")}
-          autoPlay muted loop playsInline aria-hidden="true" data-parallax="14" />
+      <section className="dark band-dark relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden pt-24 text-white" id="overview">
+        <BackgroundVideo className="absolute inset-0 -z-30 size-full object-cover" src={asset("motion/hero-smoke.mp4")} poster={asset("img/photo-hero.webp")} parallax={14} />
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,#0a0a0a88,transparent_50%,#0a0a0aaa),linear-gradient(180deg,#0a0a0a99,transparent_30%,#0a0a0acc_75%,#0a0a0a)]" />
         <div className="site-width flex md:justify-end md:pr-[12%]" data-reveal="">
           <Link to="/world" className="inline-flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-medium text-[#0a0a0a] hover:bg-[#5b6cf6] hover:text-white">
@@ -84,7 +83,8 @@ export function Home() {
           </Link>
         </div>
         <h1 className="sr-only">Plan ahead for wildfire smoke</h1>
-        <Marquee text="Plan ahead for wildfire smoke" className="mt-6 text-[clamp(4.5rem,13vw,13rem)] leading-[1.05] font-normal tracking-[-0.05em]" />
+        <Marquee text="Plan ahead for wildfire smoke" className="mt-6 text-[clamp(4.5rem,13vw,13rem)] leading-[1.05] font-normal tracking-[-0.05em]"
+          stillClassName="site-width mt-6 text-[clamp(2.3rem,11.5vw,4.5rem)] leading-[1.02] tracking-[-0.045em] text-balance" />
         <div className="site-width grid gap-10 pt-8 pb-[clamp(2.5rem,5vw,4.5rem)] md:grid-cols-[1.35fr_1fr]" data-reveal="" data-reveal-delay="0.2">
           <p className="max-w-[30ch] text-[clamp(1.45rem,2.6vw,2.4rem)] leading-[1.12] font-normal tracking-[-0.04em]">
             Serein estimates daily air pollution up to three days ahead, with a range that shows how uncertain each forecast is.
@@ -99,7 +99,8 @@ export function Home() {
       {/* Data sources strip */}
       <div className="dark band-dark border-t border-white/10 py-8 text-white/55">
         <p className="sr-only">Built on public data from: {sources.map(s => s.name).join(", ")}</p>
-        <Marquee reverse text={sources.map(s => s.name).join("   ·   ")} className="text-[1.05rem] font-medium tracking-[-0.01em]" />
+        <Marquee reverse text={sources.map(s => s.name).join("   ·   ")} className="text-[1.05rem] font-medium tracking-[-0.01em]"
+          stillClassName="site-width text-sm leading-relaxed" />
       </div>
 
       {/* Statement with a pill photo inside the heading, then a word-by-word paragraph */}

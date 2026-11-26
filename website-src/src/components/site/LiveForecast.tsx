@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { asset } from "@/data/site"
+import { MOTION_EVENT, motionPaused, prefersReducedMotion } from "@/components/site/Motion"
 import { AQI, BOX, aqiOf, loadWorld, valueAt, type Which, type WorldData } from "@/lib/world"
 
 // Live pieces for the home page. Everything shown here is read from the published
@@ -87,12 +88,19 @@ function DotCanvas({ d, values, label }: { d: WorldData; values: (number | null)
       scale = Math.min(w / spanX, h / spanY) * 0.94
       ox = (w - spanX * scale) / 2; oy = (h - spanY * scale) / 2
     }
-    const ro = new ResizeObserver(resize)
-    ro.observe(canvas)
     resize()
 
+    // The dots pulse, so the map is redrawn about 20 times a second, but only while it is
+    // on screen. With "reduce motion" on, or after the pause button, it is drawn once.
+    const reduced = prefersReducedMotion()
+    let visible = false, last = -Infinity
+    const kick = () => { if (!frame) frame = requestAnimationFrame(draw) }
     function draw(now: number) {
-      frame = requestAnimationFrame(draw)
+      frame = 0
+      const still = reduced || motionPaused()
+      if (visible && !still) kick()
+      if (!still && now - last < 50) return
+      last = now
       ctx.clearRect(0, 0, w, h)
       if (states) {
         ctx.save()
@@ -108,7 +116,7 @@ function DotCanvas({ d, values, label }: { d: WorldData; values: (number | null)
         }
         ctx.restore()
       }
-      const t = now / 1000
+      const t = still ? 0 : now / 1000
       const r = Math.max(1.1, scale * 0.25 * 0.36)
       d.points.forEach(([lat, lon, kind], i) => {
         if (!onLand[i]) return
@@ -129,8 +137,14 @@ function DotCanvas({ d, values, label }: { d: WorldData; values: (number | null)
       })
       ctx.globalAlpha = 1
     }
-    frame = requestAnimationFrame(draw)
-    return () => { cancelAnimationFrame(frame); ro.disconnect() }
+    const redraw = () => { last = -Infinity; kick() }
+    const ro = new ResizeObserver(() => { resize(); redraw() })
+    ro.observe(canvas)
+    const io = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) redraw() })
+    io.observe(canvas)
+    window.addEventListener(MOTION_EVENT, redraw)
+    redraw()
+    return () => { cancelAnimationFrame(frame); ro.disconnect(); io.disconnect(); window.removeEventListener(MOTION_EVENT, redraw) }
   }, [d, values, states])
 
   return <canvas ref={ref} role="img" aria-label={label} className="absolute inset-0 size-full" />
@@ -176,8 +190,8 @@ export function ForecastCompare() {
             <div className="absolute inset-0 bg-[#111111]" />
             <DotCanvas d={model.d} values={model.noaa} label={`NOAA forecast average PM2.5 for ${longDate(model.date)}`} />
           </div>
-          <span className="absolute top-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#f5f5f5] uppercase backdrop-blur">NOAA forecast</span>
-          <span className="absolute top-4 right-4 rounded-full bg-[#5b6cf6]/90 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#ffffff] uppercase">SmokeCast</span>
+          <span className="absolute top-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.22em] text-[#f5f5f5] uppercase backdrop-blur">NOAA forecast</span>
+          <span className="absolute top-4 right-4 rounded-full bg-[#5b6cf6]/90 px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.22em] text-[#ffffff] uppercase">SmokeCast</span>
           <div className="pointer-events-none absolute inset-y-0 w-px bg-[#f5f5f5]/80" style={{ left: `${split}%` }}>
             <span className="compare-handle absolute top-1/2 left-1/2 grid size-12 -translate-1/2 place-items-center rounded-full bg-[#ffffff] text-[#0a0a0a]">⟷</span>
           </div>
@@ -187,7 +201,7 @@ export function ForecastCompare() {
       </div>
       <label className="sr-only" htmlFor="compare-split">Move the divider between the NOAA forecast and SmokeCast</label>
       <input id="compare-split" type="range" min={0} max={100} value={Math.round(split)} onChange={e => setSplit(Number(e.target.value))}
-        className="mt-4 w-full accent-[#5b6cf6]" />
+        className="mt-2 h-7 w-full accent-[#5b6cf6]" />
       {model && <figcaption className="mt-3 space-y-3 text-sm text-muted-foreground">
         <p>Average PM₂.₅ over {longDate(model.date)} (Pacific time), from the run issued {longDate(model.d.issue_date)}.
           Each dot is a 0.25° forecast grid point; white rings are EPA monitors. Grid points above “Good”:

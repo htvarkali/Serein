@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
+import { Pause, Play } from "lucide-react"
+import { canPlayBackgroundVideo, prefersReducedMotion, setMotionPaused } from "@/components/site/Motion"
 import { cn } from "@/lib/utils"
 
 // Layout building blocks: off-white ("light") or black ("dark") bands,
@@ -41,23 +43,59 @@ export function Split({ children, className }: { children: ReactNode; className?
   return <div className={cn("grid items-center gap-[clamp(2rem,6vw,7rem)] md:grid-cols-2", className)}>{children}</div>
 }
 
-/** A line of text that scrolls sideways forever (the giant hero headline). */
-export function Marquee({ text, className, reverse }: { text: string; className?: string; reverse?: boolean }) {
+/** A line of text that scrolls sideways forever (the giant hero headline). Phones get
+ *  the same words standing still and wrapped, styled by stillClassName, because a narrow
+ *  screen shows only a few letters of a moving line at a time. Both are decoration: the
+ *  page carries the real text for screen readers next to this. */
+export function Marquee({ text, className, stillClassName, reverse }: { text: string; className?: string; stillClassName?: string; reverse?: boolean }) {
   return (
-    <div className={cn("overflow-hidden whitespace-nowrap", className)} aria-hidden="true">
-      <div className={cn("marquee", reverse && "reverse")}>
-        {[0, 1].map(k => <span key={k} className="pr-[0.4em]">{text}&nbsp;–&nbsp;{text}&nbsp;–&nbsp;</span>)}
+    <>
+      <div className={cn("overflow-hidden whitespace-nowrap max-md:hidden", className)} aria-hidden="true">
+        <div className={cn("marquee", reverse && "reverse")}>
+          {[0, 1].map(k => <span key={k} className="pr-[0.4em]">{text}&nbsp;–&nbsp;{text}&nbsp;–&nbsp;</span>)}
+        </div>
       </div>
-    </div>
+      <p className={cn("md:hidden", stillClassName)} aria-hidden="true">{text}</p>
+    </>
   )
 }
 
-/** Text whose words sharpen one by one as the paragraph scrolls through the screen. */
+/** A silent, looping background clip with a small pause button, which also holds the
+ *  other looping animations on the page. Phones, data saver and "reduce motion" get the
+ *  still poster instead, so the clip is never downloaded there. */
+export function BackgroundVideo({ src, poster, className, parallax = 10 }: { src: string; poster?: string; className?: string; parallax?: number }) {
+  const [play] = useState(canPlayBackgroundVideo)
+  const [paused, setPaused] = useState(false)
+  const ref = useRef<HTMLVideoElement>(null)
+  // Leaving the page turns the other animations back on.
+  useEffect(() => () => setMotionPaused(false), [])
+  if (!play) return poster ? <img src={poster} alt="" className={className} data-parallax={parallax} /> : null
+  function toggle() {
+    const next = !paused
+    setPaused(next)
+    setMotionPaused(next)
+    if (next) ref.current?.pause()
+    else void ref.current?.play()
+  }
+  return (
+    <>
+      <video ref={ref} className={className} src={src} poster={poster} autoPlay muted loop playsInline aria-hidden="true" data-parallax={parallax} />
+      <button type="button" onClick={toggle} aria-pressed={paused} aria-label="Pause background motion" title={paused ? "Play background motion" : "Pause background motion"}
+        className="absolute bottom-2 left-4 z-10 grid size-8 place-items-center rounded-full border border-white/30 bg-black/40 text-white hover:bg-black/70">
+        {paused ? <Play aria-hidden="true" className="size-3.5" /> : <Pause aria-hidden="true" className="size-3.5" />}
+      </button>
+    </>
+  )
+}
+
+/** Text whose words sharpen one by one as the paragraph scrolls through the screen.
+ *  Screen readers get the sentence once, whole; with "reduce motion" it is simply sharp. */
 export function WordReveal({ text, className, as: Tag = "p" }: { text: string; className?: string; as?: "p" | "h2" | "h3" }) {
   const ref = useRef<HTMLElement>(null)
   const words = text.split(" ")
-  const [lit, setLit] = useState(0)
+  const [lit, setLit] = useState(() => prefersReducedMotion() ? words.length : 0)
   useEffect(() => {
+    if (prefersReducedMotion()) return
     let frame = 0
     const update = () => {
       frame = 0
@@ -74,7 +112,8 @@ export function WordReveal({ text, className, as: Tag = "p" }: { text: string; c
     return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); cancelAnimationFrame(frame) }
   }, [words.length])
   return (
-    <Tag ref={ref as never} className={className} aria-label={text}>
+    <Tag ref={ref as never} className={className}>
+      <span className="sr-only">{text}</span>
       {words.map((w, i) => <span key={i} aria-hidden="true" className={cn("word", i >= lit && "dim")}>{w} </span>)}
     </Tag>
   )
@@ -88,8 +127,7 @@ export function PageHero({ eyebrow, title, script, lead, media, children }: {
   return (
     <section className="dark band-dark relative isolate overflow-hidden text-foreground">
       {media?.video
-        ? <video className="absolute inset-0 -z-30 size-full object-cover opacity-55" src={media.video} poster={media.image}
-            autoPlay muted loop playsInline aria-hidden="true" data-parallax="10" />
+        ? <BackgroundVideo className="absolute inset-0 -z-30 size-full object-cover opacity-55" src={media.video} poster={media.image} />
         : media?.image && <img src={media.image} alt="" className="absolute inset-0 -z-30 size-full object-cover opacity-45"
             style={{ objectPosition: media.position }} data-parallax="10" />}
       <div className="absolute inset-0 -z-20 bg-[linear-gradient(180deg,#0a0a0acc,#0a0a0a55_40%,#0a0a0a_100%)]" />
@@ -105,7 +143,7 @@ export function PageHero({ eyebrow, title, script, lead, media, children }: {
           </div>
         </div>
       </div>
-      {media?.credit && <p className="absolute right-4 bottom-3 text-[0.65rem] text-muted-foreground/80 sm:right-6">{media.credit}</p>}
+      {media?.credit && <p className="absolute right-4 bottom-3 text-[0.7rem] text-muted-foreground/80 sm:right-6">{media.credit}</p>}
     </section>
   )
 }

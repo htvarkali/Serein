@@ -8,12 +8,33 @@ gsap.registerPlugin(ScrollTrigger)
 
 let lenis: Lenis | null = null
 
+/** True when the reader's device asks for less motion (an operating system setting). */
+export const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+/** Background clips play only on wider screens, and never with "reduce motion" or data
+ *  saver on. Everyone else gets the still poster, so the clip is not downloaded. */
+export function canPlayBackgroundVideo() {
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData
+  return window.matchMedia("(min-width: 768px)").matches && !prefersReducedMotion() && !saveData
+}
+
+// The pause button in a hero stops every looping animation on the page (see styles.css,
+// ".motion-paused"). Canvases that animate listen for MOTION_EVENT to stop and restart.
+export const MOTION_EVENT = "serein:motion"
+export const motionPaused = () => document.documentElement.classList.contains("motion-paused")
+export function setMotionPaused(paused: boolean) {
+  document.documentElement.classList.toggle("motion-paused", paused)
+  window.dispatchEvent(new Event(MOTION_EVENT))
+}
+
 /** Smooth scrolling (Lenis) driving GSAP ScrollTrigger, plus reveal-on-scroll for any
- *  element marked data-reveal. Re-scans the page after every route change. */
+ *  element marked data-reveal. Re-scans the page after every route change. With
+ *  "reduce motion" on, scrolling is the browser's own and nothing slides with it. */
 export function useSiteMotion() {
   const { pathname } = useLocation()
   useEffect(() => {
     document.documentElement.classList.add("js")
+    if (prefersReducedMotion()) return
     lenis = new Lenis({ lerp: 0.09, smoothWheel: true })
     lenis.on("scroll", ScrollTrigger.update)
     const tick = (time: number) => lenis?.raf(time * 1000)
@@ -37,7 +58,7 @@ export function useSiteMotion() {
         if (el.dataset.revealDelay) el.style.setProperty("--d", `${el.dataset.revealDelay}s`)
         io.observe(el)
       })
-      document.querySelectorAll<HTMLElement>("[data-parallax]").forEach(el => {
+      if (!prefersReducedMotion()) document.querySelectorAll<HTMLElement>("[data-parallax]").forEach(el => {
         if (seen.has(el)) return
         seen.add(el)
         const amount = Number(el.dataset.parallax || 12)

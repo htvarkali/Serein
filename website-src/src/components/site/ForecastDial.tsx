@@ -1,8 +1,12 @@
+import { Fragment } from "react"
+import { prefersReducedMotion } from "@/components/site/Motion"
 import { rmseByLead } from "@/data/site"
 
 // A radial bar chart. Each ring is one forecast day; arc
 // length is proportional to RMSE (full sweep = MAX µg/m³), SmokeCast in the accent color and the
 // reference forecast in blue-grey. Only the outer rings and orbiting dots are decoration.
+// The drawing shrinks with the screen, so on a phone its small labels would come out
+// at 6 to 8 px. There they are hidden and the same facts are listed under the dial.
 const MAX = 16
 const SWEEP = 270
 const START = -135
@@ -21,7 +25,7 @@ export function ForecastDial() {
   return (
     <figure className="relative mx-auto w-full max-w-[38rem]">
       <svg viewBox="0 0 400 400" className="w-full overflow-hidden" role="img"
-        aria-label={`Forecast error by day, root mean square error in micrograms per cubic meter. ${rmseByLead.map(r => `${r.lead}: SmokeCast ${r.serein}, reference ${r.noaa}`).join("; ")}.`}>
+        aria-label={`Forecast error by day, root mean square error in micrograms per cubic meter. ${rmseByLead.map(r => `${r.lead}: SmokeCast ${r.serein.toFixed(1)}, reference ${r.noaa.toFixed(1)}`).join("; ")}.`}>
         <defs>
           <linearGradient id="dial-accent" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#c3c9ff" /><stop offset=".55" stopColor="#5b6cf6" /><stop offset="1" stopColor="#3b49d6" />
@@ -36,7 +40,7 @@ export function ForecastDial() {
             return <line key={i} x1={200 + 186 * Math.sin(a)} y1={200 - 186 * Math.cos(a)} x2={200 + (long ? 176 : 181) * Math.sin(a)} y2={200 - (long ? 176 : 181) * Math.cos(a)}
               stroke="#5b6cf6" strokeOpacity={long ? 0.7 : 0.35} strokeWidth={long ? 0.9 : 0.5} />
           })}
-          <circle cx="200" cy="8" r="3.2" fill="#ffffff"><animate attributeName="opacity" values="1;.4;1" dur="3s" repeatCount="indefinite" /></circle>
+          <circle cx="200" cy="8" r="3.2" fill="#ffffff">{!prefersReducedMotion() && <animate attributeName="opacity" values="1;.4;1" dur="3s" repeatCount="indefinite" />}</circle>
         </g>
         <g className="spin-rev">
           <circle cx="200" cy="200" r="181" fill="none" stroke="#5b6cf640" strokeWidth=".5" strokeDasharray="2 6" />
@@ -47,18 +51,27 @@ export function ForecastDial() {
             <path d={arc(r, MAX)} fill="none" stroke="#ffffff" strokeOpacity=".07" strokeWidth="12" strokeLinecap="round" />
             <path d={arc(r + 4, noaa)} fill="none" stroke="#8a8a8a" strokeOpacity=".85" strokeWidth="3" strokeLinecap="round" />
             <path d={arc(r - 3, serein)} fill="none" stroke="url(#dial-accent)" strokeWidth="6" strokeLinecap="round" className="dial-arc" pathLength={1} />
-            <text x={200 + (r + 1) * Math.sin((-139 * Math.PI) / 180)} y={200 - (r + 1) * Math.cos((-139 * Math.PI) / 180) + 3} textAnchor="end" fontSize="7.5" letterSpacing="1.6" fill="#f5f5f5" fillOpacity=".8"
+            <text x={200 + (r + 1) * Math.sin((-139 * Math.PI) / 180)} y={200 - (r + 1) * Math.cos((-139 * Math.PI) / 180) + 3} textAnchor="end" fontSize="7.5" letterSpacing="1.6" fill="#f5f5f5" fillOpacity=".8" className="max-sm:hidden"
               fontFamily="Poppins, sans-serif" fontWeight="600">{lead.toUpperCase()}</text>
           </g>
         ))}
         <text x="200" y="200" textAnchor="middle" fontFamily="Poppins, sans-serif" fontWeight="400" fontSize="26" fill="#f5f5f5">RMSE</text>
-        <text x="200" y="214" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="6.5" letterSpacing="1.8" fill="#5b6cf6">µg/m³ · LOWER IS BETTER</text>
+        <text x="200" y="214" textAnchor="middle" fontFamily="Poppins, sans-serif" fontSize="6.5" letterSpacing="1.8" fill="#5b6cf6" className="max-sm:hidden">µg/m³ · LOWER IS BETTER</text>
         {[4, 8, 12, 16].map(v => {
           const a = ((START + (SWEEP * v) / MAX) * Math.PI) / 180
-          return <text key={v} x={200 + 172 * Math.sin(a)} y={200 - 172 * Math.cos(a) + 3} textAnchor="middle" fontSize="8" fill="#a3a3a3"
+          return <text key={v} x={200 + 172 * Math.sin(a)} y={200 - 172 * Math.cos(a) + 3} textAnchor="middle" fontSize="8" fill="#a3a3a3" className="max-sm:hidden"
             fontFamily="Poppins, sans-serif">{v}</text>
         })}
       </svg>
+      <div className="mt-4 text-sm sm:hidden" aria-hidden="true">
+        <p className="text-xs text-muted-foreground">Error in µg/m³, lower is better. The full sweep is {MAX}. Rings from the outside in:</p>
+        <dl className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+          {rmseByLead.map(row => <Fragment key={row.lead}>
+            <dt className="font-medium">{row.lead}</dt>
+            <dd className="text-muted-foreground">SmokeCast {row.serein.toFixed(1)} · reference {row.noaa.toFixed(1)}</dd>
+          </Fragment>)}
+        </dl>
+      </div>
       <figcaption className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-2"><span className="h-1.5 w-6 rounded-full bg-gradient-to-r from-[#c3c9ff] to-[#3b49d6]" />SmokeCast</span>
         <span className="inline-flex items-center gap-2"><span className="h-0.5 w-6 rounded-full bg-[#8a8a8a]" />Reference forecast (AQM → HRRR → persistence)</span>

@@ -185,3 +185,18 @@
 @layer base {
   :is(a, button, input, select, [role="slider"]):focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
 }
+
+/* ---------- motion the reader can stop ---------- */
+/* The pause button in a hero (BackgroundVideo) holds every looping animation. */
+.motion-paused :is(.marquee, .spin-slow, .spin-rev, .float, .status-dot),
+.motion-paused .band-dark::before { animation-play-state: paused; }
+
+/* "Reduce motion" on the reader's device: nothing loops, nothing slides in, and the
+   content is simply there. Motion.tsx also turns off smooth scrolling and parallax. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee, .spin-slow, .spin-rev, .float, .status-dot, .band-dark::before { animation: none; }
+  .js [data-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+  .js .dial-arc, .js .is-in .dial-arc { stroke-dashoffset: 0; animation: none; }
+  .word, .project-tile, .btn-pill, .arrow-dot, .nav-link::after { transition: none; }
+}
+

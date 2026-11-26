@@ -1,5 +1,9 @@
 # Website check, 2026-11-26 (groundwork for W-12)
 
+**Update, same day:** most findings below are now fixed in the site code. What changed
+and the before-and-after numbers are in "Fixes made" at the end. Still open: H1 (a team
+decision), M7, L4, L8 and L9.
+
 What this is: a read of the built site in `website/` at commit `7a0c967`, at phone
 size, with nothing in `website-src/` changed. It covers three things: whether the
 site's words agree with the Brief and the README, how the five pages behave on a
@@ -191,3 +195,69 @@ Home and AirPlan, and leave the full file to the map page.
 
 H1 is separate. It is a decision about what the Brief and the site say, and it should
 be made before the Brief is frozen.
+
+## Fixes made, 2026-11-26
+
+Changed in `website-src/`, then rebuilt into `website/` with `npm run build` and
+checked with `python3 scripts/check_website.py`. An unchanged rebuild was compared
+with the committed site first: the JavaScript was identical apart from file names, and
+the CSS differed only in the sixth decimal place of a few colors, so the rebuild
+changes nothing except what is listed here.
+
+| Finding | What changed | Files |
+|---|---|---|
+| H2 | The dot map draws only while it is on screen, at about 20 frames a second instead of every frame, and once if motion is reduced or paused | `LiveForecast.tsx` |
+| H3 | With "reduce motion" on: no looping animations, no slide-in or blur reveals, no smooth scrolling or parallax, no background video. Everyone else gets a pause button in each hero, which stops the video and every looping animation on the page | `Motion.tsx`, `Section.tsx`, `styles.css`, `Home.tsx`, `ForecastDial.tsx` |
+| M6 | Phones (under 768 px), data saver and reduced motion get the still poster image; the clip is never downloaded | `Section.tsx` (`BackgroundVideo`) |
+| M1 | Footer and update log say the map updates every day around midday Pacific | `SiteLayout.tsx`, `data/site.ts` |
+| M2 | Forecast cards say "Today" and "Tomorrow" from the reader's Pacific date, with "Issue day" or "Day 1 ahead" underneath. Archived examples keep plain dates | `lib/world.ts` (`relativeDay`), `PlanCards.tsx`, `World.tsx` |
+| M3 | The header pill is hidden under 640 px, and kept out of the tab order while it is invisible | `SiteLayout.tsx` |
+| M4 | Under 768 px the headline stands still and wraps; the moving line stays on wider screens | `Section.tsx` (`Marquee`), `Home.tsx` |
+| M5 | On phones the ring chart hides its tiny labels and lists the same numbers under it as normal text. Smallest mono labels raised from 9.9 to 11.2 px | `ForecastDial.tsx`, `Home.tsx`, `SiteLayout.tsx`, `Section.tsx`, `LiveForecast.tsx` |
+| L1 | Footer AirNow link always underlined | `SiteLayout.tsx` |
+| L2 | The word-by-word paragraph gives screen readers the sentence once, in hidden text, instead of an `aria-label` on a `<p>` | `Section.tsx` (`WordReveal`) |
+| L3 | The logo link is named by its own text ("Falcon Devs Serein home") | `SiteLayout.tsx` |
+| L5 | On a phone the map's credits box starts closed; the (i) button opens it | `ForecastMap.tsx` |
+| L6 | Exposure sliders and the home comparison slider 28 px tall; footer, AirPlan and "Read the ..." links get 6 px more touch area above and below | `PersonPanel.tsx`, `LiveForecast.tsx`, `SiteLayout.tsx`, `AirPlan.tsx`, `SmokeCast.tsx` |
+| L7 | The map page has a "Skip to content" link | `World.tsx` |
+
+Also: the home hero gets 96 px of space at the top, so on a 320 px screen the status
+pill no longer runs under the logo.
+
+### Before and after
+
+Same machine, same scripts, same Lighthouse settings as above.
+
+| Page | Performance | Accessibility | Time until usable | Blocked time | Downloaded (site files) |
+|---|---|---|---|---|---|
+| Home | 42 → 52 | 93 → 100 | 10.1 s → 5.9 s | 2,650 → 1,040 ms | 3,115 → 1,060 KB |
+| SmokeCast | 66 → 72 | 97 → 100 | 4.8 s → 4.8 s | 510 → 310 ms | 1,860 → 601 KB |
+| AirPlan | 67 → 71 | 96 → 100 | 5.3 s → 5.3 s | 400 → 270 ms | 1,260 → 692 KB |
+| Data and methods | 90 → 89 | 96 → 100 | 2.9 s → 3.0 s | 220 → 190 ms | 344 → 346 KB |
+| Forecast map | no change | 100 → 100 | about 15 s | about 7,500 ms | 1,124 → 1,128 KB |
+
+The map page score moved between 25 and 43 from one run to the next. Run side by side,
+the old and new builds scored 41 to 43 and 42, so nothing changed there; its slow
+start is the map library itself and is the main thing left for W-12.
+
+Other checks after the fixes:
+
+- Main thread busy while the home page sits idle: 30% → 14% (script 18% → 1%).
+- With "reduce motion" on, phone and desktop: no running animations, no video, the
+  headline does not move, normal scrolling.
+- Pause button on a desktop screen: video and headline stop, and start again on a
+  second press.
+- axe-core: 0 violations on all five pages (was 2 rule types on four pages).
+- No sideways scrolling at 390, 360 or 320 px; no console errors from the site's code.
+- Remaining small touch targets: the map's own zoom buttons (29 px) and the population
+  switch on the map page.
+
+### Still open
+
+- **H1**, the meaning of "AirPlan": a team decision, see above.
+- **M7**, a small summary file so Home and AirPlan do not fetch the whole forecast:
+  needs a change to `serein.world` and the daily job, which Aadi runs.
+- **L4**, one name for the map page: a team decision.
+- **L8**, the empty role on the team card: the team.
+- **L9**, unused images: left in place because `docs/drafts/pitch_deck.md` points at one.
+- The map page's start-up time, and a check on a real iPhone and Android phone.

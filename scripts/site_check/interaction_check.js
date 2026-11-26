@@ -17,29 +17,26 @@ const out = {};
 (async () => {
   const browser = await chromium.launch();
 
-  // A. Reduced motion
-  {
-    const ctx = await browser.newContext({ ...devices['iPhone 13'], reducedMotion: 'reduce' });
+  // A. Reduced motion, on a phone and on a desktop screen (background video plays only on wider screens)
+  out.reducedMotion = {};
+  for (const [name, opts] of [['phone', devices['iPhone 13']], ['desktop', { viewport: { width: 1280, height: 900 } }]]) {
+    const ctx = await browser.newContext({ ...opts, reducedMotion: 'reduce' });
     const page = await ctx.newPage();
     await page.goto(BASE + '/', { waitUntil: 'load' }); await page.waitForTimeout(3000);
-    out.reducedMotion = await page.evaluate(() => {
+    const read = () => page.evaluate(() => {
       const mq = document.querySelector('.marquee');
       const v = document.querySelector('video');
-      const cs = mq && getComputedStyle(mq);
-      const anims = document.getAnimations().filter(a => a.playState === 'running').map(a => (a.animationName || a.constructor.name));
-      const count = {}; anims.forEach(n => count[n] = (count[n] || 0) + 1);
-      return { matches: matchMedia('(prefers-reduced-motion: reduce)').matches, marqueeAnimation: cs && cs.animationName, marqueeState: cs && cs.animationPlayState,
-        videoPaused: v && v.paused, videoAutoplay: v && v.autoplay, lenisClass: document.documentElement.className, runningAnimations: count };
+      return { x: mq ? mq.getBoundingClientRect().x : null, t: v ? v.currentTime : null };
     });
-    // does the page move by itself? compare marquee position over a second
-    const x1 = await page.evaluate(() => document.querySelector('.marquee').getBoundingClientRect().x);
-    await page.waitForTimeout(1000);
-    const x2 = await page.evaluate(() => document.querySelector('.marquee').getBoundingClientRect().x);
-    out.reducedMotion.marqueeMovedPx = Math.round(Math.abs(x2 - x1));
-    const t1 = await page.evaluate(() => document.querySelector('video').currentTime);
-    await page.waitForTimeout(1000);
-    const t2 = await page.evaluate(() => document.querySelector('video').currentTime);
-    out.reducedMotion.videoAdvancedSec = +(t2 - t1).toFixed(2);
+    const info = await page.evaluate(() => {
+      const count = {};
+      document.getAnimations().filter(a => a.playState === 'running').forEach(a => { const n = a.animationName || a.constructor.name; count[n] = (count[n] || 0) + 1; });
+      return { matches: matchMedia('(prefers-reduced-motion: reduce)').matches, hasVideo: !!document.querySelector('video'), smoothScroll: document.documentElement.classList.contains('lenis'), runningAnimations: count };
+    });
+    const a = await read(); await page.waitForTimeout(1000); const b = await read();
+    info.marqueeMovedPx = a.x === null ? 0 : Math.round(Math.abs(b.x - a.x));
+    info.videoAdvancedSec = a.t === null ? 0 : +(b.t - a.t).toFixed(2);
+    out.reducedMotion[name] = info;
     await ctx.close();
   }
 

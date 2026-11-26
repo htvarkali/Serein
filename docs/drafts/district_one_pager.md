@@ -75,8 +75,8 @@ There is no cost and no contract.
 - "AQI 101" is the level where the San Ramon Valley chart starts to recommend indoor
   recess for students with asthma, and it is the level our warning is scored on.
 - The forecast is issued at 11:30 am Pacific, so the page says "by about noon" and
-  Brief section 8 says "by midday" (changed 2026-11-26). Brief section 5 still says
-  Smoke World "updates every morning".
+  Brief section 8 says "by midday" (changed 2026-11-26). Brief section 5 and the
+  website now say it updates "every day" (also 2026-11-26).
 - Do not send this before a coach is named and the team email exists.
 - To make the PDF, print this section from GitHub's rendered view, or paste it into a
   document. Keep it to one page.

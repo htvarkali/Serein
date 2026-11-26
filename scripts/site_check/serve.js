@@ -11,7 +11,8 @@ http.createServer((req, res) => {
   const stat = fs.statSync(f);
   const text = /html|javascript|css|json|svg|plain/.test(type);
   if (text && /gzip/.test(req.headers['accept-encoding'] || '')) {
-    const buf = cache[f] || (cache[f] = zlib.gzipSync(fs.readFileSync(f)));
+    const key = f + ':' + stat.mtimeMs;  // a rebuilt file is compressed again
+    const buf = cache[key] || (cache[key] = zlib.gzipSync(fs.readFileSync(f)));
     res.writeHead(200, { 'content-type': type, 'content-encoding': 'gzip', 'content-length': buf.length, 'cache-control': 'max-age=600' });
     return res.end(buf);
   }

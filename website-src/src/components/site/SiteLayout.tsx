@@ -4,6 +4,7 @@ import { ArrowUpRight, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { useSiteMotion } from "@/components/site/Motion"
+import { TeamPortrait } from "@/components/site/TeamPortrait"
 import { team } from "@/data/site"
 import { cn } from "@/lib/utils"
 
@@ -26,11 +27,6 @@ export function Wordmark({ className, onClick }: { className?: string; onClick?:
       <span className="-mt-0.5 text-[1.55rem] font-semibold tracking-[-0.03em] uppercase">Serein</span>
     </Link>
   )
-}
-
-function Initials({ name }: { name: string }) {
-  return <span className="grid size-9 place-items-center rounded-full border-2 border-[#0a0a0a] bg-[#e7dfcc] text-[0.62rem] font-semibold text-[#0a0a0a]">
-    {name.split(" ").map(part => part[0]).join("")}</span>
 }
 
 export function SiteLayout() {
@@ -148,7 +144,11 @@ export function SiteLayout() {
           </div>
           <div>
             <h2 className="flex flex-wrap items-center gap-x-5 text-[clamp(3rem,6.5vw,6.4rem)] leading-[0.95]">
-              <span className="flex -space-x-3" aria-hidden="true">{team.slice(0, 3).map(m => <Initials key={m.name} name={m.name} />)}</span>
+              <span className="flex -space-x-3" aria-hidden="true">
+                {team.slice(0, 3).map(member => (
+                  <TeamPortrait key={member.name} member={member} className="size-9 rounded-full border-2 border-[#0a0a0a]" />
+                ))}
+              </span>
               Plan ahead for wildfire smoke
             </h2>
             <div className="mt-16 grid grid-cols-2 gap-10 text-[0.95rem] sm:grid-cols-4">

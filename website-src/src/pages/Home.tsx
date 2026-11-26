@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Eyebrow, Heading, Lead, Marquee, Script, Section, Split, WordReveal } from "@/components/site/Section"
 import { ForecastCompare, useLive } from "@/components/site/LiveForecast"
 import { ForecastDial } from "@/components/site/ForecastDial"
+import { TeamPortrait } from "@/components/site/TeamPortrait"
 import { BOX } from "@/lib/world"
 import { SOURCE_DEV, asset, headline, rmseByLead, sources, team, updates } from "@/data/site"
 
@@ -115,9 +116,14 @@ export function Home() {
           <WordReveal className="max-w-[34ch] text-[clamp(1.6rem,3.1vw,2.75rem)] leading-[1.18] tracking-[-0.035em]"
             text="When smoke could affect a practice, a shift, or a family’s plans, advance notice gives people time to prepare an alternative. SmokeCast learns from recent monitor readings and existing forecasts, and we test how well it estimates pollution when nearby readings are limited." />
           <Button asChild className="mt-10 h-14 pl-2 pr-6">
-            <Link to="/#team"><span className="flex -space-x-2">{team.slice(0, 3).map(m => (
-              <span key={m.name} className="grid size-10 place-items-center rounded-full border-2 border-[#0a0a0a] bg-[#e7dfcc] text-[0.6rem] font-semibold text-[#0a0a0a]">{m.name.split(" ").map(p => p[0]).join("")}</span>
-            ))}</span>Meet the team</Link>
+            <Link to="/#team">
+              <span aria-hidden="true" className="flex -space-x-2">
+                {team.slice(0, 3).map(member => (
+                  <TeamPortrait key={member.name} member={member} className="size-10 rounded-full border-2 border-[#0a0a0a]" />
+                ))}
+              </span>
+              Meet the team
+            </Link>
           </Button>
         </div>
       </Section>
@@ -245,9 +251,8 @@ export function Home() {
           {team.map((member, i) => (
             <li key={member.name} data-reveal="" data-reveal-delay={String(i * 0.08)}
               className={`flex min-h-56 flex-col rounded-[1.4rem] p-6 ${i % 3 === 0 ? "bg-[#0a0a0a] text-white" : i % 3 === 1 ? "bg-[#e7dfcc]" : "bg-white"}`}>
-              <span className={`grid size-14 place-items-center rounded-full text-sm font-semibold ${i % 3 === 0 ? "bg-[#5b6cf6] text-white" : "bg-[#0a0a0a] text-white"}`}>
-                {member.name.split(" ").map(part => part[0]).join("")}</span>
-              <h3 className="mt-auto pt-6 text-xl tracking-[-0.03em]">{member.name}</h3>
+              <TeamPortrait member={member} className="aspect-square w-full rounded-[0.95rem]" />
+              <h3 className="mt-5 text-xl tracking-[-0.03em]">{member.name}</h3>
               <p className="text-sm opacity-60">{member.grade}</p>
               {member.role && <p className="mt-3 text-sm opacity-80">{member.role}</p>}
             </li>

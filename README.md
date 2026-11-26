@@ -476,7 +476,7 @@ Both workflows are development diagnostics.
 | W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |
 | W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; first real update on the next run) | In progress | Aadi-Tiwari | 2026-11-23 |
-| W-12 | Lighter version that runs on phones and slow computers | Open | | |
+| W-12 | Lighter version that runs on phones and slow computers (phone-size check of the current site with a ranked list of what to change: [docs/WEBSITE_CHECK_2026-11-26.md](docs/WEBSITE_CHECK_2026-11-26.md), 2026-11-26; no site code changed yet) | Open | | |
 | W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-15 | "Where does this data come from" panel: every source, and what is measured vs. forecast vs. estimated | Done | Aadi-Tiwari | 2026-11-23 |

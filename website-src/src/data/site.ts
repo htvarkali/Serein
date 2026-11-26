@@ -68,6 +68,7 @@ export const sources = [
 // "Failed" means the change did not pass the team's acceptance checks and was not kept.
 export const updates = [
   { date: "2026-11-25", kind: "Live", title: "The forecast map now updates each morning", note: "The daily job rebuilds the map data from that morning’s run." },
+  { date: "2026-11-25", kind: "Failed", title: "Temporary fire monitors as a new input", note: "Nearby wildfire smoke monitors from the Forest Service archive did not improve days 1–2.", doc: "EXPERIMENTS.md" },
   { date: "2026-11-23", kind: "Evaluation", title: "Hour-by-hour accuracy tested", note: "Repeating the daily estimate across every hour was as accurate or better than the scaled hourly pattern.", doc: "HOURLY_ACCURACY.md" },
   { date: "2026-11-23", kind: "Accepted", title: "Recalibrated warning probabilities", note: "Fitted on calibration data. The point forecast did not change.", doc: "EXPERIMENTS.md" },
   { date: "2026-11-23", kind: "Failed", title: "GOES-West satellite smoke haze as a new input", note: "Did not improve the forecast, so it was not kept.", doc: "EXPERIMENTS.md" },

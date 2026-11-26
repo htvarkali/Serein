@@ -229,7 +229,9 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
 
   return (
     <div className="relative h-[clamp(19rem,52vh,37rem)] overflow-hidden bg-[#111a30]">
-      <div ref={containerRef} className="absolute inset-0" inert={phase !== "ready"} />
+      {/* Inline position: maplibre-gl.css sets .maplibregl-map to position: relative, which
+          beats Tailwind's layered "absolute" class and collapsed the map to 0 px tall. */}
+      <div ref={containerRef} style={{ position: "absolute", inset: 0 }} inert={phase !== "ready"} />
       {phase !== "ready" && (
         <div className="absolute inset-0 grid place-items-center bg-[#0d1528] p-6 text-center">
           <div className="max-w-xs space-y-3" role="status">

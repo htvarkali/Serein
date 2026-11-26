@@ -153,6 +153,15 @@ export function windFeatures(d: WorldData, hour: number): FeatureCollection {
   return { type: "FeatureCollection", features }
 }
 
+/** "Today", "Tomorrow" or "Yesterday" for a forecast date (YYYY-MM-DD), judged on the
+ *  Pacific calendar the forecast uses. Null for any other day, so an archived example
+ *  keeps its plain dates. */
+export function relativeDay(date: string, now = new Date()): string | null {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", year: "numeric", month: "2-digit", day: "2-digit" }).format(now)
+  const days = Math.round((Date.parse(`${date}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000)
+  return days === 0 ? "Today" : days === 1 ? "Tomorrow" : days === -1 ? "Yesterday" : null
+}
+
 export function localTime(d: WorldData, hour: number) {
   const t = new Date(Date.parse(d.start_utc) + hour * 3600e3)
   return t.toLocaleString("en-US", { timeZone: "America/Los_Angeles", weekday: "short", month: "short", day: "numeric", hour: "numeric" }) + " PT"

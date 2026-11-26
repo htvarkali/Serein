@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { aqiOf, loadWorld, nearestPoint, type WorldData } from "@/lib/world"
+import { aqiOf, loadWorld, nearestPoint, relativeDay, type WorldData } from "@/lib/world"
 
 const PLACES: Record<string, [number, number]> = {
   "San Francisco": [37.77, -122.42], Seattle: [47.61, -122.33], Spokane: [47.66, -117.43],
@@ -47,11 +47,17 @@ function DailyCard({ day, audience }: { day: DayPlan; audience: Audience }) {
   const { lead, date, median, low, high } = day
   const aqi = aqiOf(median)
   const note = planningNotes[audience][median >= 35.5 ? "plan" : high >= 35.5 ? "watch" : "check"]
+  // A reader thinks in "today" and "tomorrow"; the run thinks in days ahead. Show both.
+  const leadLabel = lead === 0 ? "Issue day" : `Day ${lead} ahead`
+  const when = date ? relativeDay(date) : null
 
   return (
     <Card className="h-full gap-4">
       <CardHeader className="px-4 sm:px-6">
-        <h3 className="text-sm font-medium text-muted-foreground">{lead === 0 ? "Issue day" : `Day ${lead} ahead`}{date ? <> · <time dateTime={date}>{dateLabel(date)}</time></> : null}</h3>
+        <h3 className="text-sm font-medium text-muted-foreground">
+          {when ? <span className="text-foreground">{when}</span> : leadLabel}{date ? <> · <time dateTime={date}>{dateLabel(date)}</time></> : null}
+          {when && <span className="block text-xs font-normal">{leadLabel}</span>}
+        </h3>
         <p className="font-serif text-5xl font-normal tabular-nums">{median} <span className="font-sans text-base text-muted-foreground">µg/m³</span></p>
       </CardHeader>
       <CardContent className="space-y-3 px-4 text-sm sm:px-6">

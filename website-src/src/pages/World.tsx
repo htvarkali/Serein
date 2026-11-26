@@ -8,7 +8,7 @@ import { Wordmark } from "@/components/site/SiteLayout"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Switch } from "@/components/ui/switch"
-import { AQI, loadPeople, loadWorld, localTime, nearestPoint, peopleUnderSmoke, valueAt,
+import { AQI, loadPeople, loadWorld, localTime, nearestPoint, peopleUnderSmoke, relativeDay, valueAt,
   type People, type Which, type WorldData } from "@/lib/world"
 
 const PLACES = {
@@ -58,7 +58,7 @@ function ForecastDetails({ data, picked, label, which, hour }: {
           const median = day.q50[picked], low = day.q05[picked], high = day.q95[picked]
           return <div key={day.lead} className="rounded-xl border bg-background/55 p-3">
             <p className="text-xs font-medium text-muted-foreground">
-              {LEADS[day.lead] ?? `Day ${day.lead}`}
+              {(day.date ? relativeDay(day.date) : null) ?? LEADS[day.lead] ?? `Day ${day.lead}`}
               {Number.isFinite(date.getTime()) ? ` · ${shortDate.format(date)}` : ""}
             </p>
             <p className="mt-2 font-serif text-3xl leading-none">{median ?? <span className="font-sans text-sm">No data</span>}</p>
@@ -162,6 +162,12 @@ export default function World() {
 
   return (
     <div className="dark min-h-screen bg-background text-foreground">
+      <a href="#map-main" onClick={event => {
+        event.preventDefault()
+        const main = document.getElementById("map-main")
+        main?.focus()
+        main?.scrollIntoView({ block: "start" })
+      }} className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-lg focus:bg-card focus:px-4 focus:py-3">Skip to content</a>
       <header className="border-b border-white/10 bg-deep/60">
         <div className="mx-auto flex max-w-[91rem] items-center justify-between gap-4 px-4 py-4 sm:px-7">
           <Wordmark className="text-3xl text-primary" />
@@ -169,7 +175,7 @@ export default function World() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[91rem] px-4 py-7 sm:px-7 lg:py-10">
+      <main id="map-main" tabIndex={-1} className="mx-auto max-w-[91rem] px-4 py-7 focus:outline-none sm:px-7 lg:py-10">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-5">
           <div>
             <h1 className="text-5xl sm:text-6xl">Forecast explorer</h1>

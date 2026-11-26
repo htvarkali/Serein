@@ -366,3 +366,33 @@ and six more inputs on a third of the rows add noise. Not merged; the loader and
 features are kept on branch `b8-fire-monitors`. Not tried: the monitors as graph
 nodes (needs HRRR and AQM extracted at their locations) or as extra training targets.
 ACCEPTANCE: FAIL b8_tmon, inner_b8_tmon: no lead 1-2 gain; inner leads 0 and 3 worse.
+
+## 2026-11-25 Ensemble size: 10 seeds instead of 5 (`--seeds 10`)
+
+Hypothesis: the differences between runs in the records above are often 0.2-0.5
+µg/m³ at leads 1-3, which is the size of the effects being tested, so part of the
+forecast error is the randomness of training. Averaging 10 networks instead of 5
+should lower RMSE a little at every lead, most at days 2-3. No input or setting
+changes; seeds 0-9 include the current seeds 0-4. Cost: twice the training time
+for each model update; the daily forecast stays seconds. Tags `ens10`,
+`ens10_holdout`, `inner_ens10` against `b8_base`, `b8_base_holdout`,
+`inner_b8_base` (same code, same day). Same acceptance rule.
+
+## 2026-11-25 CAMS: an independent forecast model as input (`build-table --cams`)
+
+Hypothesis: every input so far comes from NOAA's models or from observations, and
+the misses are at days 2-3, where HRRR has ended and AQM is the only model. ECMWF's
+CAMS global forecast is built separately (its own emissions, satellite fire
+assimilation and weather) and runs to 5 days, so it adds independent information
+exactly there. Expected: lower RMSE at leads 2-3 and possibly 1, mostly on smoke days.
+
+Inputs, fixed before the first run: the CAMS 00 UTC run of the issue day (ECMWF
+guarantees it by 10:00 UTC, 8.5 h before the 18:30 UTC issue time), PM2.5 at the
+nearest 0.4 degree cell, 3-hourly steps 0-96 h, local-day mean and max for leads 0-3
+(`cams_mean_L*`, `cams_max_L*`; day 3 has 6 of its 8 steps, at least 6 required).
+
+Caveats: CAMS is upgraded every year or so (dates not checked here), so a version
+change can sit between the training and scoring seasons; the inner fold is a second
+season pair. CAMS files come from the free Copernicus
+Atmosphere Data Store account. Tags `cams`, `cams_holdout`, `inner_cams` against the
+same-day baselines. Same acceptance rule.

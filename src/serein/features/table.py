@@ -10,6 +10,7 @@ Column groups
   aqm_*_L{l}           NOAA AQM bias-corrected PM2.5, local-day mean/max
   hms_prev             yesterday's HMS smoke density at the point (0..3)
   frp_*                nearby fire radiative power in the last 24 h (FIRMS)
+  cams_*_L{l}          ECMWF CAMS 00 UTC PM2.5 forecast, local-day mean/max (optional)
   lat, lon, doy_sin, doy_cos
 """
 
@@ -27,6 +28,8 @@ from serein.data.availability import AQM_POSTED_LAG_H, HRRR_POSTED_LAG_H, Availa
 from serein.features.daily import model_daily, obs_daily_means
 
 MET_VARS = ["u10", "v10", "pbl", "t2m", "rh2m", "colmd"]
+# CAMS is 3-hourly and ends at 96 h: day 3 has 6 of its 8 steps, so 6 is the minimum.
+CAMS_MIN_STEPS = 6
 
 
 def processed_dir(study: Study):
@@ -138,8 +141,23 @@ def _model_features(days, points, offsets, store: str, av: Availability) -> pd.D
     return pd.concat(out, axis=1).reset_index()
 
 
+def _cams_features(days, points, offsets) -> pd.DataFrame:
+    # The 00 UTC run is published hours before the 18:30 UTC issue time.
+    from serein.data import cams as cams_data
+
+    cf = cams_data.point_forecasts(days, points)
+    if cf.empty:
+        raise RuntimeError("No CAMS files for these days. Download them first (serein.data.cams).")
+    g = model_daily(cf, offsets, min_count=CAMS_MIN_STEPS)
+    g = g[g["lead"].between(0, 3)]
+    p = g.pivot_table(index=["issue_date", "point_id"], columns="lead", values=["mean", "max"])
+    p.columns = [f"cams_{stat}_L{lead}" for stat, lead in p.columns]
+    return p.reset_index()
+
+
 def build_table(study: Study, days: list[date], points: pd.DataFrame,
-                use_firms: bool = True, progress: bool = True) -> pd.DataFrame:
+                use_firms: bool = True, progress: bool = True,
+                cams: bool = False) -> pd.DataFrame:
     if not days:
         raise ValueError("feature table requires at least one issue date")
     # Issue days are calendar labels, so UTC conversion could change the day.
@@ -171,6 +189,9 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
     mod = _model_features(days, points, offsets, study.name, av)
     if len(mod):
         tab = tab.merge(mod, on=["issue_date", "point_id"], how="left")
+    if cams:
+        tab = tab.merge(_cams_features(days, points, offsets), on=["issue_date", "point_id"],
+                        how="left")
 
     # HMS (yesterday) and fires.
     fires = pd.DataFrame()

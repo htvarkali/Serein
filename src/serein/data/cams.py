@@ -13,6 +13,9 @@ from __future__ import annotations
 import zipfile
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
+
 from serein.config import raw_dir
 
 DATASET = "cams-global-atmospheric-composition-forecasts"
@@ -43,3 +46,44 @@ def download_month(year: int, month: int, overwrite: bool = False) -> Path:
         out.write_bytes(z.read(name))
     tmp.unlink()
     return out
+
+
+def point_forecasts(days, points) -> pd.DataFrame:
+    """The 00 UTC run of each issue day at each point (nearest 0.4 degree cell).
+
+    Returns ``issue_date, point_id, valid_utc, value`` with value in µg/m³, the
+    format ``serein.features.daily.model_daily`` expects. Days whose month file is
+    missing, or that are not in it, are left out (the table marks them missing).
+    """
+    import xarray as xr
+
+    lat = xr.DataArray(points["lat"].to_numpy(float), dims="p")
+    lon = xr.DataArray(points["lon"].to_numpy(float), dims="p")
+    ids = points["point_id"].to_numpy()
+    by_month: dict[tuple[int, int], list] = {}
+    for d in days:
+        by_month.setdefault((d.year, d.month), []).append(d)
+    parts = []
+    for (year, month), month_days in sorted(by_month.items()):
+        path = month_path(year, month)
+        if not path.exists():
+            continue
+        with xr.open_dataset(path) as ds:
+            runs = pd.to_datetime(ds["forecast_reference_time"].values)
+            for d in month_days:
+                run = pd.Timestamp(d.year, d.month, d.day)  # 00 UTC of the issue day
+                if run not in runs:
+                    continue
+                field = ds["pm2p5"].sel(forecast_reference_time=run)
+                vals = field.sel(latitude=lat, longitude=lon, method="nearest").values * 1e9
+                steps = run + pd.to_timedelta(ds["forecast_period"].values)
+                n_steps, n_pts = vals.shape
+                parts.append(pd.DataFrame({
+                    "issue_date": d,
+                    "point_id": np.tile(ids, n_steps),
+                    "valid_utc": np.repeat(steps, n_pts),
+                    "value": vals.reshape(-1).astype(float),
+                }))
+    if not parts:
+        return pd.DataFrame(columns=["issue_date", "point_id", "valid_utc", "value"])
+    return pd.concat(parts, ignore_index=True)

@@ -435,7 +435,7 @@ Both workflows are development diagnostics.
 ### E: Product & pitch
 | ID | Task | Status | Owner | Date |
 |---|---|---|---|---|
-| E-1 | **(non-code)** Interviews: 5+ parents of children with asthma, 2+ school nurses, 1+ pediatric doctor. Notes in `docs/interviews/` (no names) | Open | | |
+| E-1 | **(non-code)** Interviews: 5+ parents of children with asthma, 2+ school nurses, 1+ pediatric doctor. Notes in `docs/interviews/` (no names). Who to ask first and what to send: [outreach list](docs/interviews/OUTREACH_TARGETS.md) (2026-11-26); nobody has been contacted yet | Open | | |
 | E-2 | Demo app v0 (`uv run streamlit run app/streamlit_app.py`): map, family plan, check-in | Done | Aadi-Tiwari | 2026-11-01 |
 | E-2b | Polish the app using interview feedback (needs E-1) | Open | | |
 | E-2c | Sample forecast shipped in `app/sample/` so the app works without the data download | Done | Aadi-Tiwari | 2026-11-01 |
@@ -443,9 +443,9 @@ Both workflows are development diagnostics.
 | E-3b | Third language for the mockups (only after C-7 sets the review process; see C-11) | Open | | |
 | E-4 | **(non-code)** Business model: free for families; who pays (school districts, health plans, air districts), with prices and sources ([numbers](docs/BUSINESS_NUMBERS_2026-11-07.md) done; price confirmation needs E-1) | In progress | AbhinavGGarg | 2026-11-08 |
 | E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models); [source verification](docs/COMPETITOR_VERIFICATION_2026-11-07.md) | Done | Kwilier | 2026-11-07 |
-| E-6 | **(non-code)** Business plan and pitch from the Lean Canvas. First draft 2026-11-25: [business plan](docs/drafts/business_plan.md) with three-year scenarios from `python -m serein.business` (tested); the Lean Canvas text and interview findings (E-1) are still to be merged in | In progress | AbhinavGGarg | 2026-11-25 |
-| E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit) | Open | | |
-| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): USPTO status checked 2026-11-25; the SEREIN application in classes 9/42/44 was abandoned in 2023 and one live SEREIN registration covers e-cigarettes in class 34; full name search and the team's decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
+| E-6 | **(non-code)** Business plan and pitch from the Lean Canvas. First draft 2026-11-25: [business plan](docs/drafts/business_plan.md) with three-year scenarios from `python -m serein.business` (tested); the Lean Canvas text and interview findings (E-1) are still to be merged in. Pitch: [slide text and speaker notes](docs/drafts/pitch_deck.md) for the eight-minute Summit talk (2026-11-26) | In progress | AbhinavGGarg | 2026-11-26 |
+| E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit). A [one-page handout](docs/drafts/district_one_pager.md) for a district is drafted (2026-11-26); no letter has been asked for | Open | | |
+| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): USPTO word search run 2026-11-26: 30 marks contain "serein", 13 live, none of them in classes 9, 42 or 44; the earlier application in those classes was abandoned in 2023; live SEREIN registrations cover e-cigarettes and children's car seats among others; similar-sounding names not searched; the team's decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
 
 ### S: Submission (Conrad Innovation Stage, due 2027-01-07, internal target 2027-01-01)
 | ID | Task | Status | Owner | Date |

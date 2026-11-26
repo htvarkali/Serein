@@ -85,6 +85,12 @@ def cmd_download(args):
             store=study.name), days, max(1, args.workers // 4), "hrrr-temperature")
         if missing_ozone or missing_temperature:
             sys.exit("Context download incomplete: one or more cycles are missing or failed.")
+    if src == "airfire":
+        # Temporary fire monitors (B-8): one yearly file per network, so whole years.
+        from serein.data import airfire
+        for year in sorted({d.year for d in days}):
+            airfire.download_year(year)
+            print(f"airfire: {year} saved")
     if src == "firms":
         from serein.data import firms
         # Only the season days (plus the day before each run, for the 24 h window),
@@ -127,7 +133,8 @@ def cmd_build_table(args):
     days = _days(args)
     pts = load_points(study.name)
     pts = pts[pts["kind"].isin(args.kinds.split(","))]
-    tab = build_table(study, days, pts, use_firms=not args.no_firms, cams=args.cams)
+    tab = build_table(study, days, pts, use_firms=not args.no_firms, cams=args.cams,
+                      fire_monitors=args.fire_monitors)
     name = args.out or (args.split or f"{days[0]:%Y%m%d}_{days[-1]:%Y%m%d}")
     path = processed_dir(study) / f"table_{name}.parquet"
     tab.to_parquet(path, index=False)
@@ -274,7 +281,7 @@ def main(argv=None):
         sp.add_argument("--split", choices=["train", "calibrate", "test"])
 
     sp = sub.add_parser("download", help="download + extract one data source")
-    sp.add_argument("source", choices=["airnow", "hms", "hrrr", "aqm", "firms", "context", "all"])
+    sp.add_argument("source", choices=["airnow", "hms", "hrrr", "aqm", "firms", "context", "airfire", "all"])
     common(sp)
     sp.add_argument("--workers", type=int, default=8)
     sp.set_defaults(fn=cmd_download)
@@ -292,6 +299,8 @@ def main(argv=None):
     sp.add_argument("--no-firms", action="store_true")
     sp.add_argument("--cams", action="store_true",
                     help="add the ECMWF CAMS PM2.5 forecast (download the month files first)")
+    sp.add_argument("--fire-monitors", action="store_true",
+                    help="add nearby temporary fire monitors (run `serein download airfire` first)")
     sp.set_defaults(fn=cmd_build_table)
 
     sp = sub.add_parser("backtest", help="train on train split, calibrate, score on test")

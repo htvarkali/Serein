@@ -349,6 +349,52 @@ two training seasons the model may not be able to use a weak extra signal; a rea
 transport input (for example HRRR smoke beyond 48 h, which the archive does not have)
 would be needed.
 
+## 2026-11-26 B-15: train the point forecast on the scored error (`backtest --point-weight`)
+
+Hypothesis: the model is trained only with the quantile loss in log space, but it is
+scored on RMSE in µg/m³. In log space a forecast of 40 for an observed 120 costs about
+as much as 4 for 12, so the loss barely sees what makes RMSE large: the missed peaks,
+which grow with lead (day 2-3 forecasts reach a median 55% / 29% of the observed peak).
+Try 1 above only moved the output after training; this change puts the scored error
+into training. Change: add to the loss a Huber term on the median in µg/m³,
+`point_weight * huber((expm1(median) - expm1(y)) / 35.5, delta 1)`, unweighted and averaged
+over the same rows as the quantile loss (also used for early stopping). The quantile
+loss, the 6x smoke-day weight and everything else stay the same. One value is set in
+advance, `--point-weight 1` (the term is then about a quarter of the validation loss,
+about 0.10); default 0 is the current model. Expected: lower RMSE at leads 1-3, mostly
+on smoke days, with some cost in log-space quantile skill on clean days; the conformal
+step keeps the 90% coverage near 0.90. Tags `base_20261126` and `b15_point1` (dev),
+`inner_base_20261126` and `inner_b15_point1` (train 2021, score 2022), same tables and
+seeds; hidden-monitor run `b15_point1_holdout` vs. `dev_holdout` only if the primary
+test passes.
+
+Baseline check: `base_20261126` reproduces `base_20261124` exactly at every lead.
+
+Result, dev (`b15_point1` vs. `base_20261126`) and inner fold (`inner_b15_point1` vs.
+`inner_base_20261126`); RMSE new - current with the 95% day-bootstrap interval:
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval |
+|---|---|---|---|---|
+| 0 | 4.362 -> 4.451 | (+0.02, +0.16) | 4.040 -> 4.310 | (+0.02, +0.49) |
+| 1 | 7.776 -> 8.013 | (-0.12, +0.73) | 6.463 -> 6.631 | (-0.03, +0.37) |
+| 2 | 9.721 -> 9.793 | (-0.27, +0.32) | 8.034 -> 7.985 | (-0.34, +0.25) |
+| 3 | 11.584 -> 11.517 | (-0.58, +0.24) | 10.439 -> 10.208 | (-0.56, +0.06) |
+
+Smoke-day RMSE (HMS smoke over the site yesterday), dev: 6.33 -> 6.46, 11.04 -> 11.43,
+13.83 -> 13.93, 16.71 -> 16.65; inner: 6.14 -> 6.52, 9.82 -> 10.10, 11.62 -> 11.54,
+16.16 -> 15.78. USG CSI, dev: 0.656 -> 0.665, 0.535 -> 0.514, 0.435 -> 0.435,
+0.287 -> 0.263. 90% coverage stayed 0.89-0.91 on both folds. Day 3 moved the right way
+on both folds without reaching significance; day 0 got worse on both with its interval
+above 0, and days 1-2 did not improve. Training on the error in µg/m³ does not fix the
+peak shortfall any better than the larger smoke-day weight did. The `--point-weight`
+option is not merged. Hidden-monitor run not made because the primary test failed.
+ACCEPTANCE: FAIL b15_point1, inner_b15_point1: lead 0 worse on both folds with the interval above 0; no lead 1-2 gain.
+
+B-15 stays open. Four approaches that pull the median toward peaks (mean-style point,
+larger late smoke weight, 2020 data, µg/m³ loss term) all trade day 0-1 accuracy for a
+small, non-significant day 3 gain. With all leads sharing one network, a change aimed
+at days 2-3 leaks into days 0-1; a separate day 2-3 output head is the remaining idea.
+
 ## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
 
 Full results in `docs/HOURLY_ACCURACY.md`. The Serein-scaled hourly field beats NOAA's raw

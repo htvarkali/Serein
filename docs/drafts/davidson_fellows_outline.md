@@ -8,11 +8,11 @@ Source: https://www.davidsongifted.org/gifted-programs/fellows-scholarship/eligi
 
 1. **Team size.** Davidson accepts individuals or **two-person teams only**, and a
    two-person team must email DavidsonFellows@DavidsonGifted.org *before* starting the
-   application. Serein has four people. The honest options: (a) the two members whose
+   application. Serein has five people. The honest options: (a) the two members whose
    work is most separable (for example, SmokeCast and its evaluation) apply as a team
    with a clearly scoped project, crediting the rest of the team in the submission;
    (b) nobody applies; (c) one member applies alone with their own component. Option
-   (a) only works if the other two agree in writing beforehand; a scholarship that
+   (a) only works if the others agree in writing beforehand; a scholarship that
    splits a team three months before the Summit is not worth it.
 2. **Residency.** Historically the program requires US citizens or permanent residents
    residing in the US (check the Eligibility & FAQs page; it was not on the how-to-apply

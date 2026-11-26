@@ -315,3 +315,54 @@ predicts which hours of a day are worst (within-day correlations 0.04-0.30). The
 idea was tried after seeing the first result and did not help (profile vs. flat within
 +/-0.1 µg/m³). Consequence for the product: present the daily level as the tested forecast
 and do not give hour-specific advice from the hourly pattern.
+
+## 2026-11-25 B-8: temporary fire monitors (free replacement for PurpleAir)
+
+Why: B-8 asked whether extra sensors help, but PurpleAir history costs money and the
+project uses free data only. The USDA Forest Service AirFire archive publishes the
+hourly PM2.5 of temporary fire monitors (E-BAMs reported through WRCC and AIRSIS) on a
+public S3 bucket with no key. Their IDs (for example `MMCA81013`) are not in the
+AirNow hourly files Serein reads, so they are new information, and they are placed
+next to active fires, where the peaks are missed (B-15). In the West study area,
+June-October, 74 (2021), 51 (2022) and 69 (2023) monitors more than 5 km from any
+Serein monitor reported at least 24 hours; 20% of their 2021 hours were 35.5 µg/m³
+or higher.
+
+Hypothesis: recent readings of nearby fire monitors lower RMSE at leads 1-2,
+mostly on smoke days, and help hidden monitors.
+
+Inputs (`build-table --fire-monitors`, `serein.features.fire_monitors`), fixed before
+the first run: monitors within 150 km that reported in the 24 h before the AirNow
+cutoff; count, distance to the nearest (300 km if none), inverse-distance means of
+their last-6 h and last-24 h means (weights stop growing inside 10 km), their 24 h
+maximum, and the 24 h maximum of monitors upwind (within 60 degrees of where the
+issue-time HRRR wind comes from). Readings outside 0-1500 µg/m³ are dropped. The
+monitors are inputs only: no new targets, scoring stays on the same EPA rows.
+
+Caveat: these are AirFire's quality-controlled yearly files, not the raw real-time
+feed, so a real-time forecast could have seen a few readings that were later removed.
+Readings are used only up to the AirNow cutoff (newest hour starting 16:00 UTC).
+
+Runs (same code, same day): baselines `b8_base`, `b8_base_holdout`, `inner_b8_base`;
+new `b8_tmon`, `b8_tmon_holdout`, `inner_b8_tmon`. Same acceptance rule.
+
+Result. Fire monitors were within 150 km on 37-42% of monitor-days and 38-57% of
+smoke-yesterday monitor-days. The rebuilt tables match the old ones in every existing
+column; only the six `tmon_` columns differ. The baseline reproduced the job's
+2026-11-25 run exactly.
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.519 | (-0.01, +0.32) | 4.040 -> 4.351 | (+0.01, +0.56) | 6.92 -> 6.69 |
+| 1 | 7.776 -> 7.932 | (-0.18, +0.49) | 6.463 -> 6.655 | (-0.02, +0.42) | 8.39 -> 8.37 |
+| 2 | 9.721 -> 9.935 | (-0.16, +0.53) | 8.034 -> 7.849 | (-0.43, +0.05) | 9.90 -> 10.03 |
+| 3 | 11.584 -> 11.418 | (-0.45, +0.01) | 10.439 -> 10.652 | (+0.08, +0.39) | 11.38 -> 11.54 |
+
+Smoke-day RMSE is worse at leads 0-2 (11.04 -> 11.25 at lead 1), USG CSI drops at
+lead 1 (0.535 -> 0.505), coverage stays within 0.89-0.91. The extra readings do not
+help the forecast days. The same pattern as GOES haze and the FRP inputs: information
+about smoke that is already present is mostly in the EPA monitors and NOAA's runs,
+and six more inputs on a third of the rows add noise. Not merged; the loader and the
+features are kept on branch `b8-fire-monitors`. Not tried: the monitors as graph
+nodes (needs HRRR and AQM extracted at their locations) or as extra training targets.
+ACCEPTANCE: FAIL b8_tmon, inner_b8_tmon: no lead 1-2 gain; inner leads 0 and 3 worse.

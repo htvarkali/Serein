@@ -1,9 +1,11 @@
 # IP decision memo (task E-8), for team discussion
 
-Written 2026-11-07 by a non-lawyer. Conrad's prize partners include ArentFox Schiff
-pro-bono patent services for Scholar winners, and the Nov 12 Conrad virtual workshop
-is "Business Insight: Protect Your Idea." Attend it, then decide. Nothing below is
-legal advice; verify fees and status on uspto.gov.
+Written 2026-11-07 by a non-lawyer. The trademark facts (item 4) were rechecked on
+USPTO's own status system on 2026-11-25 and have changed. The 2024-25 Conrad prize
+list named ArentFox Schiff pro-bono patent services for Scholar winners; that list is
+no longer online and the 2026 awards page does not mention it, so do not count on it.
+Conrad's November 12 workshop, "Business Insight: Protect Your Idea", has passed.
+Nothing below is legal advice; verify fees and status on uspto.gov.
 
 ## What the rules require
 
@@ -34,24 +36,40 @@ legal advice; verify fees and status on uspto.gov.
    check-in, with a rule that the output can only be stricter than a public
    guideline, and (d) the pipeline from (a) to (c) producing a zoned plan. Abstract
    ideas and pure math are not patentable; a concrete system with these components
-   is at least describable. Whether it is *grantable* is a question for the
-   ArentFox attorneys if we win; for the brief, "provisional filed on the combined
+   is at least describable. Whether it is *grantable* is a question for a
+   patent attorney; for the brief, "provisional filed on the combined
    system" is enough.
-4. **The name "SEREIN" has a live conflict.** A SEREIN mark exists in Classes 9,
-   42 and 44 for "downloadable computer software for diagnosing and treating
-   psychological and related physiological comorbidities of severe acute and chronic
-   diseases," published for opposition January 11, 2022 (serial 90636402).
-   https://trademarks.justia.com/906/36/serein-90636402.html
-   That is health software in the same classes we would file in. A USPTO examiner
-   could refuse our application for likelihood of confusion. An earlier SEREiN mark
-   in Class 25 (clothing) was abandoned in 2018 and is not a concern.
-   https://trademarkdir.com/owner/serein
-   **Action:** check the live status of serial 90636402 on USPTO TSDR
-   (tsdr.uspto.gov). If it registered, talk to a mentor about (i) keeping "Serein"
-   as a project name for the competition only, (ii) picking a product name we can
-   own before the website and video are final, or (iii) filing anyway in Class 42
-   with a narrow description and accepting refusal risk. A trademark application is
-   $350 per class (electronic); do not spend it until this is resolved.
+4. **The name "SEREIN": the conflict found on November 7 is dead. Checked on USPTO
+   TSDR on 2026-11-25** (status pages generated 2026-11-26 01:00 EST).
+
+   | Serial | Owner | Goods and services | Status |
+   |---|---|---|---|
+   | 90636402 | Blue Note Therapeutics, Inc. | Classes 9, 42 and 44: software for "diagnosing and treating psychological and related physiological comorbidities of severe acute and chronic diseases" | **Dead.** Abandoned October 9, 2023: no Statement of Use was filed after the Notice of Allowance of March 8, 2022 (two extensions were granted first) |
+   | 98444557 (Reg. No. 7758030) | Serein International Limited, Hong Kong | Class 34: electronic cigarettes, e-liquid and accessories; a stylized word with an umbrella design | **Live.** Registered April 15, 2025 |
+
+   What this means, as far as a non-lawyer can say:
+   - The health-software application that worried us never registered and is no longer
+     active. It was the only SEREIN filing we knew of in the classes we would use.
+   - The one live registration we found is for vaping products. Those goods are not
+     software or a health service, so it is a different kind of question from the first
+     one. It is also a fact to think about for its own sake: a children's asthma product
+     would share its name with an e-cigarette brand. That is a branding choice for the
+     team, apart from any legal one.
+   - **This was a check of two serial numbers, not a search.** The earlier SEREiN mark in
+     Class 25 (clothing) was abandoned in 2018 and is not a concern.
+     https://trademarkdir.com/owner/serein
+
+   **Action before spending $350:** run a full search at https://tmsearch.uspto.gov/
+   (search "serein", filter to live marks, then look at anything in Classes 9, 42 and
+   44 and at similar spellings such as "serene" and "sereine" for health or software
+   goods). It takes about ten minutes. Save a screenshot with the date in
+   `docs/drafts/`. Then decide: (i) keep "Serein" and file in Class 42 with a narrow
+   description, (ii) keep it as a project name for the competition only, or (iii) pick
+   a product name we can own before the website and video are final. A trademark
+   application is $350 per class when the goods are picked from the USPTO's ID Manual;
+   writing a free-form description adds $200 per class (USPTO trademark fee page,
+   updated November 4, 2026).
+   https://www.uspto.gov/trademarks/trademark-fee-information
 
 ## Options
 
@@ -66,7 +84,10 @@ code; it is (1) the validated, pre-registered backtest nobody else has published
 a family product, (2) partnerships with a district and a clinician, and (3) the data
 flywheel from check-ins (which we never publish). Say exactly that in Brief Q4.
 
-## Draft text for Brief Q4 "IP protection" (replace the [TEAM decision needed] block)
+## Draft text for Brief Q4 "IP protection"
+
+A shortened version of this paragraph went into `innovation_brief.md` on 2026-11-25,
+with a `[TEAM]` note to confirm option A and to add the line about the name.
 
 > Our forecasting code is open source (MIT) so that health departments and judges
 > can audit it; we believe trust is worth more than secrecy for a product that

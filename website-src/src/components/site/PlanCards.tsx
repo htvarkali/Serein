@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { aqiOf, loadWorld, nearestPoint, relativeDay, type WorldData } from "@/lib/world"
+import { aqiOf, chanceLabel, loadWorld, nearestPoint, outlookExtras, relativeDay, type WorldData } from "@/lib/world"
 
 const PLACES: Record<string, [number, number]> = {
   "San Francisco": [37.77, -122.42], Seattle: [47.61, -122.33], Spokane: [47.66, -117.43],
@@ -17,7 +17,7 @@ const PLACES: Record<string, [number, number]> = {
 type Audience = "activity" | "family" | "worker"
 type Dataset = "live" | "aug2023"
 type Snapshot = { state: "loading" | "error" } | { state: "ready"; data: WorldData }
-type DayPlan = { lead: number; date: string | null; median: number; low: number; high: number }
+type DayPlan = { lead: number; date: string | null; median: number; low: number; high: number } & ReturnType<typeof outlookExtras>
 
 const planningNotes = {
   activity: {
@@ -44,7 +44,7 @@ const dateLabel = (day: string) =>
 const isNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value)
 
 function DailyCard({ day, audience }: { day: DayPlan; audience: Audience }) {
-  const { lead, date, median, low, high } = day
+  const { lead, date, median, low, high, chance, warned, lowConfidence } = day
   const aqi = aqiOf(median)
   const note = planningNotes[audience][median >= 35.5 ? "plan" : high >= 35.5 ? "watch" : "check"]
   // A reader thinks in "today" and "tomorrow"; the run thinks in days ahead. Show both.
@@ -66,6 +66,14 @@ function DailyCard({ day, audience }: { day: DayPlan; audience: Audience }) {
           {aqi.name}
         </p>
         <p className="text-muted-foreground">Forecast range {low}–{high} µg/m³</p>
+        {chance !== null && <p>
+          <span className="font-medium">{chanceLabel(chance)}</span>{" "}
+          <span className="text-muted-foreground">chance of reaching “Unhealthy for Sensitive Groups”</span>
+        </p>}
+        {(warned || lowConfidence) && <div className="flex flex-wrap gap-2">
+          {warned && <span className="rounded-full bg-[#f0883e]/20 px-2.5 py-1 text-xs font-medium text-foreground">Smoke warning</span>}
+          {lowConfidence && <span className="rounded-full border px-2.5 py-1 text-xs font-medium">Less certain than usual</span>}
+        </div>}
         <p className="rounded-lg bg-secondary p-3 leading-relaxed text-secondary-foreground">{note}</p>
       </CardContent>
     </Card>
@@ -94,9 +102,11 @@ export function PlanCards() {
     const [lat, lon] = PLACES[place]
     const point = nearestPoint(data, lon, lat)
     if (point < 0) return []
-    return data.daily.flatMap(({ lead, date, q05, q50, q95 }): DayPlan[] => {
+    return data.daily.flatMap((day): DayPlan[] => {
+      const { lead, date, q05, q50, q95 } = day
       const [low, median, high] = [q05[point], q50[point], q95[point]]
-      return isNumber(low) && isNumber(median) && isNumber(high) ? [{ lead, date, median, low, high }] : []
+      return isNumber(low) && isNumber(median) && isNumber(high)
+        ? [{ lead, date, median, low, high, ...outlookExtras(day, point) }] : []
     })
   }, [data, place])
 
@@ -169,6 +179,12 @@ export function PlanCards() {
           Daily estimates are unavailable for {place} in this snapshot. Choose another location or switch outlooks.
         </p>
       )}
+      {days.some(day => day.chance !== null || day.warned !== null) && <p className="mt-5 max-w-3xl text-sm text-muted-foreground">
+        The chance is how often forecasts like this one reached a daily average of 35.5 µg/m³ (AQI 101) on
+        past calibration days. A smoke warning uses the cut-off we test against EPA’s official forecast.
+        “Less certain than usual” marks the widest tenth of forecast ranges. All of these come from 2023
+        development tests, not the final test.
+      </p>}
       <p className="mt-5 max-w-3xl text-sm text-muted-foreground">
         These estimates are daily outdoor PM₂.₅ averages for the nearest forecast point. Check{" "}
         <a href="https://www.airnow.gov/" className="underline underline-offset-4">current AQI</a> and follow local or workplace guidance before making activity decisions.

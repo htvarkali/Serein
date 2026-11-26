@@ -15,9 +15,31 @@ export type WorldData = {
   v: (number | null)[]
   fires: [number, number, number][] // lat, lon, fire radiative power
   // SmokeCast's tested daily forecast per local day: median and 90% range per point.
-  daily?: { lead: number; date: string | null; q05: (number | null)[]; q50: (number | null)[]; q95: (number | null)[] }[]
+  // When the trained run's settings were available (serein.world), also: p_usg, the
+  // calibrated chance in percent of a day at or above 35.5 µg/m³ (AQI 101); warn, the
+  // backtest's warning rule (1 = warned); low_conf, the widest 10% of ranges (1 = flagged).
+  daily?: DailyOutlook[]
   grid: Int32Array
 }
+export type DailyOutlook = {
+  lead: number; date: string | null
+  q05: (number | null)[]; q50: (number | null)[]; q95: (number | null)[]
+  p_usg?: (number | null)[]; warn?: number[]; low_conf?: number[]
+}
+
+/** The chance, warning and confidence for one place on one day, when the file has them. */
+export function outlookExtras(day: DailyOutlook, point: number) {
+  const chance = day.p_usg?.[point]
+  return {
+    chance: typeof chance === "number" ? chance : null,
+    warned: day.warn ? day.warn[point] === 1 : null,
+    lowConfidence: day.low_conf ? day.low_conf[point] === 1 : null,
+  }
+}
+
+/** "Under 1%" and "Over 99%" instead of 0% and 100%: a forecast is never certain. */
+export const chanceLabel = (chance: number) => chance < 1 ? "under 1%" : chance > 99 ? "over 99%" : `${chance}%`
+
 export type Which = "serein" | "noaa"
 
 export const GRID = { lat0: 32, lon0: -125, step: 0.25, rows: 69, cols: 45 }

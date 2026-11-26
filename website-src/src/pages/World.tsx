@@ -8,7 +8,7 @@ import { Wordmark } from "@/components/site/SiteLayout"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Switch } from "@/components/ui/switch"
-import { AQI, loadPeople, loadWorld, localTime, nearestPoint, peopleUnderSmoke, relativeDay, valueAt,
+import { AQI, chanceLabel, loadPeople, loadWorld, localTime, nearestPoint, outlookExtras, peopleUnderSmoke, relativeDay, valueAt,
   type People, type Which, type WorldData } from "@/lib/world"
 
 const PLACES = {
@@ -56,6 +56,7 @@ function ForecastDetails({ data, picked, label, which, hour }: {
         {days.map(day => {
           const date = new Date(`${day.date}T00:00:00Z`)
           const median = day.q50[picked], low = day.q05[picked], high = day.q95[picked]
+          const { chance, warned, lowConfidence } = outlookExtras(day, picked)
           return <div key={day.lead} className="rounded-xl border bg-background/55 p-3">
             <p className="text-xs font-medium text-muted-foreground">
               {(day.date ? relativeDay(day.date) : null) ?? LEADS[day.lead] ?? `Day ${day.lead}`}
@@ -63,10 +64,17 @@ function ForecastDetails({ data, picked, label, which, hour }: {
             </p>
             <p className="mt-2 font-serif text-3xl leading-none">{median ?? <span className="font-sans text-sm">No data</span>}</p>
             {typeof low === "number" && typeof high === "number" && <p className="mt-1 text-xs text-muted-foreground">Range {low}–{high}</p>}
+            {chance !== null && <p className="mt-1 text-xs"><span className="font-medium">{chanceLabel(chance)}</span> <span className="text-muted-foreground">chance of USG</span></p>}
+            {warned && <p className="mt-1.5 w-fit rounded-full bg-[#f0883e]/25 px-2 py-0.5 text-xs font-medium">Smoke warning</p>}
+            {lowConfidence && <p className="mt-1.5 w-fit rounded-full border px-2 py-0.5 text-xs">Less certain</p>}
           </div>
         })}
       </div>
     ) : <p className="mt-3 text-sm text-muted-foreground">Daily outlook unavailable for this run.</p>}
+    {days.some(day => day.p_usg || day.warn) && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+      USG: a daily average of 35.5 µg/m³ or more (AQI 101, “Unhealthy for Sensitive Groups”). Chances are
+      calibrated on past forecasts; the warning is the rule we score against EPA’s forecast. Development results.
+    </p>}
 
     <details className="mt-6 rounded-xl border bg-background/40" onToggle={event => setShowHourly(event.currentTarget.open)}>
       <summary className="cursor-pointer rounded-xl px-4 py-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-primary">Explore hourly estimates</summary>

@@ -54,7 +54,7 @@ function addMapLayers(map: maplibregl.Map, canvas: HTMLCanvasElement) {
       "circle-radius": ["interpolate", ["linear"], ["sqrt", ["max", ["get", "frp"], 0]], 0, 2, 30, 10] } })
   map.addSource("monitors", { type: "geojson", data: EMPTY })
   map.addLayer({ id: "monitors", type: "circle", source: "monitors", minzoom: 6,
-    paint: { "circle-radius": 3.5, "circle-color": "#ffffff", "circle-stroke-color": "#102321", "circle-stroke-width": 1 } })
+    paint: { "circle-radius": 3.5, "circle-color": "#ffffff", "circle-stroke-color": "#0b1222", "circle-stroke-width": 1 } })
   map.addSource("people", { type: "geojson", data: EMPTY })
   map.addLayer({ id: "people", type: "circle", source: "people", layout: { visibility: "none" },
     paint: {
@@ -71,15 +71,15 @@ function addMapLayers(map: maplibregl.Map, canvas: HTMLCanvasElement) {
   map.addLayer({ id: "poi-labels", type: "symbol", source: "omt", "source-layer": "poi", minzoom: 13,
     filter: ["in", ["get", "class"], ["literal", ["school", "college", "hospital"]]],
     layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 11, "text-offset": [0, 1.1], "text-anchor": "top" },
-    paint: { "text-color": "#ffffff", "text-halo-color": "#091615", "text-halo-width": 1.2 } })
+    paint: { "text-color": "#ffffff", "text-halo-color": "#0b1222", "text-halo-width": 1.2 } })
   map.addLayer({ id: "places", type: "symbol", source: "omt", "source-layer": "place",
     filter: ["in", ["get", "class"], ["literal", ["city", "town", "village"]]],
     layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"],
       "text-size": ["interpolate", ["linear"], ["zoom"], 5, 11, 10, 15] },
-    paint: { "text-color": "#ffffff", "text-halo-color": "#091615", "text-halo-width": 1.4 } })
+    paint: { "text-color": "#ffffff", "text-halo-color": "#0b1222", "text-halo-width": 1.4 } })
   map.addSource("picked", { type: "geojson", data: EMPTY })
   map.addLayer({ id: "picked", type: "circle", source: "picked",
-    paint: { "circle-radius": 7, "circle-color": "#102321", "circle-stroke-color": "#fff5da", "circle-stroke-width": 3 } })
+    paint: { "circle-radius": 7, "circle-color": "#0b1222", "circle-stroke-color": "#fff5da", "circle-stroke-width": 3 } })
 }
 
 function setFeatures(map: maplibregl.Map, id: string, features: FeatureCollection) {
@@ -121,9 +121,9 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
           glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
           sources: { stateBoundaries: { type: "geojson", data: `${import.meta.env.BASE_URL}data/states.geojson`, attribution: "Boundaries: US Census Bureau" } },
           layers: [
-            { id: "bg", type: "background", paint: { "background-color": "#25423b" } },
-            { id: "land", type: "fill", source: "stateBoundaries", paint: { "fill-color": "#3c6254" } },
-            { id: "states", type: "line", source: "stateBoundaries", paint: { "line-color": "#f1f0df", "line-opacity": 0.62, "line-width": 1.1 } },
+            { id: "bg", type: "background", paint: { "background-color": "#0d1528" } },
+            { id: "land", type: "fill", source: "stateBoundaries", paint: { "fill-color": "#1a2742" } },
+            { id: "states", type: "line", source: "stateBoundaries", paint: { "line-color": "#c9a466", "line-opacity": 0.6, "line-width": 1.1 } },
           ],
         },
       })
@@ -204,19 +204,18 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
   useEffect(() => {
     const map = mapRef.current
     if (!map || !focus || phase !== "ready") return
-    map.easeTo({ center: focus, zoom: 5.9, duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 450 })
+    map.easeTo({ center: focus, zoom: 5.9, duration: 450 })
   }, [focus, phase])
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !playing || phase !== "ready") return
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)")
     let step = 0
     const dashes = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0],
       [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]]
     const update = () => {
       if (!map.getLayer("wind-flow")) return
-      const animate = !reducedMotion.matches && !document.hidden
+      const animate = !document.hidden
       map.setLayoutProperty("wind-flow", "visibility", animate ? "visible" : "none")
       if (animate) map.setPaintProperty("wind-flow", "line-dasharray", dashes[step++ % dashes.length])
     }
@@ -229,10 +228,10 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
   }, [playing, phase])
 
   return (
-    <div className="relative h-[clamp(19rem,52vh,37rem)] overflow-hidden bg-[#25423b]">
+    <div className="relative h-[clamp(19rem,52vh,37rem)] overflow-hidden bg-[#111a30]">
       <div ref={containerRef} className="absolute inset-0" inert={phase !== "ready"} />
       {phase !== "ready" && (
-        <div className="absolute inset-0 grid place-items-center bg-[#142d28] p-6 text-center">
+        <div className="absolute inset-0 grid place-items-center bg-[#0d1528] p-6 text-center">
           <div className="max-w-xs space-y-3" role="status">
             {phase === "loading" ? <p>Loading the terrain map…</p> : <>
               <p className="font-medium">The terrain map is unavailable.</p>

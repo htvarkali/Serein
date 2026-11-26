@@ -3,6 +3,13 @@ import { createRoot } from "react-dom/client"
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { SiteLayout } from "@/components/site/SiteLayout"
 import { Home } from "@/pages/Home"
+import "@fontsource/cormorant/300.css"
+import "@fontsource/cormorant/300-italic.css"
+import "@fontsource/cormorant/400.css"
+import "@fontsource/cormorant/400-italic.css"
+import "@fontsource/cormorant/500.css"
+import "@fontsource-variable/montserrat/wght.css"
+import "@fontsource/pinyon-script/400.css"
 import "./styles.css"
 
 // Heavy pages load on demand so the home page stays fast.

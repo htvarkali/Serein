@@ -3,7 +3,7 @@ import { ArrowDown, ArrowRight, CalendarDays, CloudSun, Wind } from "lucide-reac
 import { Button } from "@/components/ui/button"
 import { Card, CardDescription, CardHeader } from "@/components/ui/card"
 import { PlanCards } from "@/components/site/PlanCards"
-import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
+import { Eyebrow, Heading, Lead, PageHero, Section, Split } from "@/components/site/Section"
 import { asset } from "@/data/site"
 
 const useCases = [
@@ -15,17 +15,11 @@ const useCases = [
 export default function AirPlan() {
   return (
     <>
-      <section className="dark relative isolate overflow-hidden bg-background text-foreground">
-        <img src={asset("img/photo-family.webp")} width={1440} height={1080} alt=""
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-55" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-background via-background/85 to-background/35" />
-        <div className="mx-auto w-[min(100%-2*clamp(1.25rem,5.5vw,6rem),82rem)] py-[clamp(5rem,11vw,9rem)]">
-          <Eyebrow>Smoke planning</Eyebrow>
-          <h1 className="mt-3 mb-5 text-[clamp(3.6rem,10vw,9rem)]">AirPlan</h1>
-          <Lead className="max-w-[36ch]">See what the next three days could bring and give yourself time to prepare.</Lead>
-          <Button asChild size="lg" className="mt-7"><Link to="/airplan#example">View the outlook <ArrowDown aria-hidden="true" /></Link></Button>
-        </div>
-      </section>
+      <PageHero eyebrow="Smoke planning" title="AirPlan" script="prepare"
+        media={{ video: asset("motion/lake.mp4"), image: asset("img/photo-family.webp") }}
+        lead="See what the next three days could bring and give yourself time to prepare.">
+        <Button asChild size="lg" className="h-12 px-7"><Link to="/airplan#example">View the outlook <ArrowDown aria-hidden="true" /></Link></Button>
+      </PageHero>
 
       <Section id="example">
         <Heading>Plan around the daily outlook.</Heading>
@@ -37,9 +31,9 @@ export default function AirPlan() {
         <Heading>How to use the forecast.</Heading>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {useCases.map(({ icon: Icon, title, description }) => (
-            <Card key={title} className="h-full">
+            <Card key={title} className="gilded h-full" data-reveal="">
               <CardHeader>
-                <Icon aria-hidden="true" className="mb-2 size-6 text-primary" />
+                <Icon aria-hidden="true" className="mb-2 size-7 text-primary" strokeWidth={1.3} />
                 <h3 className="text-xl font-semibold">{title}</h3>
                 <CardDescription className="text-base">{description}</CardDescription>
               </CardHeader>

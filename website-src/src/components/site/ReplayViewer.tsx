@@ -79,7 +79,7 @@ function Panel({ title, values, monitors, states, caption }: {
         <CardDescription>{caption}</CardDescription>
       </CardHeader>
       <CardContent className="px-4 sm:px-6">
-        <canvas ref={ref} width={560} height={360} className="h-auto w-full rounded-md bg-[#18322d]"
+        <canvas ref={ref} width={560} height={360} className="h-auto w-full rounded-md bg-[#111a30]"
           role="img" aria-label={`Monitor map. ${title}. ${caption}`} />
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 import { ArrowRight, Code } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
-import { sources } from "@/data/site"
+import { Heading, PageHero, Section, Split } from "@/components/site/Section"
+import { asset, sources } from "@/data/site"
 
 const repository = "https://github.com/htvarkali/Serein"
 const docs = `${repository}/blob/main/docs`
@@ -16,12 +16,11 @@ const references = [
 export default function About() {
   return (
     <>
-      <Section>
-        <Eyebrow>Data and methods</Eyebrow>
-        <h1 className="mt-3 mb-5 max-w-[15ch] text-[clamp(3.6rem,9vw,8rem)]">How Serein works</h1>
-        <Lead>Serein is a student research project studying whether recent local readings can improve wildfire smoke forecasts.</Lead>
-        <Button asChild variant="outline" size="lg" className="mt-7"><a href={repository}><Code aria-hidden="true" /> View the project on GitHub</a></Button>
-      </Section>
+      <PageHero eyebrow="Data and methods" title="How Serein works" script="methods"
+        media={{ image: asset("img/world-preview.webp") }}
+        lead="Serein is a student research project studying whether recent local readings can improve wildfire smoke forecasts.">
+        <Button asChild variant="outline" size="lg" className="h-12 px-7"><a href={repository}><Code aria-hidden="true" /> View the project on GitHub</a></Button>
+      </PageHero>
       <Section className="pt-0">
         <Split className="items-start">
           <Heading>From data to a daily outlook.</Heading>

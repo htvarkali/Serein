@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { EquityChart, HiddenChart, RmseChart, WarningsChart } from "@/components/site/ResultCharts"
 import { ReplayViewer } from "@/components/site/ReplayViewer"
-import { Eyebrow, Heading, Lead, Section, Split } from "@/components/site/Section"
+import { Eyebrow, Heading, Lead, PageHero, Section, Split } from "@/components/site/Section"
 import { SOURCE_DEV, asset, headline, rmseByLead } from "@/data/site"
 
 const docs = "https://github.com/htvarkali/Serein/blob/main/docs"
@@ -27,28 +27,13 @@ export default function SmokeCast() {
 
   return (
     <>
-      <Section>
-        <Split>
-          <div className="min-w-0">
-            <Eyebrow>Forecast research</Eyebrow>
-            <h1 className="mt-3 mb-5 text-[clamp(3.6rem,10vw,9rem)]">SmokeCast</h1>
-            <Lead className="max-w-[32ch]">A daily outlook for wildfire smoke, up to three days ahead.</Lead>
-            <p className="mt-4 max-w-prose text-muted-foreground">
-              SmokeCast learns from air-monitor readings and NOAA forecasts to estimate daily fine particle pollution
-              (PM₂.₅). Each estimate comes with a range so people can plan around uncertainty.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Button asChild size="lg"><Link to="/smokecast#results">Compare forecasts <ArrowDown aria-hidden="true" /></Link></Button>
-              <Button asChild variant="outline" size="lg"><Link to="/smokecast#replay">Replay a smoke week</Link></Button>
-            </div>
-          </div>
-          <figure>
-            <img src={asset("img/photo-research.webp")} alt="Smoke rising from the Hayes Fire over a forested mountain valley"
-              width={1440} height={1080} className="aspect-[4/3] w-full rounded-xl border object-cover shadow-sm" />
-            <figcaption className="mt-3 text-sm text-muted-foreground">Hayes Fire, Olympic National Park. Courtesy of the National Park Service.</figcaption>
-          </figure>
-        </Split>
-      </Section>
+      <PageHero eyebrow="Forecast research" title="SmokeCast" script="forecast"
+        media={{ video: asset("motion/hayes-fire.mp4"), image: asset("img/photo-research.webp"), credit: "Hayes Fire, Olympic National Park. Courtesy of the National Park Service." }}
+        lead={<>A daily outlook for wildfire smoke, up to three days ahead. SmokeCast learns from air-monitor readings and NOAA forecasts to
+          estimate daily fine particle pollution (PM₂.₅), and each estimate comes with a range so people can plan around uncertainty.</>}>
+        <Button asChild size="lg" className="h-12 px-7"><Link to="/smokecast#results">Compare forecasts <ArrowDown aria-hidden="true" /></Link></Button>
+        <Button asChild variant="outline" size="lg" className="h-12 px-7"><Link to="/smokecast#replay">Replay a smoke week</Link></Button>
+      </PageHero>
 
       <Section tone="dark" id="results">
         <Eyebrow>2023 development results</Eyebrow>
@@ -62,7 +47,7 @@ export default function SmokeCast() {
             <TabsTrigger value="hidden" className="min-h-11 whitespace-normal px-2">Hidden monitors</TabsTrigger>
             <TabsTrigger value="equity" className="min-h-11 whitespace-normal px-2">Monitor access</TabsTrigger>
           </TabsList>
-          <Card className="mt-2 min-w-0">
+          <Card className="gilded mt-2 min-w-0">
             <TabsContent value="error" className="min-w-0">
               <CardHeader className="px-4 sm:px-6">
                 <h3 className="text-lg font-semibold">Daily PM₂.₅ forecast error</h3>
@@ -127,9 +112,9 @@ export default function SmokeCast() {
         <Heading>How SmokeCast works.</Heading>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {steps.map(({ icon: Icon, title, description }) => (
-            <Card key={title} className="h-full">
+            <Card key={title} className="gilded h-full" data-reveal="">
               <CardHeader>
-                <Icon aria-hidden="true" className="mb-2 size-6 text-primary" />
+                <Icon aria-hidden="true" className="mb-2 size-7 text-primary" strokeWidth={1.3} />
                 <h3 className="text-xl font-semibold">{title}</h3>
                 <CardDescription className="text-base">{description}</CardDescription>
               </CardHeader>

@@ -2,6 +2,8 @@
 
 Draft 3 (2026-11-23): every entry checked against Crossref, PubMed or the source page; titles, DOIs, pages and dead links corrected, duplicates marked. Items still marked [TEAM] need a person.
 
+Update of 2026-11-25: entries 7, 44, 46 and 57 settled; entries 58 to 66 added for the business plan and the revised Brief sections 8 and 10. Two [TEAM] items are left: A6, and the list of AI tools at the end, which the Rules require.
+
 Format: author/organization, year, title, venue, URL. Sections A and B are the
 model's own citations (from `docs/METHODS.md` and `docs/DATA.md`); sections C to F
 support brief sections 3, 6, 7, 9 and 10. Remove any reference whose number is cut
@@ -15,7 +17,7 @@ A2. Khetsuriani, N., et al. 2007. Prevalence of viral respiratory tract infectio
 A3. Williams, L. K., et al. 2011. Quantifying the proportion of severe asthma exacerbations attributable to inhaled corticosteroid nonadherence. Journal of Allergy and Clinical Immunology 128(6): 1185-1191.e2. https://doi.org/10.1016/j.jaci.2011.09.011
 A4. Strickland, M. J., et al. 2010. Short-term associations between ambient air pollutants and pediatric asthma emergency department visits. American Journal of Respiratory and Critical Care Medicine 182(3): 307-316. https://doi.org/10.1164/rccm.200908-1201OC
 A5. Gent, J. F., et al. 2009. Symptoms and medication use in children with asthma and traffic-related sources of fine particle pollution. Environmental Health Perspectives 117(7): 1168-1174. https://doi.org/10.1289/ehp.0800335 (Evidence considered and not used; cite only if Q4 mentions it.)
-A6. CDC. Asthma Call-back Survey (ACBS). https://www.cdc.gov/asthma/acbs/ [TEAM: this overview page does not itself define "not well controlled"; link the ACBS methodology or control-status page that does before citing that definition]
+A6. CDC. Asthma Call-back Survey (ACBS). https://www.cdc.gov/asthma/acbs/ [TEAM: this overview page does not itself define "not well controlled"; link the ACBS methodology or control-status page that does before citing that definition. A candidate that could not be opened on 2026-11-25 because PubMed Central blocked the request: "Assessing asthma control and associated risk factors among persons with current asthma", https://pmc.ncbi.nlm.nih.gov/articles/PMC4552346/ . Open it in a browser and check that it defines the categories for children before using it.]
 A7. US EPA. 2024. Final Reconsideration of the National Ambient Air Quality Standards for Particulate Matter (PM) (final rule of Feb 7, 2024, which also revises the PM2.5 AQI). https://www.epa.gov/pm-pollution/final-reconsideration-national-ambient-air-quality-standards-particulate-matter-pm
 A8. Barkjohn, K. K., Gantt, B., Clements, A. L. 2021. Development and application of a United States-wide correction for PM2.5 data collected with the PurpleAir sensor. Atmospheric Measurement Techniques 14: 4617-4637. https://doi.org/10.5194/amt-14-4617-2021
 
@@ -37,7 +39,7 @@ B7. Berlinghieri, R., Burt, D. R., Giani, P., Fiore, A. M., Broderick, T. 2026. 
 4. Heft-Neal, S., Gould, C. F., Childs, M. L., Kiang, M. V., Nadeau, K. C., Duggan, M., Bendavid, E., Burke, M. 2023. Emergency department visits respond nonlinearly to wildfire smoke. PNAS 120(39): e2302409120. https://doi.org/10.1073/pnas.2302409120
 5. Washington State Office of Financial Management. 2022 (August). Increased medical and emergency department claims for asthma after wildfire smoke exposure in Washington, 2014-2018. https://ofm.wa.gov/sites/default/files/public/dataresearch/healthcare/pdf/smoke_exposure_extract.pdf (now redirects to a /wp-content/uploads/ address; recheck before submitting)
 6. Oregon Health Authority. 2025. OHA data show poor air quality linked to more emergency visits. https://www.oregon.gov/oha/erd/pages/oha-data-show-poor-air-quality-linked-to-more-emergency-visits.aspx
-7. Gabbay, J. M., et al. 2025. National Economic Burden of Pediatric Asthma Hospitalizations. Annals of the American Thoracic Society 22(10): 1611-1614. https://doi.org/10.1513/AnnalsATS.202501-128RL [TEAM: the 2022 KID data source is not confirmed; full text not read]
+7. Gabbay, J. M., Bajaj, B. V. M., Levano, S. R., Perez, J. M., Islamovic, F., Graham, R. J., Kahn, J. G., Hametz, P. A., Fiori, K. P., Rastogi, D. 2025. National Economic Burden of Pediatric Asthma Hospitalizations. Annals of the American Thoracic Society 22(10): 1611-1614. https://doi.org/10.1513/AnnalsATS.202501-128RL (Read 2026-11-25: a cross-sectional analysis of the 2022 Kids' Inpatient Database; 64,393 hospitalizations; mean cost $7,464 and total $480.6 million, both hospital costs in 2022 dollars derived from charges with the cost-to-charge ratio, not charges.)
 8. Pearson, W. S., Goates, S. A., Harrykissoon, S. D., Miller, S. A. 2014. State-based Medicaid costs for pediatric asthma emergency department visits. Preventing Chronic Disease 11: 140139. https://doi.org/10.5888/pcd11.140139
 9. Roemer, M. 2024 (September). Costs of Treat-and-Release Emergency Department Visits in the United States, 2021. HCUP Statistical Brief #311. AHRQ. https://hcup-us.ahrq.gov/reports/statbriefs/sb311-ED-visit-costs-2021.pdf
 10. Nurmagambetov, T., Kuwahara, R., Garbe, P. 2018. The Economic Burden of Asthma in the United States, 2008-2013. Annals of the American Thoracic Society 15(3): 348-356. https://doi.org/10.1513/annalsats.201703-259oc (also cited in AAFA Asthma Facts and Figures, updated April 2026: https://aafa.org/wp-content/uploads/2025/04/aafa-asthma-facts-and-figures.pdf)
@@ -89,9 +91,9 @@ sources are numbered 48–53 below.
 41. Meta. WhatsApp Business Platform pricing. https://developers.facebook.com/docs/whatsapp/pricing
 42. Render. 2026. Pricing. https://render.com/pricing
 43. PurpleAir. 2023. API pricing. https://community.purpleair.com/t/api-pricing/4523
-44. USPTO. 2026. Fee schedule. https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule
+44. USPTO. 2026. Fee schedule. https://www.uspto.gov/learning-and-resources/fees-and-payment/uspto-fee-schedule ; trademark fees: https://www.uspto.gov/trademarks/trademark-fee-information (read 2026-11-25, page updated November 4, 2026: $350 per class for a base electronic application, plus $100 per class for insufficient information and $200 per class for free-form descriptions of goods and services)
 45. Space Center Houston. 2026. Conrad Challenge 2026-27 Student Guide. https://conrad.spacecenter.org/wp-content/uploads/2026/08/2026-2027-Conrad-Challenge-Student-Guide-Official.pdf
-46. Conrad Challenge. 2024-25 Conrad Challenge Awards. https://conrad.spacecenter.org/?p=86349 [TEAM: conradchallenge.org is now a parked domain; the 1517 Fund and AWS credit details were not visible on this page in the 2026-11-23 check, so confirm them before citing]
+46. Conrad Challenge. 2026. 2026 Conrad Challenge Innovation Summit Awards. https://conrad.spacecenter.org/2026-awards/ (Read 2026-11-25. The page lists the 2025-26 awards and names no 1517 Fund or AWS prize, and the 2024-25 list at conradchallenge.org is a parked domain, so the sentence about those prizes was removed from Brief section 10. Do not cite this entry unless a section mentions Conrad awards.)
 47. Davidson Institute. Davidson Fellows Scholarship, 2027 cycle. https://www.davidsongifted.org/gifted-programs/fellows-scholarship/eligibility/how-to-apply/
 
 ## Additional competition references (Q7)
@@ -110,7 +112,38 @@ Accessed November 7, 2026.
 54. Huang, J., McQueen, J., Wilczak, J., et al. 2017. Improving NOAA NAQFC PM2.5 Predictions with a Bias Correction Approach. Weather and Forecasting 32(2): 407-421. https://doi.org/10.1175/WAF-D-16-0118.1
 55. Hamer, S., Sleeman, J., Stajner, I. 2023. Forecast-Aware Model Driven LSTM. arXiv 2303.12963. https://arxiv.org/abs/2303.12963
 56. Su, J. G., Barrett, M. A., Henderson, K., et al. 2017. Feasibility of Deploying Inhaler Sensors to Identify the Impacts of Environmental Triggers and Built Environment Factors on Asthma Short-Acting Bronchodilator Use. Environmental Health Perspectives 125(2): 254-261. https://doi.org/10.1289/EHP266
-57. Google. Air Quality API overview (hourly forecasts up to 96 h on a 500 m grid). https://developers.google.com/maps/documentation/air-quality/overview [TEAM: recheck the product claims on the day before submitting]
+57. Google. Air Quality API overview (hourly forecasts up to 96 h on a 500 m grid). https://developers.google.com/maps/documentation/air-quality/overview (Rechecked 2026-11-25, page updated 2026-11-09: hourly forecasts "up to 96 hours", "500 x 500 meters resolution", over 100 countries, health recommendations for groups including children and people with asthma; no accuracy figures on the page. Recheck the day before submitting, as for every link.)
+
+## Business plan and Brief sections 8 and 10, added 2026-11-25
+
+Read 2026-11-25. Entries 58 to 62 are cited only in `docs/drafts/business_plan.md`
+unless the outdoor-employer buyer is added to Brief section 6.
+
+58. California Code of Regulations, Title 8, section 5141.1. Protection from Wildfire Smoke. https://www.dir.ca.gov/title8/5141_1.html
+59. Oregon Administrative Rules 437-002-1081. Protection from Wildfire Smoke (effective July 1, 2022). https://www.law.cornell.edu/regulations/oregon/Or-Admin-Code-SS-437-002-1081
+60. Washington State Department of Labor and Industries. Wildfire smoke (chapter 296-820 WAC). https://www.lni.wa.gov/safety-health/safety-topics/topics/wildfire-smoke
+61. California Employment Development Department. 2025. California Agricultural Employment, 2023 annual average (state total 407,700). https://labormarketinfo.edd.ca.gov/file/agric/ca-ag-employ-map-2023.pdf
+62. California Education Code section 42127 (school district budgets adopted on or before July 1). https://california.public.law/codes/education_code_section_42127
+63. Lozano Smith. 2025 (December 10). Bid Thresholds Raised For 2026 (Public Contract Code section 20111(a): $119,100 for K-12 purchases of equipment, materials, supplies and services other than construction, from January 1, 2026). https://lozanosmith.com/news-clientnewsbriefdetail.php?news_id=3451 (A law firm's summary; the 2027 amount is usually announced in December, so recheck before submitting. Cited in Brief section 8.)
+64. Conrad Challenge. Phase 2: Innovation Stage (deadline January 7, 2027; $499 per team; financial aid applications November 2 to December 3, 2026). https://conrad.spacecenter.org/the-challenge/innovation-stage/ (Cited in Brief section 10.)
+65. Conrad Challenge. Financial Aid Opens for Phase 2: Innovation Stage. https://conrad.spacecenter.org/calendar/financial-aid-opens-for-phase-2-innovation-stage-2/
+66. USPTO. Trademark Status and Document Retrieval, serial numbers 90636402 and 98444557 (status pages generated 2026-11-26 01:00 EST). https://tsdr.uspto.gov/ (Supports `docs/drafts/ip_decision_memo.md`; not cited in the Brief.)
+
+## AI tools (required by the Rules and Regulations)
+
+Conrad's Rules and Regulations, "Use of and Standards for Competition Submissions",
+item 4 (read 2026-11-25): a submission "may not copy or use other materials- including
+artificial intelligence (AI) tools- without properly citing the source." Item 2 says
+the submission "must be entirely the work of the student team members."
+https://conrad.spacecenter.org/the-challenge/rules-and-regulations/
+
+No part of the Brief, the website or this list names an AI tool yet.
+
+[TEAM: before submitting, list here every AI tool any of us used, with the maker, the
+version or model if known, the months of use, the address, and one line on what it was
+used for (for example code, documentation, literature search, drafting). Each member
+answers for their own part. Then say in one sentence, in the Brief or on the website,
+which parts are our own decisions. Judge Q&A answer 22 depends on this.]
 
 ## Optional attachments (up to 2): recommendation
 

@@ -367,7 +367,7 @@ checked against main on 2026-11-23.
 | B-6 ⭐ | Trained on 2021-22, tuned on 2023 dev weeks only; settings frozen in BACKTEST_PROTOCOL §6b | Done | Aadi-Tiwari | 2026-11-01 |
 | B-7 | Node masking in training (hides readings and site history of 15% of sensors) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-7b | Leave-sites-out test (`--holdout-sites 0.2`) | Done | Aadi-Tiwari | 2026-11-01 |
-| B-8 | Add PurpleAir nodes; measure how much low-cost sensors help (needs A-12, A-14). PurpleAir history costs money, so the free USFS AirFire temporary fire monitors were tried instead on 2026-11-25: they failed the acceptance rule as inputs, see [EXPERIMENTS.md](docs/EXPERIMENTS.md) (code on branch `b8-fire-monitors`). Untried: the monitors as graph nodes | Open | | |
+| B-8 | Add PurpleAir nodes; measure how much low-cost sensors help (needs A-12, A-14). PurpleAir history costs money, so the free USFS AirFire temporary fire monitors were tried instead on 2026-11-25: they failed the acceptance rule both as inputs and as graph nodes, see [EXPERIMENTS.md](docs/EXPERIMENTS.md) (code on branches `b8-fire-monitors` and `gn-fire-monitors`). Free extra sensors do not improve the model | Done | Aadi-Tiwari | 2026-11-25 |
 | B-9a | Map v0: `serein map --date ...` on a 0.25° grid | Done | Aadi-Tiwari | 2026-11-01 |
 | B-9b | Kilometer-grid development forecasts, footprint maps and area-weighted tract summaries; exercised around Sacramento and Portland ([guide](docs/NEIGHBORHOOD_MAPS.md)) | Done | Aadi-Tiwari | 2026-11-06 |
 | B-10a | Graph vs. no-graph + settings sweep (`scripts/sweep_graph.sh`) | Done | Aadi-Tiwari | 2026-11-01 |

@@ -100,3 +100,30 @@ def load_monitors(years: list[int], region: Region) -> tuple[pd.DataFrame, pd.Da
     if not np.isfinite(monitors[["lat", "lon"]].to_numpy()).all():
         raise ValueError("monitor coordinates must be finite")
     return monitors.reset_index(drop=True), hourly
+
+
+def node_points(monitors: pd.DataFrame, points: pd.DataFrame) -> pd.DataFrame:
+    """Registry rows (kind ``tmon``) for monitors used as graph nodes.
+
+    ``proxy_id`` is the nearest map-grid cell: its NOAA inputs (HRRR, AQM) stand in
+    for the monitor's own, which were never extracted (at most ~14 km away on the
+    0.25 degree grid).
+    """
+    from serein.data.points import nearest_site_offset
+
+    grid = points[points["kind"] == "grid"]
+    if grid.empty:
+        raise ValueError("the points registry has no grid cells to take NOAA inputs from")
+    epa = points[points["kind"] == "epa"]
+    glat, glon = np.radians(grid["lat"].to_numpy(float)), np.radians(grid["lon"].to_numpy(float))
+    mlat, mlon = np.radians(monitors["lat"].to_numpy(float)), np.radians(monitors["lon"].to_numpy(float))
+    d = (np.sin((glat[None] - mlat[:, None]) / 2) ** 2
+         + np.cos(mlat[:, None]) * np.cos(glat[None]) * np.sin((glon[None] - mlon[:, None]) / 2) ** 2)
+    return pd.DataFrame({
+        "point_id": "T" + monitors["site_id"].astype(str),
+        "lat": monitors["lat"].to_numpy(float),
+        "lon": monitors["lon"].to_numpy(float),
+        "kind": "tmon",
+        "gmt_offset": nearest_site_offset(monitors["lat"], monitors["lon"], epa),
+        "proxy_id": grid["point_id"].to_numpy()[np.argmin(d, axis=1)],
+    })

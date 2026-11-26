@@ -396,3 +396,39 @@ change can sit between the training and scoring seasons; the inner fold is a sec
 season pair. CAMS files come from the free Copernicus
 Atmosphere Data Store account. Tags `cams`, `cams_holdout`, `inner_cams` against the
 same-day baselines. Same acceptance rule.
+
+## 2026-11-25 B-8 try 2: fire monitors as input-only graph nodes (`--aux-kinds tmon`)
+
+Hypothesis: as six summary inputs (try 1) the fire monitors added noise, but the
+graph can weigh each neighbor by its distance, direction and the wind, which a fixed
+summary cannot. As graph nodes they should help where a fire monitor is upwind of an
+EPA monitor, at leads 0-2.
+
+Design, fixed before the first run: the 352 AirFire deployments in the study area in
+2021-2023 become nodes of kind `tmon` (`serein add-monitor-nodes`). Each EPA monitor
+keeps its current 10 EPA neighbors and also receives one-way edges from its 5 nearest
+fire monitors within 150 km; fire monitors receive nothing, have no targets and are
+never calibrated or scored, so scoring stays on the same EPA rows. Their readings use
+the AirNow cutoff; their NOAA inputs (HRRR, AQM) come from the nearest 0.25 degree
+grid cell (median 9 km, at most 16 km away), because HRRR and AQM were never
+extracted at their sites. On days a monitor is not deployed its node has the NOAA
+inputs but no readings. Runs use `--no-gbm` (the trees are not part of the rule). Tags `gn`,
+`gn_holdout`, `inner_gn` against the same-day baselines.
+
+Result. 352 extra nodes, 1,671 extra edges (graph 777 nodes, 5,921 edges). With no
+extra kinds the changed code reproduces the baseline exactly (`gn_regress`, RMSE equal
+to 4 decimals at every lead), and the EPA rows of the new tables equal the old ones.
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.400 | (-0.04, +0.14) | 4.040 -> 4.193 | (-0.03, +0.30) | 6.92 -> 6.98 |
+| 1 | 7.776 -> 7.828 | (-0.08, +0.20) | 6.463 -> 6.500 | (-0.04, +0.10) | 8.39 -> 8.50 |
+| 2 | 9.721 -> 9.778 | (-0.20, +0.37) | 8.034 -> 8.127 | (-0.01, +0.18) | 9.90 -> 10.14 |
+| 3 | 11.584 -> 11.537 | (-0.31, +0.16) | 10.439 -> 10.690 | (+0.15, +0.35) | 11.38 -> 11.34 |
+
+USG CSI rises slightly at leads 2-3 (0.435 -> 0.449, 0.287 -> 0.311) and coverage is
+unchanged, but RMSE does not improve anywhere and the inner fold is worse at lead 3.
+Both ways of using the fire monitors (summary inputs and graph nodes) fail, so B-8 is
+answered for the free sensors available: extra temporary monitors do not improve this
+model. Code kept on branch `gn-fire-monitors`, not merged.
+ACCEPTANCE: FAIL gn, inner_gn: no lead better; inner lead 3 worse.

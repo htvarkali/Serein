@@ -184,10 +184,29 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
     hourly = airnow.load_hourly(pad)
     if hourly.empty:
         raise RuntimeError("No AirNow data cached for these days. Run `serein download airnow`.")
+    tmon = points[points["kind"] == "tmon"] if "kind" in points else points.iloc[:0]
+    if len(tmon):
+        # Temporary fire monitors as graph nodes (B-8): their own readings, and NOAA
+        # inputs from the nearest grid cell (``proxy_id``).
+        from serein.data import airfire
+        _, mon_hourly = airfire.load_monitors(sorted({d.year for d in pad}), study.region)
+        mon_hourly = mon_hourly.assign(site_id="T" + mon_hourly["site_id"].astype(str))
+        mon_hourly = mon_hourly[mon_hourly["site_id"].isin(tmon["point_id"])]
+        hourly = pd.concat([hourly, mon_hourly[["site_id", "time_utc", "pm25"]]],
+                           ignore_index=True)
     daily = obs_daily_means(hourly, offsets)
 
     tab = _obs_features(hourly, daily, points, days, av, leads)
-    mod = _model_features(days, points, offsets, study.name, av)
+    own = points[points["kind"] != "tmon"] if len(tmon) else points
+    mod = _model_features(days, own, offsets.loc[own["point_id"]], study.name, av)
+    if len(tmon):
+        prox = tmon.drop_duplicates("proxy_id")
+        prox_offsets = prox.set_index("proxy_id")["gmt_offset"].rename_axis("point_id")
+        pm = _model_features(days, prox.assign(point_id=prox["proxy_id"]), prox_offsets,
+                             study.name, av)
+        pm = (pm.rename(columns={"point_id": "proxy_id"})
+              .merge(tmon[["point_id", "proxy_id"]], on="proxy_id").drop(columns="proxy_id"))
+        mod = pd.concat([mod, pm], ignore_index=True)
     if len(mod):
         tab = tab.merge(mod, on=["issue_date", "point_id"], how="left")
     if cams:

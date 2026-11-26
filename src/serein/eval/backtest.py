@@ -29,7 +29,7 @@ from serein.eval.metrics import (
     interval_metrics,
     point_metrics,
 )
-from serein.features.graph import build_knn_graph, idw_neighbor_mean
+from serein.features.graph import add_source_edges, build_knn_graph, idw_neighbor_mean
 from serein.features.prepare import (
     Prep,
     history_from,
@@ -46,11 +46,15 @@ from serein.models.gnn import QUANTILES
 from serein.models.train import TrainConfig, Trainer
 
 
-def _load(study: Study, name: str) -> pd.DataFrame:
+def _load(study: Study, name: str, kinds: tuple = ("epa",)) -> pd.DataFrame:
     p = processed_dir(study) / f"table_{name}.parquet"
     if not p.exists():
         raise FileNotFoundError(f"{p} missing. Run `serein build-table --split {name}`.")
     df = pd.read_parquet(p)
+    return df[df["kind"].isin(kinds)].reset_index(drop=True)
+
+
+def _epa(df: pd.DataFrame) -> pd.DataFrame:
     return df[df["kind"] == "epa"].reset_index(drop=True)
 
 
@@ -206,17 +210,22 @@ def run_backtest(study: Study, args) -> dict:
         print(s)
         log_lines.append(s)
 
-    train = _load(study, args.train)
-    cal = _load(study, args.calibrate)
+    # Extra sensor kinds (B-8: "tmon" fire monitors) are graph inputs only: they send
+    # readings to EPA monitors but are never trained on, calibrated or scored.
+    aux = tuple(k for k in (getattr(args, "aux_kinds", "") or "").split(",") if k)
+    kinds = ("epa",) + aux
+    train_all = _load(study, args.train, kinds)
+    cal_all = _load(study, args.calibrate, kinds)
+    train = _epa(train_all)
     # Ablations (B-10): remove whole input groups by column prefix, e.g. "aqm_,hrrr_".
     drop = [p for p in (getattr(args, "drop", "") or "").split(",") if p]
     # (Inputs are hidden from the model via Prep(exclude=...); the table keeps every
     # column so baselines, smoke-day subsets and scoring are unchanged.)
-    par = _week_parity(cal)
-    val = cal[par == 0].reset_index(drop=True)
-    conf = cal[par == 1].reset_index(drop=True)
+    par = _week_parity(cal_all)
+    val_all = cal_all[par == 0].reset_index(drop=True)
+    conf_all = cal_all[par == 1].reset_index(drop=True)
     if final:
-        test = _load(study, args.test)
+        test_all = _load(study, args.test, kinds)
         lock = out_dir / "FINAL_RUN_LOCK.json"
         if lock.exists() and not getattr(args, "force", False):
             raise SystemExit(f"Final test already run ({lock}). Re-running needs --force and "
@@ -226,8 +235,9 @@ def run_backtest(study: Study, args) -> dict:
             raise SystemExit("Commit (and push) the code before the final test: src/, configs/, "
                              "scripts/ or the lock files have uncommitted changes.")
     else:
-        test = conf  # dev mode: score on odd weeks of the calibration season
-        conf = val   # ...and calibrate intervals on the even weeks
+        test_all = conf_all  # dev mode: score on odd weeks of the calibration season
+        conf_all = val_all   # ...and calibrate intervals on the even weeks
+    val, conf, test = _epa(val_all), _epa(conf_all), _epa(test_all)
 
     leads = leads_of(train)
     log(f"# Serein backtest ({'FINAL' if final else 'dev'}) - {datetime.now():%Y-%m-%d %H:%M}")
@@ -235,17 +245,30 @@ def run_backtest(study: Study, args) -> dict:
     log(f"rows: train {len(train)}, val {len(val)}, conf {len(conf)}, test {len(test)}; leads {leads}")
 
     pts = load_points(study.name).set_index("point_id")
-    node_ids = sorted(set(train["point_id"]) | set(val["point_id"]) | set(test["point_id"])
-                      | set(conf["point_id"]))
-    node_ids = [n for n in node_ids if n in pts.index]
+    frames_all = {"train": train_all, "val": val_all, "conf": conf_all, "test": test_all}
+
+    def ids_of(kind_mask):
+        ids = set().union(*(set(f.loc[kind_mask(f), "point_id"]) for f in frames_all.values()))
+        return [n for n in sorted(ids) if n in pts.index]
+
+    node_ids = ids_of(lambda f: f["kind"] == "epa")
+    n_epa = len(node_ids)
     g = build_knn_graph(pts.loc[node_ids, "lat"], pts.loc[node_ids, "lon"],
                         k=study.raw["graph"]["k_neighbors"], max_km=study.raw["graph"]["max_km"])
+    if aux:
+        node_ids = node_ids + ids_of(lambda f: f["kind"] != "epa")
+        g = add_source_edges(g, pts.loc[node_ids, "lat"], pts.loc[node_ids, "lon"], n_epa,
+                             k=int(getattr(args, "aux_k", 5)),
+                             radius_km=float(getattr(args, "aux_km", 150.0)),
+                             max_km=study.raw["graph"]["max_km"])
+        log(f"extra input-only nodes ({','.join(aux)}): {len(node_ids) - n_epa}")
     log(f"graph: {len(node_ids)} nodes, {g.n_edges} edges")
 
     prep = Prep(exclude=tuple(drop),
                 use_obs_base=not any(p.startswith("obs_") for p in drop)).fit(train)
-    gds = {k: to_graph_data(v, prep, node_ids)
-           for k, v in {"train": train, "val": val, "conf": conf, "test": test}.items()}
+    gds = {k: to_graph_data(v, prep, node_ids) for k, v in frames_all.items()}
+    for gd in gds.values():
+        gd.Y[:, n_epa:] = np.nan  # extra nodes are inputs only
     F = gds["train"].X.shape[2]
     log(f"features: {F}")
     if drop:
@@ -274,7 +297,7 @@ def run_backtest(study: Study, args) -> dict:
 
     if frac > 0:
         rng = np.random.default_rng(1234)
-        holdout[rng.choice(len(node_ids), round(frac * len(node_ids)), replace=False)] = True
+        holdout[rng.choice(n_epa, round(frac * n_epa), replace=False)] = True
         for gd in gds.values():
             hide_holdout(gd.X)
         gds["train"].Y[:, holdout] = np.nan
@@ -286,7 +309,7 @@ def run_backtest(study: Study, args) -> dict:
     # it, taken from all seasons loaded (inputs only, never targets).
     history = int(getattr(args, "history", 1) or 1)
     if history > 1:
-        parts = [train, cal] + ([test] if final else [])
+        parts = [train_all, cal_all] + ([test_all] if final else [])
         full = to_graph_data(pd.concat(parts, ignore_index=True), prep, node_ids)
         if holdout.any():
             hide_holdout(full.X)
@@ -298,9 +321,8 @@ def run_backtest(study: Study, args) -> dict:
     # Base forecast without a node's own readings (neighbors' readings instead): used
     # for sensors hidden by node masking in training and for hidden monitors.
     # Hidden monitors never share readings with neighbors (sources=~holdout).
-    srcs = {"train": train, "val": val, "conf": conf, "test": test}
     for k, gd in gds.items():
-        gd.base_nbr = neighbor_base(gd, srcs[k], prep, g, sources=~holdout)
+        gd.base_nbr = neighbor_base(gd, frames_all[k], prep, g, sources=~holdout)
         if holdout.any():
             gd.base[:, holdout] = gd.base_nbr[:, holdout]
 
@@ -329,8 +351,10 @@ def run_backtest(study: Study, args) -> dict:
             log(f"\n## training {name} (seed {args.seed + k})")
             tr = Trainer(F, len(leads), g, gds["train"].feat_names, cfg)
             tr.fit(gds["train"], gds["val"], log=log)
-            qc_list.append(_rows_from_graph(tr.predict(gds["conf"]), gds["conf"], len(conf)))
-            qt_list.append(_rows_from_graph(tr.predict(gds["test"]), gds["test"], len(test)))
+            qc = _rows_from_graph(tr.predict(gds["conf"]), gds["conf"], len(conf_all))
+            qt = _rows_from_graph(tr.predict(gds["test"]), gds["test"], len(test_all))
+            qc_list.append(qc[(conf_all["kind"] == "epa").to_numpy()])
+            qt_list.append(qt[(test_all["kind"] == "epa").to_numpy()])
             if name == "smokecast":
                 states.append({key: value.detach().cpu().clone()
                                for key, value in tr.model.state_dict().items()})
@@ -352,6 +376,8 @@ def run_backtest(study: Study, args) -> dict:
                            seeds=[args.seed + k for k in range(n_seeds)])
 
     # ---- Gradient boosting (no graph learning) ------------------------------
+    if aux and not getattr(args, "no_gbm", False):
+        raise SystemExit("--aux-kinds needs --no-gbm (the trees' neighbor features use EPA nodes only)")
     if holdout.any() and not getattr(args, "no_gbm", False):
         log("(gbm skipped in leave-sites-out mode: its neighbor features would see hidden sites)")
     if not getattr(args, "no_gbm", False) and not holdout.any():

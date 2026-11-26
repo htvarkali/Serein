@@ -79,3 +79,32 @@ def idw_neighbor_mean(values: np.ndarray, g: Graph, power: float = 1.0) -> np.nd
     np.add.at(den.T, g.dst, (ok * w).T)
     with np.errstate(invalid="ignore", divide="ignore"):
         return np.where(den > 0, num / den, np.nan)
+
+
+def add_source_edges(g: Graph, lat, lon, n_targets: int, k: int, radius_km: float,
+                     max_km: float) -> Graph:
+    """Add one-way edges into the first ``n_targets`` nodes from the nodes after them.
+
+    Used for sensors that only send readings (temporary fire monitors, B-8): each
+    target gets edges from its ``k`` nearest sources within ``radius_km``. The
+    targets' own edges are unchanged. ``max_km`` is the graph's distance scale, so
+    edge features match ``build_knn_graph``.
+    """
+    lat, lon = np.asarray(lat, float), np.asarray(lon, float)
+    n_src = len(lat) - n_targets
+    if n_src <= 0 or k <= 0:
+        return g
+    d = haversine_km(lat[:n_targets, None], lon[:n_targets, None],
+                     lat[None, n_targets:], lon[None, n_targets:])
+    order = np.argsort(d, axis=1)[:, :k]
+    dst = np.repeat(np.arange(n_targets), order.shape[1])
+    src = order.reshape(-1) + n_targets
+    dd = d[dst, src - n_targets]
+    keep = dd <= radius_km
+    src, dst, dd = src[keep], dst[keep], dd[keep]
+    b = bearing_rad(lat[src], lon[src], lat[dst], lon[dst])
+    attr = np.stack([dd / max_km, np.log1p(dd) / np.log1p(max_km), np.sin(b), np.cos(b)], 1)
+    return Graph(np.concatenate([g.src, src]).astype(np.int64),
+                 np.concatenate([g.dst, dst]).astype(np.int64),
+                 np.concatenate([g.dist_km, dd]), np.concatenate([g.bearing, b]),
+                 np.concatenate([g.edge_attr, attr.astype(np.float32)]))

@@ -125,6 +125,26 @@ def cmd_build_points(args):
     print(pts["kind"].value_counts().to_string())
 
 
+def cmd_add_monitor_nodes(args):
+    """Add temporary fire monitors to the points registry as kind ``tmon`` (B-8)."""
+    from serein.data import airfire
+    from serein.data.points import load_points, save_points
+
+    study = load_study(args.config)
+    pts = load_points(study.name)
+    pts = pts[pts["kind"] != "tmon"]
+    years = [int(y) for y in args.years.split(",")]
+    if set(years) & set(study.raw["split"]["test"]):
+        sys.exit("Test seasons are never loaded before the final test.")
+    monitors, _ = airfire.load_monitors(years, study.region)
+    nodes = airfire.node_points(monitors, pts)
+    out = pd.concat([pts, nodes], ignore_index=True)
+    if out["point_id"].duplicated().any():
+        raise ValueError("a fire monitor ID collides with an existing point ID")
+    save_points(out, study.name)
+    print(out["kind"].value_counts().to_string())
+
+
 def cmd_build_table(args):
     from serein.data.points import load_points
     from serein.features.table import build_table, processed_dir
@@ -292,6 +312,11 @@ def main(argv=None):
     sp.add_argument("--no-grid", action="store_true")
     sp.set_defaults(fn=cmd_build_points)
 
+    sp = sub.add_parser("add-monitor-nodes", help="add temporary fire monitors as graph nodes")
+    sp.add_argument("--config", default=DEFAULT_CONFIG)
+    sp.add_argument("--years", required=True, help="comma list, train/calibrate seasons only")
+    sp.set_defaults(fn=cmd_add_monitor_nodes)
+
     sp = sub.add_parser("build-table", help="feature/target table for a set of days")
     common(sp)
     sp.add_argument("--kinds", default="epa")
@@ -317,6 +342,10 @@ def main(argv=None):
     sp.add_argument("--force", action="store_true")
     sp.add_argument("--no-ablation", action="store_true")
     sp.add_argument("--no-gbm", action="store_true")
+    sp.add_argument("--aux-kinds", default="",
+                    help="extra point kinds used as input-only graph nodes, e.g. tmon (B-8)")
+    sp.add_argument("--aux-k", type=int, default=5, help="extra nodes sending to each monitor")
+    sp.add_argument("--aux-km", type=float, default=150.0, help="their maximum distance")
     sp.add_argument("--node-mask", type=float, default=0.15)
     sp.add_argument("--drop", default="", help="ablation: drop input groups by prefix, e.g. aqm_,hrrr_")
     sp.add_argument("--no-wind", action="store_true", help="ablation: no wind on graph edges")

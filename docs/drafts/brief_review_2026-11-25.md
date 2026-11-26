@@ -117,7 +117,7 @@ keeps every result now in the section except the single-input details, and it dr
 PurpleAir from the next steps because B-8 was closed on November 25. Put that back if
 A-14 is still planned.
 
-**What we built.** Smoke World (htvarkali.github.io/Serein), a public 3D map of the western U.S. that updates each morning with the next 72 hours of smoke, wind and fires, and shows the tested daily forecast and its range for any place clicked. Behind it are a pipeline that downloads five fire seasons of free public data from NOAA, NASA and EPA, trains SmokeCast, scores it and draws maps; a demo app with the map, a family's plan and the daily check-in; and automated tests that run on every change.
+**What we built.** Smoke World (htvarkali.github.io/Serein), a public 3D map of the western U.S. that updates each day with the next 72 hours of smoke, wind and fires, and shows the tested daily forecast and its range for any place clicked. Behind it are a pipeline that downloads five fire seasons of free public data from NOAA, NASA and EPA, trains SmokeCast, scores it and draws maps; a demo app with the map, a family's plan and the daily check-in; and automated tests that run on every change.
 
 **How we tested.** We wrote the rules before scoring (docs/BACKTEST_PROTOCOL.md): train on 2021-22, tune on 2023, and keep 2024-25 for one final test.
 

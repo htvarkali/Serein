@@ -47,11 +47,11 @@ family demonstration uses simulated children. Accuracy, interval coverage and
 usefulness require their own evaluation; competitor features and research results
 do not validate Serein. Pilot workflow and distribution remain team decisions.
 
-## 8. Go-to-market (150 words) [draft: 124 words]
+## 8. Go-to-market (150 words) [draft: 147 words]
 
-Start with one partner that already acts on smoke days: a school district or school-nurse group in a smoke-affected part of California, Oregon or Washington. Serein sends its nurses a neighborhood forecast each morning of fire season and gives families a free sign-up link for AirPlan, alongside the AirNow Flag Program many schools already run. Precedent that organizations will do this: UW Medicine reached 64,000 patients with neighborhood smoke guidance in 2025 and renewed for 2026, and Ventura County already texts farmworkers smoke alerts in English and Spanish. First-season success is two numbers: how many smoke days the district was warned about a day ahead, and how many families still log after 30 days. A clinician reviews every message before any family sees it. [TEAM: name any district, nurse, clinic or air district that has agreed to talk; attach letters of support (E-7).]
+Start with one partner that already acts on smoke days: a school district or school-nurse group in a smoke-affected part of California, Oregon or Washington. Serein sends its nurses a neighborhood forecast each morning of fire season and gives families a free sign-up link for AirPlan, alongside the AirNow Flag Program many schools already run. Precedent: UW Medicine texted neighborhood smoke guidance to 64,000 patients in 2025 and renewed for 2026, and Ventura County texts farmworkers smoke alerts in English and Spanish. First-season success is two numbers: how many smoke days the district was warned about a day ahead, and how many families still log after 30 days. A clinician reviews every message before any family sees it. At $5,000 to $15,000 a year, a subscription is far below California's $119,100 threshold for formal bidding on district services (2026), so state law does not require a bid. [TEAM: name any district, nurse, clinic or air district that has agreed to talk; attach letters of support (E-7).]
 
-## 9. Business model (300 words) [draft: 270 words]
+## 9. Business model (300 words) [draft: 292 words]
 
 Families never pay. Organizations that make decisions on smoke days pay a yearly subscription for the neighborhood forecast, alerts and a dashboard; the personal plan rides along free.
 
@@ -61,15 +61,20 @@ Families never pay. Organizations that make decisions on smoke days pay a yearly
 - Health plans and children's hospitals: $10 to $20 per enrolled child with asthma per year, less than one Medi-Cal asthma-education unit ($26.66 per 30 minutes). A child asthma hospitalization costs $7,464, so one avoided stay funds 370 to 750 child-years of Serein. We do not yet have evidence that Serein avoids visits; a pilot would measure it.
 - Air districts and health departments: a license to embed the forecast in alerts they already send.
 
-**Costs.** All inputs are free public data from NOAA, NASA and EPA. [TEAM: paste the measured median seconds per issue day and the hardware from `outputs/timing/`.] A T4 GPU costs $0.53 an hour on demand, so a daily forecast for the western US costs cents a day, and a small web host is $7 to $25 a month. Text alerts cost about $0.013 per SMS part; our messages fit in one or two parts, so 60 smoke-day alerts to 1,000 families cost about $1,100 a season. WhatsApp utility messages cost $0.0034 each. PurpleAir sensor history, if added, costs about $1 to $5 per sensor-year. At the prices above, compute and messaging together stay under 10% of revenue.
+**Costs.** All inputs are free public data from NOAA, NASA and EPA. Running the trained model (all 5 ensemble members, 425 western monitors) takes 0.016 seconds per forecast day on a desktop CPU (median of 20 runs, measured 2026-11-23); downloading NOAA's daily files takes longer and was not timed. No GPU is needed to forecast, so a small web host at $7 to $25 a month covers it. Text alerts cost about $0.013 per SMS part and our messages fit in one or two parts, so a heavy season of 60 alerts costs about $1.13 per family ($1,100 for 1,000 families), or $0.20 by WhatsApp. By SMS that is 5% to 15% of a district's fee if every child with asthma enrolls, and 6% to 11% of a health plan's. [TEAM: these shares are computed in `src/serein/business.py` and tested; rerun `python -m serein.business` if a price changes.]
 
-## 10. Fundraising (150 words) [draft: 131 words]
+## 10. Fundraising (150 words) [draft: 124 words]
 
-To reach the Summit and run one pilot season we need about $3,000 to $5,000: the $499 Conrad fee (or financial aid), $65 for a provisional patent (micro-entity) and $350 for a trademark application on the name, about $300 for a fire season of hosting, roughly $1,100 of text messages for 1,000 families, $500 for native-speaker and translation review, and travel. Sources: Conrad's prize partners (1517 Fund has given Scholar teams $1,000 plus $10,000 in AWS credits), the Davidson Fellows Scholarship (deadline February 17, 2027), small rolling seed grants such as The Pollination Project, in-kind sensors or data from an air district or PurpleAir, and a crowdfunding page. Federal environmental-justice grants are not realistically available in 2026-27. After the pilot, the first paying district funds the next season. [TEAM: confirm 1517 Fund and AWS are still 2026-27 prize partners.]
+To reach the Summit and run one pilot season we need about $3,000 to $5,000: the $499 Conrad fee (or financial aid), $65 for a provisional patent (micro-entity) and $350 for a trademark application on the name, about $300 for a fire season of hosting, roughly $1,100 of text messages for 1,000 families, $500 for native-speaker and translation review, and travel. Sources: Conrad's financial aid for the fee (applications close December 3, 2026), the Davidson Fellows Scholarship (deadline February 17, 2027), small rolling seed grants such as The Pollination Project, in-kind sensors or data from an air district or PurpleAir, and a crowdfunding page. Federal environmental-justice grants are not realistically available in 2026-27. After the pilot, the first paying district funds the next season. [TEAM: say whether we applied for financial aid. The earlier line about 1517 Fund and AWS prizes was removed: Conrad's 2026 awards page names neither.]
 
 ---
 
-## Status note (2026-11-08)
+## Status note (2026-11-08, updated 2026-11-25)
+
+Sections 8, 9 and 10 here were brought back in line with `innovation_brief.md` on
+2026-11-25 (bidding threshold in 8, messaging cost shares in 9, financial aid in 10;
+see `brief_review_2026-11-25.md`). Count every Brief section with
+`python3 scripts/check_brief.py`.
 
 Sections 6, 8, 9 and 10 below were merged into `innovation_brief.md` on 2026-11-08.
 Section 7 in the brief is the E-5 rewrite by Kwilier (merged 2026-11-07), which is the

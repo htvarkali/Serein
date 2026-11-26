@@ -49,36 +49,26 @@ export const team = [
     name: "Aadi Tiwari",
     grade: "11th grade",
     role: "Data pipeline, SmokeCast forecast model, backtest protocol, Smoke World",
-    photo: "aadi.webp",
-    photoStyle: { objectPosition: "35% center", transform: "scale(1.15)", transformOrigin: "28% 32%" },
   },
   {
     name: "Harshateja Varkali",
     grade: "11th grade",
     role: "Website, sensor quality checks and forecast reliability",
-    photo: "teja.webp",
-    photoStyle: { objectPosition: "35% center", transform: "scale(1.19)", transformOrigin: "45% 6%" },
   },
   {
     name: "Abhinav Garg",
     grade: "12th grade",
     role: "Business model, market research and IP",
-    photo: "abhinav.webp",
-    photoStyle: { transform: "scale(1.11)", transformOrigin: "50% top" },
   },
   {
     name: "Arush Kudaraya",
     grade: "11th grade",
     role: "Forecast context (ozone, heat, pollen) and competitor research",
-    photo: "arush.webp",
-    photoStyle: { objectPosition: "58% center", transform: "scale(1.27)", transformOrigin: "60% 56%" },
   },
   {
     name: "Jagath Prabath",
     grade: "11th grade",
     role: "",
-    photo: "jagath.webp",
-    photoStyle: { objectPosition: "center 78%" },
   },
 ]
 

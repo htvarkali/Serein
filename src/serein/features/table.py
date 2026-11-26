@@ -10,6 +10,7 @@ Column groups
   aqm_*_L{l}           NOAA AQM bias-corrected PM2.5, local-day mean/max
   hms_prev             yesterday's HMS smoke density at the point (0..3)
   frp_*                nearby fire radiative power in the last 24 h (FIRMS)
+  tmon_*               nearby temporary fire monitors (optional, ``fire_monitors=True``)
   lat, lon, doy_sin, doy_cos
 """
 
@@ -139,7 +140,8 @@ def _model_features(days, points, offsets, store: str, av: Availability) -> pd.D
 
 
 def build_table(study: Study, days: list[date], points: pd.DataFrame,
-                use_firms: bool = True, progress: bool = True) -> pd.DataFrame:
+                use_firms: bool = True, progress: bool = True,
+                fire_monitors: bool = False) -> pd.DataFrame:
     if not days:
         raise ValueError("feature table requires at least one issue date")
     # Issue days are calendar labels, so UTC conversion could change the day.
@@ -189,22 +191,31 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
             if len(fires):
                 fires = fires[fires["method"].isin(["VIIRS", "MODIS"])]
     pts = points.set_index("point_id").loc[tab["point_id"].unique()].reset_index()
-    hms_cols, fire_parts = [], []
+    if fire_monitors:
+        from serein.data import airfire
+        from serein.features.fire_monitors import monitor_features
+        monitors, mon_hourly = airfire.load_monitors(sorted({d.year for d in days}), study.region)
+    hms_cols, fire_parts, mon_parts = [], [], []
     it = tqdm(days, desc="hms/fires", disable=not progress)
     for d in it:
         sub = pts
         dens = hms.density_at_points(av.hms_day(d), sub)
         hms_cols.append(pd.DataFrame({"issue_date": d, "point_id": sub["point_id"], "hms_prev": dens}))
+        wind = tab[tab["issue_date"] == d].set_index("point_id").reindex(sub["point_id"])
+        u = wind.get("wind_now_u10", pd.Series(np.nan, index=wind.index)).to_numpy()
+        v = wind.get("wind_now_v10", pd.Series(np.nan, index=wind.index)).to_numpy()
         if len(fires):
-            wind = tab[tab["issue_date"] == d].set_index("point_id").reindex(sub["point_id"])
-            u = wind.get("wind_now_u10", pd.Series(np.nan, index=wind.index)).to_numpy()
-            v = wind.get("wind_now_v10", pd.Series(np.nan, index=wind.index)).to_numpy()
             ff = firms.fire_features(fires, sub, av.issue_time(d), av.firms_window_hours, u, v)
             ff["issue_date"], ff["point_id"] = d, sub["point_id"].to_numpy()
             fire_parts.append(ff)
+        if fire_monitors:
+            mf = monitor_features(monitors, mon_hourly, sub, d, av, u, v)
+            mon_parts.append(mf.assign(issue_date=d))
     tab = tab.merge(pd.concat(hms_cols), on=["issue_date", "point_id"], how="left")
     if fire_parts:
         tab = tab.merge(pd.concat(fire_parts), on=["issue_date", "point_id"], how="left")
+    if mon_parts:
+        tab = tab.merge(pd.concat(mon_parts), on=["issue_date", "point_id"], how="left")
 
     tab = tab.merge(points[["point_id", "lat", "lon", "kind"]], on="point_id", how="left")
     doy = pd.to_datetime(tab["issue_date"]).dt.day_of_year

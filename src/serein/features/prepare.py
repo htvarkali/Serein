@@ -17,7 +17,7 @@ import pandas as pd
 
 ID_COLS = ["issue_date", "point_id", "kind"]
 LOG_PREFIXES = ("obs_last", "obs_max", "obs_prev", "hrrr_smoke_", "aqm_", "frp_",
-                "hrrr_colmd", "hrrr_pbl")
+                "hrrr_colmd", "hrrr_pbl", "tmon_")
 OBS_PREFIX = "obs_"  # columns hidden during node masking
 SITE_HISTORY = ("site_clim", "site_bg")  # also unknown at places with no sensor
 # Derived from site_bg (the site's own clean-air history), so it leaks that history

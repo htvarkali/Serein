@@ -1,8 +1,8 @@
 # IP decision memo (task E-8), for team discussion
 
 Written 2026-11-07 by a non-lawyer. The trademark facts (item 4) were rechecked on
-USPTO's own status system on 2026-11-25 and a full word search was run on 2026-11-26;
-they have changed. The 2024-25 Conrad prize
+USPTO's own status system on 2026-11-25, and word searches for "serein" and "serene"
+were run on 2026-11-26; they have changed. The 2024-25 Conrad prize
 list named ArentFox Schiff pro-bono patent services for Scholar winners; that list is
 no longer online and the 2026 awards page does not mention it, so do not count on it.
 Conrad's November 12 workshop, "Business Insight: Protect Your Idea", has passed.
@@ -84,10 +84,33 @@ Nothing below is legal advice; verify fees and status on uspto.gov.
    - The nearest live filings by subject are SEREIN WELLNESS LLC (therapy wraps, a
      medical-device class, still pending) and SEREIN for children's car seats. Neither
      is software or a forecast.
-   - **What this search does not cover:** marks that sound or look alike but are
-     spelled differently, such as "serene" or "serenity", and unregistered names in
-     use. An examiner weighs those too. That check, and any opinion on whether a
-     filing would succeed, needs an attorney or the USPTO itself.
+
+   **Similar-sounding names, 2026-11-26.** The same search for "serene": 742 results,
+   of which 739 were read; 327 are live, and 42 of those are in Class 9, 42 or 44. An
+   examiner looks at names that sound alike as well as names spelled alike, and many
+   English speakers will say "Serein" as "serene".
+
+   | Live mark | Serial | Class and goods | Status |
+   |---|---|---|---|
+   | SERENE (Polar Electro Oy, Finland) | 88742034, Reg. No. 6285916 | 9, 10, 14, 38, 41, 42 and 44: exercise and weight-reduction software, wearable trackers, and wrist sensors that record body signals and "environmental air purity" | Registered March 9, 2021 |
+   | SERENEFLOW | 99737244 | 9: mobile phone application software | Pending |
+   | SERENA | 99625221 | 9 and 42: project management software | Pending |
+   | MENTE SERENA | 90668141 | 42 and 44: software as a service | Registered |
+   | SERENE INSIGHTS, THE SERENE WAY, SERENE CARE SOLUTION SERVICES | 99603847, 99690532, 99416398 | 44: psychotherapy and mental health services | Registered |
+
+   The other live marks in those classes are mostly spas, dentists, dermatology,
+   landscape design, noise machines, speakers and locks. The goods shown in the results list are
+   cut short, so only the first row was opened in full.
+
+   What it means, as far as a non-lawyer can say:
+   - **Polar's SERENE is the one to take seriously.** It is live in the classes we would
+     file in, for health-related software and sensors, and its goods mention air
+     purity. Whether "Serein" is too close to it is exactly the question an examiner or
+     an attorney answers, and we should not guess.
+   - Nothing here stops us from using Serein as the name of a competition entry. It
+     bears on whether we could register it and on choosing a product name later.
+   - **Still not covered:** names spelled other ways again (for example "serenity"),
+     and names in use that were never registered.
 
    **If the team keeps the name:** a trademark application is $350 per class when the
    goods are picked from the USPTO's ID Manual; writing a free-form description adds
@@ -95,7 +118,8 @@ Nothing below is legal advice; verify fees and status on uspto.gov.
    https://www.uspto.gov/trademarks/trademark-fee-information The choice is still
    (i) keep "Serein" and file in Class 42 with a narrow description, (ii) keep it as a
    project name for the competition only, or (iii) pick a product name we can own
-   before the website and video are final.
+   before the website and video are final. After the "serene" search we would ask an
+   attorney before paying for (i); (ii) costs nothing and works for January.
 
 ## Options
 

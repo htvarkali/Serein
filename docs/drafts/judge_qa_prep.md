@@ -163,8 +163,10 @@ Summit, as the rules require of finalists. [After E-8: the decision on the name.
 We searched the U.S. trademark records on November 26, 2026. Thirty marks contain
 "serein" and 13 are live, none of them in the software or health-service classes; an
 earlier application there was abandoned in 2023. Live SEREIN registrations cover
-unrelated goods such as e-cigarettes and children's car seats. We did not search
-similar-sounding names, and we have not filed yet. [Update after the team decides.]
+unrelated goods such as e-cigarettes and children's car seats. We also searched the
+similar-sounding "serene": one live SERENE registration, owned by a fitness-watch
+company, covers health-related software and sensors, so we would ask an attorney
+before filing. We have not filed. [Update after the team decides.]
 
 **22. Did students really build this? It's a lot of code.**
 Yes, and each of us can walk you through our part. [Each member: one sentence on what

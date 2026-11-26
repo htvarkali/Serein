@@ -47,7 +47,7 @@ export default function SmokeCast() {
             <TabsTrigger value="hidden" className="min-h-11 whitespace-normal px-2">Hidden monitors</TabsTrigger>
             <TabsTrigger value="equity" className="min-h-11 whitespace-normal px-2">Monitor access</TabsTrigger>
           </TabsList>
-          <Card className="gilded mt-2 min-w-0">
+          <Card className="outlined mt-2 min-w-0">
             <TabsContent value="error" className="min-w-0">
               <CardHeader className="px-4 sm:px-6">
                 <h3 className="text-lg font-semibold">Daily PM₂.₅ forecast error</h3>
@@ -112,7 +112,7 @@ export default function SmokeCast() {
         <Heading>How SmokeCast works.</Heading>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {steps.map(({ icon: Icon, title, description }) => (
-            <Card key={title} className="gilded h-full" data-reveal="">
+            <Card key={title} className="outlined h-full" data-reveal="">
               <CardHeader>
                 <Icon aria-hidden="true" className="mb-2 size-7 text-primary" strokeWidth={1.3} />
                 <h3 className="text-xl font-semibold">{title}</h3>

@@ -31,7 +31,7 @@ export default function AirPlan() {
         <Heading>How to use the forecast.</Heading>
         <div className="mt-8 grid gap-4 md:grid-cols-3">
           {useCases.map(({ icon: Icon, title, description }) => (
-            <Card key={title} className="gilded h-full" data-reveal="">
+            <Card key={title} className="outlined h-full" data-reveal="">
               <CardHeader>
                 <Icon aria-hidden="true" className="mb-2 size-7 text-primary" strokeWidth={1.3} />
                 <h3 className="text-xl font-semibold">{title}</h3>

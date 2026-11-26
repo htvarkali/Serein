@@ -74,7 +74,7 @@ export function Home() {
   return (
     <>
       {/* Hero: smoke video, a status pill, a giant title scrolling sideways, then the statement. */}
-      <section className="dark night relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden text-white" id="overview">
+      <section className="dark band-dark relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden text-white" id="overview">
         <video className="absolute inset-0 -z-30 size-full object-cover" src={asset("motion/hero-smoke.mp4")} poster={asset("img/photo-hero.webp")}
           autoPlay muted loop playsInline aria-hidden="true" data-parallax="14" />
         <div className="absolute inset-0 -z-20 bg-[linear-gradient(90deg,#0a0a0a88,transparent_50%,#0a0a0aaa),linear-gradient(180deg,#0a0a0a99,transparent_30%,#0a0a0acc_75%,#0a0a0a)]" />
@@ -97,7 +97,7 @@ export function Home() {
       </section>
 
       {/* Data sources strip */}
-      <div className="dark night border-t border-white/10 py-8 text-white/55">
+      <div className="dark band-dark border-t border-white/10 py-8 text-white/55">
         <p className="sr-only">Built on public data from: {sources.map(s => s.name).join(", ")}</p>
         <Marquee reverse text={sources.map(s => s.name).join("   ·   ")} className="text-[1.05rem] font-medium tracking-[-0.01em]" />
       </div>
@@ -123,9 +123,9 @@ export function Home() {
       </Section>
 
       {/* Live comparison inside a big black rounded panel */}
-      <section id="compare" className="parchment pb-[clamp(5rem,10vw,9rem)]">
+      <section id="compare" className="band-light pb-[clamp(5rem,10vw,9rem)]">
         <div className="site-width">
-          <div className="dark night overflow-hidden rounded-[2.2rem] p-[clamp(1.5rem,5vw,5rem)] text-foreground">
+          <div className="dark band-dark overflow-hidden rounded-[2.2rem] p-[clamp(1.5rem,5vw,5rem)] text-foreground">
             <Split className="md:grid-cols-[0.9fr_1.1fr]">
               <div>
                 <Eyebrow dot>Latest published run</Eyebrow>

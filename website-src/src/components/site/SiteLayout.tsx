@@ -17,7 +17,7 @@ export const NAV = [
 const REPO = "https://github.com/htvarkali/Serein"
 const DOCS = `${REPO}/blob/main/docs`
 
-/** Studio-style logo: a small tilted pill over a bold word. */
+/** Logo: a small tilted pill (the team name) over the project name. */
 export function Wordmark({ className, onClick }: { className?: string; onClick?: () => void; tagline?: boolean }) {
   return (
     <Link to="/" onClick={onClick} className={cn("inline-flex flex-col items-start leading-none", className)} aria-label="Serein home">
@@ -108,7 +108,7 @@ export function SiteLayout() {
                 <Menu aria-hidden="true" className="size-5" strokeWidth={1.5} />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" showCloseButton={false} className="dark night w-[min(100vw,34rem)] border-0 bg-[#0a0a0a] p-0 text-foreground"
+            <SheetContent side="right" showCloseButton={false} className="dark band-dark w-[min(100vw,34rem)] border-0 bg-[#0a0a0a] p-0 text-foreground"
               onCloseAutoFocus={event => {
                 if (menuNavigation.current) {
                   event.preventDefault()
@@ -136,7 +136,7 @@ export function SiteLayout() {
 
       <main id="main" ref={mainRef} tabIndex={-1} className="focus:outline-none"><Outlet /></main>
 
-      <footer className="dark night relative overflow-hidden text-foreground">
+      <footer className="dark band-dark relative overflow-hidden text-foreground">
         <div className="site-width grid gap-14 pt-[clamp(6rem,12vw,11rem)] pb-10 lg:grid-cols-[1fr_2fr]">
           <div>
             <Wordmark className="text-white" />

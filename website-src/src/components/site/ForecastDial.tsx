@@ -1,6 +1,6 @@
 import { rmseByLead } from "@/data/site"
 
-// A radial bar chart in the style of an astrolabe. Each ring is one forecast day; arc
+// A radial bar chart. Each ring is one forecast day; arc
 // length is proportional to RMSE (full sweep = MAX µg/m³), SmokeCast in the accent color and the
 // reference forecast in blue-grey. Only the outer rings and orbiting dots are decoration.
 const MAX = 16
@@ -23,7 +23,7 @@ export function ForecastDial() {
       <svg viewBox="0 0 400 400" className="w-full overflow-hidden" role="img"
         aria-label={`Forecast error by day, root mean square error in micrograms per cubic meter. ${rmseByLead.map(r => `${r.lead}: SmokeCast ${r.serein}, reference ${r.noaa}`).join("; ")}.`}>
         <defs>
-          <linearGradient id="dial-gold" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id="dial-accent" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#c3c9ff" /><stop offset=".55" stopColor="#5b6cf6" /><stop offset="1" stopColor="#3b49d6" />
           </linearGradient>
           <radialGradient id="dial-glow"><stop offset="0" stopColor="#5b6cf633" /><stop offset="1" stopColor="#5b6cf600" /></radialGradient>
@@ -46,7 +46,7 @@ export function ForecastDial() {
           <g key={lead}>
             <path d={arc(r, MAX)} fill="none" stroke="#ffffff" strokeOpacity=".07" strokeWidth="12" strokeLinecap="round" />
             <path d={arc(r + 4, noaa)} fill="none" stroke="#8a8a8a" strokeOpacity=".85" strokeWidth="3" strokeLinecap="round" />
-            <path d={arc(r - 3, serein)} fill="none" stroke="url(#dial-gold)" strokeWidth="6" strokeLinecap="round" className="dial-arc" pathLength={1} />
+            <path d={arc(r - 3, serein)} fill="none" stroke="url(#dial-accent)" strokeWidth="6" strokeLinecap="round" className="dial-arc" pathLength={1} />
             <text x={200 + (r + 1) * Math.sin((-139 * Math.PI) / 180)} y={200 - (r + 1) * Math.cos((-139 * Math.PI) / 180) + 3} textAnchor="end" fontSize="7.5" letterSpacing="1.6" fill="#f5f5f5" fillOpacity=".8"
               fontFamily="Poppins, sans-serif" fontWeight="600">{lead.toUpperCase()}</text>
           </g>

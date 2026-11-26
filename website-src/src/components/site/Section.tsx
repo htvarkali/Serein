@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { cn } from "@/lib/utils"
 
-// Building blocks for the studio layout: off-white ("light") or black ("dark") bands,
+// Layout building blocks: off-white ("light") or black ("dark") bands,
 // a small mono label, very large tight headings and a lead paragraph.
 export function Section({ tone = "light", id, className, children }: {
   tone?: "light" | "dark"; id?: string; className?: string; children: ReactNode; stars?: boolean }) {
   return (
     <section id={id} tabIndex={id ? -1 : undefined}
       className={cn("scroll-mt-24 overflow-hidden focus:outline-none py-[clamp(5rem,10vw,10rem)]",
-        tone === "dark" ? "dark night text-foreground" : "parchment text-foreground", className)}>
+        tone === "dark" ? "dark band-dark text-foreground" : "band-light text-foreground", className)}>
       <div className="site-width">{children}</div>
     </section>
   )
@@ -41,7 +41,7 @@ export function Split({ children, className }: { children: ReactNode; className?
   return <div className={cn("grid items-center gap-[clamp(2rem,6vw,7rem)] md:grid-cols-2", className)}>{children}</div>
 }
 
-/** A line of text that scrolls sideways forever (the giant studio headline). */
+/** A line of text that scrolls sideways forever (the giant hero headline). */
 export function Marquee({ text, className, reverse }: { text: string; className?: string; reverse?: boolean }) {
   return (
     <div className={cn("overflow-hidden whitespace-nowrap", className)} aria-hidden="true">
@@ -86,7 +86,7 @@ export function PageHero({ eyebrow, title, script, lead, media, children }: {
   eyebrow: string; title: ReactNode; script?: string; lead?: ReactNode
   media?: { image?: string; video?: string; position?: string; credit?: string }; children?: ReactNode }) {
   return (
-    <section className="dark night relative isolate overflow-hidden text-foreground">
+    <section className="dark band-dark relative isolate overflow-hidden text-foreground">
       {media?.video
         ? <video className="absolute inset-0 -z-30 size-full object-cover opacity-55" src={media.video} poster={media.image}
             autoPlay muted loop playsInline aria-hidden="true" data-parallax="10" />

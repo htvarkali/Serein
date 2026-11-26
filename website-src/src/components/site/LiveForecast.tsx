@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Link } from "react-router-dom"
-import { ArrowRight } from "lucide-react"
 import { asset } from "@/data/site"
 import { AQI, BOX, aqiOf, loadWorld, valueAt, type Which, type WorldData } from "@/lib/world"
 
@@ -39,40 +37,6 @@ function dayMean(d: WorldData, which: Which, p: number, hours: number[]) {
 }
 
 const longDate = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })
-
-/** The glass bar over the hero: real facts about the latest published run. */
-export function LiveBar() {
-  const live = useLive()
-  const facts = useMemo(() => {
-    if (live.state !== "ready") return null
-    const d = live.data
-    const monitors = d.points.filter(p => p[2] === 1).length
-    const fires = d.fires.filter(([lat, lon]) => inWest(lat, lon)).length
-    return [
-      { label: "Latest run", value: longDate(d.issue_date) },
-      { label: "Looks ahead", value: `${d.hours} hours` },
-      { label: "EPA monitors", value: monitors.toLocaleString() },
-      { label: "Fire detections, West", value: fires.toLocaleString() },
-    ]
-  }, [live])
-
-  return (
-    <div className="glass mx-auto flex w-full max-w-5xl flex-col gap-1 rounded-[1.4rem] p-2 text-left md:flex-row md:items-stretch" aria-live="polite">
-      <dl className="grid flex-1 grid-cols-2 md:grid-cols-4">
-        {(facts ?? Array.from({ length: 4 }, (_, i) => ({ label: ["Latest run", "Looks ahead", "EPA monitors", "Fire detections, West"][i], value: live.state === "error" ? "Unavailable" : "Loading…" })))
-          .map((f, i) => (
-            <div key={f.label} className={`px-5 py-3 ${i ? "md:border-l md:border-[#e5e5e5]" : ""}`}>
-              <dt className="text-[0.6rem] font-semibold tracking-[0.24em] text-[#3b49d6] uppercase">{f.label}</dt>
-              <dd className="mt-1 text-[0.95rem] font-medium text-[#0a0a0a]">{f.value}</dd>
-            </div>
-          ))}
-      </dl>
-      <Link to="/world" className="btn-gold inline-flex min-h-14 items-center justify-center gap-2 rounded-[1.1rem] px-7 text-[0.7rem] font-semibold tracking-[0.24em] uppercase">
-        Explore the map <ArrowRight className="size-4" aria-hidden="true" />
-      </Link>
-    </div>
-  )
-}
 
 type Geo = { features: { geometry: { type: string; coordinates: number[][][] | number[][][][] } }[] }
 let statesCache: Promise<Geo> | null = null
@@ -202,7 +166,7 @@ export function ForecastCompare() {
 
   return (
     <figure className="min-w-0">
-      <div ref={box} className="gilded relative aspect-[5/6] w-full cursor-ew-resize touch-none overflow-hidden rounded-[1.6rem] bg-[#111111] select-none sm:aspect-[4/4.2]"
+      <div ref={box} className="outlined relative aspect-[5/6] w-full cursor-ew-resize touch-none overflow-hidden rounded-[1.6rem] bg-[#111111] select-none sm:aspect-[4/4.2]"
         onPointerDown={e => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setFromPointer(e.clientX) }}
         onPointerMove={e => dragging.current && setFromPointer(e.clientX)}
         onPointerUp={() => { dragging.current = false }}>

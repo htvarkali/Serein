@@ -20,7 +20,7 @@ export function ForecastDial() {
   const ticks = Array.from({ length: 72 }, (_, i) => i)
   return (
     <figure className="relative mx-auto w-full max-w-[38rem]">
-      <svg viewBox="0 0 400 400" className="w-full overflow-visible" role="img"
+      <svg viewBox="0 0 400 400" className="w-full overflow-hidden" role="img"
         aria-label={`Forecast error by day, root mean square error in micrograms per cubic meter. ${rmseByLead.map(r => `${r.lead}: SmokeCast ${r.serein}, reference ${r.noaa}`).join("; ")}.`}>
         <defs>
           <linearGradient id="dial-gold" x1="0" y1="0" x2="1" y2="1">

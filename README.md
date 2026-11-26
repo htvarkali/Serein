@@ -445,7 +445,7 @@ Both workflows are development diagnostics.
 | E-5 | **(non-code)** Competitor table: verify every row in the Brief draft (AirNow, PurpleAir, IQAir, Apple/Google, Propeller Health, EPA Smoke Sense, published research models); [source verification](docs/COMPETITOR_VERIFICATION_2026-11-07.md) | Done | Kwilier | 2026-11-07 |
 | E-6 | **(non-code)** Business plan and pitch from the Lean Canvas. First draft 2026-11-25: [business plan](docs/drafts/business_plan.md) with three-year scenarios from `python -m serein.business` (tested); the Lean Canvas text and interview findings (E-1) are still to be merged in. Pitch: [slide text and speaker notes](docs/drafts/pitch_deck.md) for the eight-minute Summit talk (2026-11-26) | In progress | AbhinavGGarg | 2026-11-26 |
 | E-7 | **(non-code)** Letters of support (school district, air district, asthma nonprofit). A [one-page handout](docs/drafts/district_one_pager.md) for a district is drafted (2026-11-26); no letter has been asked for | Open | | |
-| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): USPTO word search run 2026-11-26: 30 marks contain "serein", 13 live, none of them in classes 9, 42 or 44; the earlier application in those classes was abandoned in 2023; live SEREIN registrations cover e-cigarettes and children's car seats among others; similar-sounding names not searched; the team's decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
+| E-8 | **(non-code)** IP decision: keep code open and protect the name, or move models private; trademark search on "Serein" ([memo](docs/drafts/ip_decision_memo.md): USPTO word search run 2026-11-26: 30 marks contain "serein", 13 live, none of them in classes 9, 42 or 44; the earlier application in those classes was abandoned in 2023; live SEREIN registrations cover e-cigarettes and children's car seats among others. A search for "serene" found a live SERENE registration (Polar Electro) in classes 9, 42 and 44 for health-related software and sensors, which bears on registering the name, not on using it for the competition; the team's decision pending) | In progress | AbhinavGGarg | 2026-11-08 |
 
 ### S: Submission (Conrad Innovation Stage, due 2027-01-07, internal target 2027-01-01)
 | ID | Task | Status | Owner | Date |
@@ -483,7 +483,7 @@ Both workflows are development diagnostics.
 | W-16 | People layer: neighborhoods by income and how many people are under smoke each hour (data in `docs/EQUITY.md`) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-17 | Places that matter: schools, hospitals, farms and work sites under unhealthy smoke each hour (schools and hospitals shown from OpenStreetMap; not counted yet; farms and work sites not added) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-18 | Highlight places more than 25 km from any air monitor | Done | Aadi-Tiwari | 2026-11-23 |
-| W-19 | **(non-code)** Watch 5 people use the 3D world for the first time and note where they get stuck | Open | | |
+| W-19 | **(non-code)** Watch 5 people use the 3D world for the first time and note where they get stuck. Script and recording sheet: [docs/SMOKE_WORLD_FIRST_USE_TEST.md](docs/SMOKE_WORLD_FIRST_USE_TEST.md) (2026-11-26); nobody has been tested yet | Open | | |
 | W-20 | **(non-code)** Credit every data source on the website (several licenses require it) | Done | Aadi-Tiwari | 2026-11-23 |
 
 ### Q: Code quality

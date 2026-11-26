@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "btn-gold rounded-full text-[0.72rem] font-semibold tracking-[0.22em] uppercase",
+        default: "btn-gold rounded-full text-sm font-medium",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:bg-destructive/60 dark:focus-visible:ring-destructive/40",
         outline:
-          "rounded-full border border-gold/60 bg-transparent text-[0.72rem] font-semibold tracking-[0.22em] uppercase hover:border-gold hover:bg-gold/10",
+          "rounded-full border border-current/30 bg-transparent text-sm font-medium hover:border-current hover:bg-current/5",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:

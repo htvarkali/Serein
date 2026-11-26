@@ -63,3 +63,15 @@ export const sources = [
   { name: "OpenStreetMap via OpenFreeMap", what: "Places, roads and 3D buildings", license: "ODbL, credit required" },
   { name: "MapLibre GL JS", what: "3D map engine", license: "BSD-3-Clause" },
 ]
+
+// Update log: real entries from docs/EXPERIMENTS.md and the project history.
+// "Failed" means the change did not pass the team's acceptance checks and was not kept.
+export const updates = [
+  { date: "2026-11-25", kind: "Live", title: "The forecast map now updates each morning", note: "The daily job rebuilds the map data from that morning’s run." },
+  { date: "2026-11-23", kind: "Evaluation", title: "Hour-by-hour accuracy tested", note: "Repeating the daily estimate across every hour was as accurate or better than the scaled hourly pattern.", doc: "HOURLY_ACCURACY.md" },
+  { date: "2026-11-23", kind: "Accepted", title: "Recalibrated warning probabilities", note: "Fitted on calibration data. The point forecast did not change.", doc: "EXPERIMENTS.md" },
+  { date: "2026-11-23", kind: "Failed", title: "GOES-West satellite smoke haze as a new input", note: "Did not improve the forecast, so it was not kept.", doc: "EXPERIMENTS.md" },
+  { date: "2026-11-23", kind: "Failed", title: "Blending forecasters, second look", note: "Four more blending variants; none was better.", doc: "EXPERIMENTS.md" },
+  { date: "2026-11-23", kind: "Failed", title: "2020 as extra training data", note: "Tried for the day 2–3 peaks that are still under-predicted.", doc: "EXPERIMENTS.md" },
+  { date: "2026-11-23", kind: "Failed", title: "A fire growth input", note: "Previous-day fire radiative power did not help.", doc: "EXPERIMENTS.md" },
+] as const

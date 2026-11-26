@@ -15,7 +15,7 @@ const useCases = [
 export default function AirPlan() {
   return (
     <>
-      <PageHero eyebrow="Smoke planning" title="AirPlan" script="prepare"
+      <PageHero eyebrow="Smoke planning" title="AirPlan" script="plan with the range, not just the number"
         media={{ video: asset("motion/lake.mp4"), image: asset("img/photo-family.webp") }}
         lead="See what the next three days could bring and give yourself time to prepare.">
         <Button asChild size="lg" className="h-12 px-7"><Link to="/airplan#example">View the outlook <ArrowDown aria-hidden="true" /></Link></Button>

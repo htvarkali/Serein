@@ -27,7 +27,7 @@ export default function SmokeCast() {
 
   return (
     <>
-      <PageHero eyebrow="Forecast research" title="SmokeCast" script="forecast"
+      <PageHero eyebrow="Forecast research" title="SmokeCast" script="tested on held-out 2023 weeks"
         media={{ video: asset("motion/hayes-fire.mp4"), image: asset("img/photo-research.webp"), credit: "Hayes Fire, Olympic National Park. Courtesy of the National Park Service." }}
         lead={<>A daily outlook for wildfire smoke, up to three days ahead. SmokeCast learns from air-monitor readings and NOAA forecasts to
           estimate daily fine particle pollution (PM₂.₅), and each estimate comes with a range so people can plan around uncertainty.</>}>

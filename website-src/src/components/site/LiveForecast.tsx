@@ -61,9 +61,9 @@ export function LiveBar() {
       <dl className="grid flex-1 grid-cols-2 md:grid-cols-4">
         {(facts ?? Array.from({ length: 4 }, (_, i) => ({ label: ["Latest run", "Looks ahead", "EPA monitors", "Fire detections, West"][i], value: live.state === "error" ? "Unavailable" : "Loading…" })))
           .map((f, i) => (
-            <div key={f.label} className={`px-5 py-3 ${i ? "md:border-l md:border-[#e4d8bf]" : ""}`}>
-              <dt className="text-[0.6rem] font-semibold tracking-[0.24em] text-[#9c7638] uppercase">{f.label}</dt>
-              <dd className="mt-1 text-[0.95rem] font-medium text-[#2a2318]">{f.value}</dd>
+            <div key={f.label} className={`px-5 py-3 ${i ? "md:border-l md:border-[#e5e5e5]" : ""}`}>
+              <dt className="text-[0.6rem] font-semibold tracking-[0.24em] text-[#3b49d6] uppercase">{f.label}</dt>
+              <dd className="mt-1 text-[0.95rem] font-medium text-[#0a0a0a]">{f.value}</dd>
             </div>
           ))}
       </dl>
@@ -133,7 +133,7 @@ function DotCanvas({ d, values, label }: { d: WorldData; values: (number | null)
       if (states) {
         ctx.save()
         ctx.beginPath(); ctx.rect(ox, oy, spanX * scale, spanY * scale); ctx.clip()
-        ctx.strokeStyle = "#c9a46659"; ctx.lineWidth = 0.8
+        ctx.strokeStyle = "#5b6cf659"; ctx.lineWidth = 0.8
         for (const f of states.features) {
           const polys = (f.geometry.type === "Polygon" ? [f.geometry.coordinates] : f.geometry.coordinates) as number[][][][]
           for (const poly of polys) for (const ring of poly) {
@@ -151,7 +151,7 @@ function DotCanvas({ d, values, label }: { d: WorldData; values: (number | null)
         const v = values[i]
         const [x, y] = project(lat, lon)
         if (kind === 1) {
-          ctx.globalAlpha = 0.9; ctx.strokeStyle = "#ecd3a0"; ctx.lineWidth = 0.9
+          ctx.globalAlpha = 0.9; ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 0.9
           ctx.beginPath(); ctx.arc(x, y, r * 0.85, 0, Math.PI * 2); ctx.stroke()
           return
         }
@@ -202,20 +202,20 @@ export function ForecastCompare() {
 
   return (
     <figure className="min-w-0">
-      <div ref={box} className="gilded relative aspect-[5/6] w-full cursor-ew-resize touch-none overflow-hidden rounded-[1.6rem] bg-[#0d1528] select-none sm:aspect-[4/4.2]"
+      <div ref={box} className="gilded relative aspect-[5/6] w-full cursor-ew-resize touch-none overflow-hidden rounded-[1.6rem] bg-[#111111] select-none sm:aspect-[4/4.2]"
         onPointerDown={e => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); setFromPointer(e.clientX) }}
         onPointerMove={e => dragging.current && setFromPointer(e.clientX)}
         onPointerUp={() => { dragging.current = false }}>
         {model ? <>
           <DotCanvas d={model.d} values={model.serein} label={`SmokeCast-adjusted average PM2.5 for ${longDate(model.date)}`} />
           <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - split}% 0 0)` }}>
-            <div className="absolute inset-0 bg-[#0d1528]" />
+            <div className="absolute inset-0 bg-[#111111]" />
             <DotCanvas d={model.d} values={model.noaa} label={`NOAA forecast average PM2.5 for ${longDate(model.date)}`} />
           </div>
-          <span className="absolute top-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#f3ead8] uppercase backdrop-blur">NOAA forecast</span>
-          <span className="absolute top-4 right-4 rounded-full bg-[#c9a466]/90 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#1d1608] uppercase">SmokeCast</span>
-          <div className="pointer-events-none absolute inset-y-0 w-px bg-[#f3ead8]/80" style={{ left: `${split}%` }}>
-            <span className="compare-handle absolute top-1/2 left-1/2 grid size-12 -translate-1/2 place-items-center rounded-full bg-[#f6f1e6] text-[#2a2318]">⟷</span>
+          <span className="absolute top-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#f5f5f5] uppercase backdrop-blur">NOAA forecast</span>
+          <span className="absolute top-4 right-4 rounded-full bg-[#5b6cf6]/90 px-3 py-1.5 text-[0.6rem] font-semibold tracking-[0.22em] text-[#ffffff] uppercase">SmokeCast</span>
+          <div className="pointer-events-none absolute inset-y-0 w-px bg-[#f5f5f5]/80" style={{ left: `${split}%` }}>
+            <span className="compare-handle absolute top-1/2 left-1/2 grid size-12 -translate-1/2 place-items-center rounded-full bg-[#ffffff] text-[#0a0a0a]">⟷</span>
           </div>
         </> : <p className="absolute inset-0 grid place-items-center p-8 text-center text-sm text-muted-foreground">
           {live.state === "error" ? "The latest forecast could not load. Try the forecast map." : live.state === "loading" ? "Loading the latest forecast…" : "This run does not cover a full next day."}
@@ -223,10 +223,10 @@ export function ForecastCompare() {
       </div>
       <label className="sr-only" htmlFor="compare-split">Move the divider between the NOAA forecast and SmokeCast</label>
       <input id="compare-split" type="range" min={0} max={100} value={Math.round(split)} onChange={e => setSplit(Number(e.target.value))}
-        className="mt-4 w-full accent-[#c9a466]" />
+        className="mt-4 w-full accent-[#5b6cf6]" />
       {model && <figcaption className="mt-3 space-y-3 text-sm text-muted-foreground">
         <p>Average PM₂.₅ over {longDate(model.date)} (Pacific time), from the run issued {longDate(model.d.issue_date)}.
-          Each dot is a 0.25° forecast grid point; gold rings are EPA monitors. Grid points above “Good”:
+          Each dot is a 0.25° forecast grid point; white rings are EPA monitors. Grid points above “Good”:
           {" "}NOAA {model.aboveGood.noaa}%, SmokeCast {model.aboveGood.serein}%.</p>
         <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs" aria-label="AQI categories">
           {AQI.slice(0, 5).map(a => <li key={a.name} className="inline-flex items-center gap-1.5">

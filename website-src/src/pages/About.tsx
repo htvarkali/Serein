@@ -16,7 +16,7 @@ const references = [
 export default function About() {
   return (
     <>
-      <PageHero eyebrow="Data and methods" title="How Serein works" script="methods"
+      <PageHero eyebrow="Data and methods" title="How Serein works" script="all the code is on GitHub"
         media={{ image: asset("img/world-preview.webp") }}
         lead="Serein is a student research project studying whether recent local readings can improve wildfire smoke forecasts.">
         <Button asChild variant="outline" size="lg" className="h-12 px-7"><a href={repository}><Code aria-hidden="true" /> View the project on GitHub</a></Button>

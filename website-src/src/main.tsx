@@ -3,13 +3,11 @@ import { createRoot } from "react-dom/client"
 import { HashRouter, Navigate, Route, Routes, useLocation } from "react-router-dom"
 import { SiteLayout } from "@/components/site/SiteLayout"
 import { Home } from "@/pages/Home"
-import "@fontsource/cormorant/300.css"
-import "@fontsource/cormorant/300-italic.css"
-import "@fontsource/cormorant/400.css"
-import "@fontsource/cormorant/400-italic.css"
-import "@fontsource/cormorant/500.css"
-import "@fontsource-variable/montserrat/wght.css"
-import "@fontsource/pinyon-script/400.css"
+import "@fontsource/poppins/300.css"
+import "@fontsource/poppins/400.css"
+import "@fontsource/poppins/500.css"
+import "@fontsource/poppins/600.css"
+import "@fontsource/caveat/500.css"
 import "./styles.css"
 
 // Heavy pages load on demand so the home page stays fast.
@@ -35,7 +33,7 @@ function DocumentTitle() {
 }
 
 function Loading() {
-  return <div role="status" className="grid min-h-[60vh] place-items-center text-muted-foreground">Loading page…</div>
+  return <div role="status" className="dark grid min-h-screen place-items-center bg-[#0a0a0a] text-muted-foreground">Loading page…</div>
 }
 
 createRoot(document.getElementById("root")!).render(

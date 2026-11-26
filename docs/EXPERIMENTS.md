@@ -366,3 +366,84 @@ and six more inputs on a third of the rows add noise. Not merged; the loader and
 features are kept on branch `b8-fire-monitors`. Not tried: the monitors as graph
 nodes (needs HRRR and AQM extracted at their locations) or as extra training targets.
 ACCEPTANCE: FAIL b8_tmon, inner_b8_tmon: no lead 1-2 gain; inner leads 0 and 3 worse.
+
+## 2026-11-25 Ensemble size: 10 seeds instead of 5 (`--seeds 10`)
+
+Hypothesis: the differences between runs in the records above are often 0.2-0.5
+µg/m³ at leads 1-3, which is the size of the effects being tested, so part of the
+forecast error is the randomness of training. Averaging 10 networks instead of 5
+should lower RMSE a little at every lead, most at days 2-3. No input or setting
+changes; seeds 0-9 include the current seeds 0-4. Cost: twice the training time
+for each model update; the daily forecast stays seconds. Tags `ens10`,
+`ens10_holdout`, `inner_ens10` against `b8_base`, `b8_base_holdout`,
+`inner_b8_base` (same code, same day). Same acceptance rule.
+
+## 2026-11-25 CAMS: an independent forecast model as input (`build-table --cams`)
+
+Hypothesis: every input so far comes from NOAA's models or from observations, and
+the misses are at days 2-3, where HRRR has ended and AQM is the only model. ECMWF's
+CAMS global forecast is built separately (its own emissions, satellite fire
+assimilation and weather) and runs to 5 days, so it adds independent information
+exactly there. Expected: lower RMSE at leads 2-3 and possibly 1, mostly on smoke days.
+
+Inputs, fixed before the first run: the CAMS 00 UTC run of the issue day (ECMWF
+guarantees it by 10:00 UTC, 8.5 h before the 18:30 UTC issue time), PM2.5 at the
+nearest 0.4 degree cell, 3-hourly steps 0-96 h, local-day mean and max for leads 0-3
+(`cams_mean_L*`, `cams_max_L*`; day 3 has 6 of its 8 steps, at least 6 required).
+
+Caveats: CAMS is upgraded every year or so (dates not checked here), so a version
+change can sit between the training and scoring seasons; the inner fold is a second
+season pair. CAMS files come from the free Copernicus
+Atmosphere Data Store account. Tags `cams`, `cams_holdout`, `inner_cams` against the
+same-day baselines. Same acceptance rule.
+
+Result (10 seeds vs. 5, same code and day):
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.401 | (-0.03, +0.10) | 4.040 -> 4.126 | (-0.05, +0.20) | 6.92 -> 6.96 |
+| 1 | 7.776 -> 7.808 | (-0.13, +0.23) | 6.463 -> 6.599 | (+0.01, +0.30) | 8.39 -> 8.46 |
+| 2 | 9.721 -> 9.681 | (-0.11, +0.05) | 8.034 -> 8.182 | (+0.06, +0.26) | 9.90 -> 9.93 |
+| 3 | 11.584 -> 11.510 | (-0.15, +0.06) | 10.439 -> 10.699 | (+0.13, +0.41) | 11.38 -> 11.37 |
+
+The dev changes are small and their intervals straddle 0, as expected from averaging.
+The inner fold is worse at leads 1-3 with intervals above 0: adding seeds 5-9 moved
+the one-season model away from the truth, so more averaging is not a reliable gain
+here (not investigated further). Coverage and USG CSI unchanged. Five seeds stay.
+ACCEPTANCE: FAIL ens10, inner_ens10: no lead better; inner leads 1-3 worse.
+
+## 2026-11-25 B-8 try 2: fire monitors as input-only graph nodes (`--aux-kinds tmon`)
+
+Hypothesis: as six summary inputs (try 1) the fire monitors added noise, but the
+graph can weigh each neighbor by its distance, direction and the wind, which a fixed
+summary cannot. As graph nodes they should help where a fire monitor is upwind of an
+EPA monitor, at leads 0-2.
+
+Design, fixed before the first run: the 352 AirFire deployments in the study area in
+2021-2023 become nodes of kind `tmon` (`serein add-monitor-nodes`). Each EPA monitor
+keeps its current 10 EPA neighbors and also receives one-way edges from its 5 nearest
+fire monitors within 150 km; fire monitors receive nothing, have no targets and are
+never calibrated or scored, so scoring stays on the same EPA rows. Their readings use
+the AirNow cutoff; their NOAA inputs (HRRR, AQM) come from the nearest 0.25 degree
+grid cell (median 9 km, at most 16 km away), because HRRR and AQM were never
+extracted at their sites. On days a monitor is not deployed its node has the NOAA
+inputs but no readings. Runs use `--no-gbm` (the trees are not part of the rule). Tags `gn`,
+`gn_holdout`, `inner_gn` against the same-day baselines.
+
+Result. 352 extra nodes, 1,671 extra edges (graph 777 nodes, 5,921 edges). With no
+extra kinds the changed code reproduces the baseline exactly (`gn_regress`, RMSE equal
+to 4 decimals at every lead), and the EPA rows of the new tables equal the old ones.
+
+| Lead | Dev RMSE | Dev interval | Inner RMSE | Inner interval | Hidden monitors (dev) |
+|---|---|---|---|---|---|
+| 0 | 4.362 -> 4.400 | (-0.04, +0.14) | 4.040 -> 4.193 | (-0.03, +0.30) | 6.92 -> 6.98 |
+| 1 | 7.776 -> 7.828 | (-0.08, +0.20) | 6.463 -> 6.500 | (-0.04, +0.10) | 8.39 -> 8.50 |
+| 2 | 9.721 -> 9.778 | (-0.20, +0.37) | 8.034 -> 8.127 | (-0.01, +0.18) | 9.90 -> 10.14 |
+| 3 | 11.584 -> 11.537 | (-0.31, +0.16) | 10.439 -> 10.690 | (+0.15, +0.35) | 11.38 -> 11.34 |
+
+USG CSI rises slightly at leads 2-3 (0.435 -> 0.449, 0.287 -> 0.311) and coverage is
+unchanged, but RMSE does not improve anywhere and the inner fold is worse at lead 3.
+Both ways of using the fire monitors (summary inputs and graph nodes) fail, so B-8 is
+answered for the free sensors available: extra temporary monitors do not improve this
+model. Code kept on branch `gn-fire-monitors`, not merged.
+ACCEPTANCE: FAIL gn, inner_gn: no lead better; inner lead 3 worse.

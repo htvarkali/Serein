@@ -1,7 +1,8 @@
 # IP decision memo (task E-8), for team discussion
 
 Written 2026-11-07 by a non-lawyer. The trademark facts (item 4) were rechecked on
-USPTO's own status system on 2026-11-25 and have changed. The 2024-25 Conrad prize
+USPTO's own status system on 2026-11-25 and a full word search was run on 2026-11-26;
+they have changed. The 2024-25 Conrad prize
 list named ArentFox Schiff pro-bono patent services for Scholar winners; that list is
 no longer online and the 2026 awards page does not mention it, so do not count on it.
 Conrad's November 12 workshop, "Business Insight: Protect Your Idea", has passed.
@@ -50,26 +51,51 @@ Nothing below is legal advice; verify fees and status on uspto.gov.
    What this means, as far as a non-lawyer can say:
    - The health-software application that worried us never registered and is no longer
      active. It was the only SEREIN filing we knew of in the classes we would use.
-   - The one live registration we found is for vaping products. Those goods are not
-     software or a health service, so it is a different kind of question from the first
-     one. It is also a fact to think about for its own sake: a children's asthma product
-     would share its name with an e-cigarette brand. That is a branding choice for the
-     team, apart from any legal one.
-   - **This was a check of two serial numbers, not a search.** The earlier SEREiN mark in
-     Class 25 (clothing) was abandoned in 2018 and is not a concern.
-     https://trademarkdir.com/owner/serein
+   - One live registration is for vaping products. Those goods are not software or a
+     health service, so it is a different kind of question from the first one. It is
+     also a fact to think about for its own sake: a children's asthma product would
+     share its name with an e-cigarette brand. That is a branding choice for the team,
+     apart from any legal one.
+   - The earlier SEREiN mark in Class 25 (clothing) was abandoned and is not a concern.
 
-   **Action before spending $350:** run a full search at https://tmsearch.uspto.gov/
-   (search "serein", filter to live marks, then look at anything in Classes 9, 42 and
-   44 and at similar spellings such as "serene" and "sereine" for health or software
-   goods). It takes about ten minutes. Save a screenshot with the date in
-   `docs/drafts/`. Then decide: (i) keep "Serein" and file in Class 42 with a narrow
-   description, (ii) keep it as a project name for the competition only, or (iii) pick
-   a product name we can own before the website and video are final. A trademark
-   application is $350 per class when the goods are picked from the USPTO's ID Manual;
-   writing a free-form description adds $200 per class (USPTO trademark fee page,
-   updated November 4, 2026).
-   https://www.uspto.gov/trademarks/trademark-fee-information
+   **Full word search, 2026-11-26.** USPTO Trademark Search (tmsearch.uspto.gov),
+   marks containing "serein": 30 results, 13 live and 17 dead.
+
+   | Live mark | Serial | Class and goods | Status |
+   |---|---|---|---|
+   | SEREIN | 99046662 | 12: safety seats for infants and children for vehicles | Registered |
+   | SEREIN | 98444557 | 34: electronic cigarettes and accessories | Registered |
+   | SEREIN | 97360248 | 26: lace, wigs, hair extensions | Registered |
+   | SEREIN | 90617341 | 21: bowls, cake moulds, candle holders | Registered |
+   | SEREIN WELLNESS LLC | 99575120 | 10 and 16: hot or cold therapy wraps | Pending |
+   | SEREIN LIVING | 99324246 | 24: shower curtains, bedding | Pending |
+   | LES SEREIN | 88193651 | 25: clothing | Registered |
+   | LE CIEL SEREIN | 86960334 | 33: wines | Registered |
+   | AESTHETIC SEREIN | 98487623 | 18: backpacks, bags | Registered |
+   | SEREINHAVEN | 99225814 | 24: blankets, bed linen | Registered |
+   | YXSEREIN | 50045770 | 21: make-up brushes, household containers | Pending |
+   | ONLYSEREIN | 97626665 | 35: retail jewelry stores | Pending |
+   | COATSEREIN | 50083863 | 3 and 5: grooming preparations | Pending |
+
+   What the search shows:
+   - **No live mark containing "serein" is in Class 9, 42 or 44**, the classes for
+     software, software services and health services. The three filings that ever
+     were (90636402 in 9, 42 and 44; SEREINSTITCH in 9; SALON SEREIN in 44) are dead.
+   - The nearest live filings by subject are SEREIN WELLNESS LLC (therapy wraps, a
+     medical-device class, still pending) and SEREIN for children's car seats. Neither
+     is software or a forecast.
+   - **What this search does not cover:** marks that sound or look alike but are
+     spelled differently, such as "serene" or "serenity", and unregistered names in
+     use. An examiner weighs those too. That check, and any opinion on whether a
+     filing would succeed, needs an attorney or the USPTO itself.
+
+   **If the team keeps the name:** a trademark application is $350 per class when the
+   goods are picked from the USPTO's ID Manual; writing a free-form description adds
+   $200 per class (USPTO trademark fee page, updated November 4, 2026).
+   https://www.uspto.gov/trademarks/trademark-fee-information The choice is still
+   (i) keep "Serein" and file in Class 42 with a narrow description, (ii) keep it as a
+   project name for the competition only, or (iii) pick a product name we can own
+   before the website and video are final.
 
 ## Options
 

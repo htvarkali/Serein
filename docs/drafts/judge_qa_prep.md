@@ -160,10 +160,11 @@ never published. We will file a provisional patent on the combined system before
 Summit, as the rules require of finalists. [After E-8: the decision on the name.]
 
 **21. Is the name yours?**
-We checked the U.S. trademark records on November 25, 2026. An earlier application for
-SEREIN in health software was abandoned in 2023. One live registration exists, for
-electronic cigarettes, which is a different kind of product. That was a check of two
-records and not a full search, so we have not filed yet. [Update after the search.]
+We searched the U.S. trademark records on November 26, 2026. Thirty marks contain
+"serein" and 13 are live, none of them in the software or health-service classes; an
+earlier application there was abandoned in 2023. Live SEREIN registrations cover
+unrelated goods such as e-cigarettes and children's car seats. We did not search
+similar-sounding names, and we have not filed yet. [Update after the team decides.]
 
 **22. Did students really build this? It's a lot of code.**
 Yes, and each of us can walk you through our part. [Each member: one sentence on what

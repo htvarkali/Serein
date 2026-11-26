@@ -189,7 +189,7 @@ first read them on is no longer online, so we cannot cite it.
 | A child is harmed after following a plan | A plan can only be stricter than EPA guidance and always points to the child's own doctor | Clinician review before any family sees a message; no real families before consent and review (docs/ETHICS.md). [TEAM: ask an adult advisor about insurance before a pilot] |
 | Children's health data | The check-in holds a child's symptoms | No real entries today. [TEAM: ask an advisor which privacy laws apply before the pilot; we have not checked] |
 | The final test comes out worse | 2024-25 has not been scored | We report it either way and re-price nothing until it is in |
-| The name | See the [IP memo](ip_decision_memo.md): the old health-software application is dead; one live SEREIN registration covers e-cigarettes | Run a full name search before paying $350 |
+| The name | See the [IP memo](ip_decision_memo.md): a USPTO word search on 2026-11-26 found no live mark containing "serein" in the software or health classes; live SEREIN registrations elsewhere include e-cigarettes and children's car seats | Decide whether to keep the name before the video is filmed; similar-sounding names were not searched |
 
 ## 9. Dates
 

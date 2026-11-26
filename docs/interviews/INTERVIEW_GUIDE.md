@@ -19,6 +19,9 @@ asks, one takes notes.
 
 ## Finding people
 
+A list of local organizations to ask first, with what to send each one, is in
+[OUTREACH_TARGETS.md](OUTREACH_TARGETS.md) (written 2026-11-26).
+
 - Parents: your own school's nurse can forward a two-line ask to families (they
   cannot give you names). Local asthma Facebook groups, AAFA support communities,
   your pediatrician's office bulletin board, youth sports coaches (practice

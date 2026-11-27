@@ -163,13 +163,18 @@ export function ForecastCompare() {
     const { date, hours } = tomorrowHours(d)
     if (!date || hours.length < 18) return null
     const noaa = d.points.map((_, p) => dayMean(d, "noaa", p, hours))
-    const serein = d.points.map((_, p) => dayMean(d, "serein", p, hours))
+    // SmokeCast side: the daily median the backtest scores. The hourly animation is only
+    // that median spread over NOAA's hourly shape and rounded, so its average can drift.
+    const day = d.daily?.find(x => x.date === date)
+    const serein = day
+      ? d.points.map((_, p) => day.q50[p] ?? null)
+      : d.points.map((_, p) => dayMean(d, "serein", p, hours))
     const grid = d.points.flatMap((pt, i) => (pt[2] === 0 ? [i] : []))
     const share = (vals: (number | null)[]) => {
       const vs = grid.map(i => vals[i]).filter((v): v is number => v !== null)
       return vs.length ? Math.round((100 * vs.filter(v => v > 9.0).length) / vs.length) : 0
     }
-    return { d, date, noaa, serein, aboveGood: { noaa: share(noaa), serein: share(serein) } }
+    return { d, date, noaa, serein, sereinDaily: !!day, aboveGood: { noaa: share(noaa), serein: share(serein) } }
   }, [live])
 
   function setFromPointer(clientX: number) {
@@ -203,7 +208,8 @@ export function ForecastCompare() {
       <input id="compare-split" type="range" min={0} max={100} value={Math.round(split)} onChange={e => setSplit(Number(e.target.value))}
         className="mt-2 h-7 w-full accent-[#5b6cf6]" />
       {model && <figcaption className="mt-3 space-y-3 text-sm text-muted-foreground">
-        <p>Average PM₂.₅ over {longDate(model.date)} (Pacific time), from the run issued {longDate(model.d.issue_date)}.
+        <p>{model.sereinDaily ? "Daily PM₂.₅" : "Average PM₂.₅"} for {longDate(model.date)} (Pacific time), from the run issued {longDate(model.d.issue_date)}:
+          NOAA's hourly forecast averaged over the day{model.sereinDaily ? ", and SmokeCast's daily median forecast (the number the backtest scores)" : ""}.
           Each dot is a 0.25° forecast grid point; white rings are EPA monitors. Grid points above “Good”:
           {" "}NOAA {model.aboveGood.noaa}%, SmokeCast {model.aboveGood.serein}%.</p>
         <ul className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs" aria-label="AQI categories">

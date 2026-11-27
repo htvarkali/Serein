@@ -13,7 +13,7 @@ export const headline = {
   falseEpa: 98,
   rmseSerein: 7.8, // day-1 RMSE, µg/m³
   rmseNoaa: 11.0,
-  hiddenSerein: 8.4, // day-1 RMSE at monitors hidden from the model
+  hiddenSerein: 8.5, // day-1 RMSE at monitors hidden from the model
   hiddenNoaa: 11.1,
   extraDays: 63, // extra smoky area-days warned vs. EPA, day 1
 }

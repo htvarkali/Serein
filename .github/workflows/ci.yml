@@ -47,3 +47,24 @@ jobs:
         run: .venv/bin/python -m pytest -q
       - name: Check command-line entry point
         run: .venv/bin/serein --help
+
+  website:
+    # The site in website/ is built from website-src/ by hand and committed, so nothing
+    # else would notice a change that no longer type checks or builds.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: website-src/package-lock.json
+      - name: Type check and build the website from website-src
+        working-directory: website-src
+        run: |
+          npm ci
+          npx tsc --noEmit
+          npx vite build --outDir "$RUNNER_TEMP/site" --emptyOutDir
+      - name: Check the fresh build's files and links
+        run: python3 scripts/check_website.py "$RUNNER_TEMP/site"

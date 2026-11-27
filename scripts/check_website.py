@@ -73,7 +73,11 @@ def validate_website(root: Path) -> list[str]:
 
 
 if __name__ == "__main__":
-    problems = validate_website(WEBSITE)
+    import sys
+
+    # Optional folder argument: CI checks a fresh build without touching website/.
+    root = Path(sys.argv[1]) if len(sys.argv) > 1 else WEBSITE
+    problems = validate_website(root)
     if problems:
         raise SystemExit("\n".join(problems))
     print("Website files and internal links verified.")

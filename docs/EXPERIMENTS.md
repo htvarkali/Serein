@@ -417,10 +417,48 @@ Two variants, both fixed now, before any run:
   current inputs. In B-16 try 2 they moved lead 2 the right way on both folds but also
   moved lead 0 through the shared network; here they cannot.
 
+How it is run (written before the variant runs, after the baselines took 30 minutes
+each on a shared GPU): the day 0-1 network is the current model with the same seeds,
+so it is not trained again. Each variant run trains only the day 2-3 network
+(`backtest --train-leads 2,3`), and the combined forecast takes leads 0-1 from the
+baseline run and leads 2-3 from the variant run. Conformal offsets, warning cut-offs and
+the recalibrated probabilities are all fitted per lead, so this gives the same numbers as
+one run that trains both networks.
+
 Baselines `base_20261127` and `inner_base_20261127` (today's code, provided tables).
 Same acceptance rule; with two variants a pass must hold on both folds, and the
 hidden-monitor run (`--holdout-sites 0.2 --no-gbm`) is made only for a variant that
 passes the primary test.
+
+Baseline check: `base_20261127` and `inner_base_20261127` reproduce `base_20261126` and
+`inner_base_20261126` exactly (every SmokeCast column, all 32,725 rows of each). All
+variant runs are on code cdb22ea (kept on branch `conrad/b15-late-net`).
+
+Result (combined forecast vs. current; RMSE with the 95% day-bootstrap interval of
+new - current; leads 0-1 are identical, difference exactly 0, so only leads 2-3 are shown):
+
+| Variant | Fold | Lead 2 RMSE | Interval | Lead 3 RMSE | Interval |
+|---|---|---|---|---|---|
+| V1 same inputs | dev | 9.721 -> 9.850 | (-0.09, +0.34) | 11.584 -> 11.461 | (-0.33, +0.08) |
+| V1 same inputs | inner | 8.034 -> 8.037 | (-0.16, +0.18) | 10.439 -> 10.540 | (-0.03, +0.23) |
+| V2 partial-day inputs | dev | 9.721 -> 9.886 | (-0.29, +0.74) | 11.584 -> 11.328 | (-0.61, +0.08) |
+| V2 partial-day inputs | inner | 8.034 -> 8.048 | (-0.12, +0.17) | 10.439 -> 10.309 | (-0.34, +0.11) |
+
+Smoke-day RMSE at lead 2 got worse in all four (dev 13.83 -> 14.05 and 14.16; inner
+11.62 -> 11.67 and 11.79). USG CSI moved by at most 0.015 either way. 90% coverage stayed
+0.89-0.92. V2 moved day 3 the right way on both folds (not significant); V1 did not
+repeat across folds.
+
+What this shows: a network trained only for days 2-3 is not better at day 2 than the
+shared one, and slightly worse on smoke days. Learning days 0-1 at the same time helps
+the day-2 forecast, so the shared network is not what holds day 2 back, and splitting it
+off removes the leak into days 0-1 without giving a day-2 gain. The option is not merged.
+Hidden-monitor run not made because the primary test failed.
+ACCEPTANCE: FAIL b15_late, inner_b15_late, b15_latep, inner_b15_latep: no lead 1-2 gain; lead 2 not better on either fold.
+
+B-15 stays open. Five approaches have now failed; the day 2-3 peak shortfall looks
+limited by what the inputs say about smoke two and three days ahead, not by how the
+model is trained. The only untried route is new information for those days.
 
 ## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
 

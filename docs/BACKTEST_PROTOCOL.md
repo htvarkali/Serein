@@ -161,7 +161,7 @@ Chosen using ONLY the 2023 calibration season (`scripts/sweep_graph.sh`, logs in
 | Ensemble | 5 seeds (0-4), quantiles averaged, then conformal calibration |
 | Graph | 10 nearest monitors within 300 km |
 | Warning rule | warn if P(≥ 35.5) ≥ cut-off tuned per lead on calibration weeks |
-| Reported chance of unhealthy air | raw P(≥ 35.5) mapped per lead by an isotonic fit on the conformal (odd) calibration weeks, hidden monitors excluded (`smokecast_probcal_L<lead>`, `prob_recal.json`); the warning rule above still uses the raw probability (added 2026-11-23) |
+| Reported chance of unhealthy air | raw P(≥ 35.5) mapped per lead by an isotonic fit on the conformal calibration weeks (odd weeks in the final run, even weeks in dev mode, see section 2), hidden monitors excluded (`smokecast_probcal_L<lead>`, `prob_recal.json`); the warning rule above still uses the raw probability (added 2026-11-23) |
 | Low-confidence flag | 90% range (log scale) wider than the 90th percentile of the same calibration rows, per lead (`flag_width.json`; added 2026-11-23) |
 | Smoke-day loss weight | 6× for observed days ≥ 35.5 µg/m³ (B-13: tested 1, 3, 6; 6 captured most of each peak) |
 | Base forecast without own sensor | distance-weighted neighbors' readings (used for masked sensors in training, hidden monitors, map grid) |

@@ -92,10 +92,29 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const [phase, setPhase] = useState<Phase>("loading")
   const [attempt, setAttempt] = useState(0)
+  // Starting the map is the slowest thing on this page (about 4 s of a slow phone's time in
+  // our tests), so it waits until the map is about to scroll into view. On a phone the
+  // forecast card sits above the map, so the check waits for the forecast (or 3 s, if it
+  // fails) to settle the layout first. On a wide screen the map is visible at once.
+  const [near, setNear] = useState(false)
+  const [settled, setSettled] = useState(false)
+  useEffect(() => {
+    if (data) { setSettled(true); return }
+    const timer = window.setTimeout(() => setSettled(true), 3000)
+    return () => window.clearTimeout(timer)
+  }, [data])
 
   useEffect(() => {
     const container = containerRef.current
-    if (!container) return
+    if (!container || near || !settled) return
+    const io = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) setNear(true) }, { rootMargin: "200px 0px" })
+    io.observe(container)
+    return () => io.disconnect()
+  }, [near, settled])
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container || !near) return
     let active = true
     let map: maplibregl.Map | undefined
     setPhase("loading")
@@ -114,6 +133,8 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
       map = new maplibre.Map({
         container,
         center: [-120.1, 41.6], zoom: 4.7, pitch: 42, maxPitch: 70,
+        // Phones are 3x; drawing at 2x halves the pixels with no visible loss on this map.
+        pixelRatio: Math.min(window.devicePixelRatio || 1, 2),
         scrollZoom: false, cooperativeGestures: true, maxTileCacheSize: 250, fadeDuration: 150,
         attributionControl: { compact: true },
         style: {
@@ -154,7 +175,7 @@ export default function ForecastMap({ data, which, hour, playing, people, showPe
       mapRef.current = null
       canvasRef.current = null
     }
-  }, [attempt])
+  }, [attempt, near])
 
   useEffect(() => {
     const map = mapRef.current

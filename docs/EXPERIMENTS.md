@@ -417,6 +417,14 @@ Two variants, both fixed now, before any run:
   current inputs. In B-16 try 2 they moved lead 2 the right way on both folds but also
   moved lead 0 through the shared network; here they cannot.
 
+How it is run (written before the variant runs, after the baselines took 30 minutes
+each on a shared GPU): the day 0-1 network is the current model with the same seeds,
+so it is not trained again. Each variant run trains only the day 2-3 network
+(`backtest --train-leads 2,3`), and the combined forecast takes leads 0-1 from the
+baseline run and leads 2-3 from the variant run. Conformal offsets, warning cut-offs and
+the recalibrated probabilities are all fitted per lead, so this gives the same numbers as
+one run that trains both networks.
+
 Baselines `base_20261127` and `inner_base_20261127` (today's code, provided tables).
 Same acceptance rule; with two variants a pass must hold on both folds, and the
 hidden-monitor run (`--holdout-sites 0.2 --no-gbm`) is made only for a variant that

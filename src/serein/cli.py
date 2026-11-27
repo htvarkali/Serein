@@ -320,6 +320,8 @@ def main(argv=None):
                     help="days of inputs each sensor reads (1 = today only)")
     sp.add_argument("--smoke-weight", type=float, default=6.0,
                     help="loss weight for days >= 35.5 ug/m3 (1 = none)")
+    sp.add_argument("--train-leads", default="",
+                    help="development only: train on these leads, e.g. 2,3 (B-15)")
     sp.set_defaults(fn=cmd_backtest)
 
     sp = sub.add_parser("map", help="forecast map for one day from a trained run")

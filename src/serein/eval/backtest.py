@@ -309,6 +309,14 @@ def run_backtest(study: Study, args) -> dict:
         if holdout.any():
             gd.base[:, holdout] = gd.base_nbr[:, holdout]
 
+    train_leads = None
+    if getattr(args, "train_leads", ""):
+        want = [int(v) for v in str(args.train_leads).split(",")]
+        if final or not set(want) <= set(leads):
+            raise SystemExit("--train-leads is a development option for leads in the table")
+        train_leads = tuple(leads.index(v) for v in want)
+        log(f"loss and early stopping use leads {want} only; other leads are not usable")
+
     preds_q: dict[str, np.ndarray] = {}   # model -> [rows, L, Q] log1p
     levels: dict[str, tuple] = {}
 
@@ -330,7 +338,7 @@ def run_backtest(study: Study, args) -> dict:
                               weight_decay=getattr(args, "weight_decay", 1e-4),
                               lr=getattr(args, "lr", 2e-3),
                               smoke_weight=getattr(args, "smoke_weight", 1.0),
-                              history=history)
+                              history=history, train_leads=train_leads)
             log(f"\n## training {name} (seed {args.seed + k})")
             tr = Trainer(F, len(leads), g, gds["train"].feat_names, cfg)
             tr.fit(gds["train"], gds["val"], log=log)
@@ -351,7 +359,9 @@ def run_backtest(study: Study, args) -> dict:
             q_conf_cal = calibrate_quantiles(q_conf, cqr, QUANTILES)
         preds_q[name], levels[name] = q_test, QUANTILES
         cqr_store[name] = {f"{k[0]}_{k[1]}": v for k, v in cqr.qhat.items()}
-        if name == "smokecast":
+        if name == "smokecast" and train_leads is not None:
+            log("no model export: this network is trained on some leads only")
+        elif name == "smokecast":
             from serein.models.infer import save_artifacts
             save_artifacts(out_dir, prep, node_ids, F, leads, cfg, cqr, states,
                            seeds=[args.seed + k for k in range(n_seeds)])

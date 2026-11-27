@@ -39,6 +39,9 @@ class TrainConfig:
     # the day-2 warning rate by 7 points. Costs ~1.8x training time.
     deterministic: bool = True
     history: int = 1            # days of inputs each sensor reads (1 = today only)
+    # Lead indices the loss and early stopping use (None = all). A network trained on
+    # some leads only gives no usable forecast for the others (B-15 experiments).
+    train_leads: tuple[int, ...] | None = None
 
 
 def _device():
@@ -102,7 +105,16 @@ class Trainer:
             xh = self._hide(xh, m.unsqueeze(-1).expand(-1, -1, xh.shape[2]))
         return x, b, xh
 
+    def _target(self, y):
+        """Targets with the leads outside ``train_leads`` set to missing."""
+        if self.cfg.train_leads is None:
+            return y
+        keep = torch.zeros(y.shape[-1], dtype=torch.bool, device=y.device)
+        keep[list(self.cfg.train_leads)] = True
+        return torch.where(keep, y, torch.full_like(y, float("nan")))
+
     def _loss(self, q, y):
+        y = self._target(y)
         w = None
         if self.cfg.smoke_weight != 1.0:
             w = torch.where(torch.nan_to_num(y) > np.log1p(35.5),
@@ -117,7 +129,7 @@ class Trainer:
         for s in range(0, len(gd.days), 16):
             idx = np.arange(s, min(s + 16, len(gd.days)))
             x, w, b, y, xh = self._tensors(gd, idx)
-            k = torch.isfinite(y).sum().item()
+            k = torch.isfinite(self._target(y)).sum().item()
             tot += self._loss(self._forward(x, w, b, xh), y).item() * k
             n += k
         return tot / max(n, 1)

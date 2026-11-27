@@ -25,10 +25,9 @@ Principles
 Scoring lens (Storytelling and Professionalism, 20%): clarity of the opportunity,
 investor appeal, and the same name, logo and colors as the website and the Brief.
 
-**Check before recording.** `docs/results/` is still the November 2 snapshot (71%, 81
-false alarms). The README and the Brief quote the November 23 rerun (72%, 92 false
-alarms). Use the README numbers, and re-export the snapshot and the figures before a
-chart goes on screen, so the chart and the voice say the same thing.
+**Check before recording.** `docs/results/` was re-exported from the November 23 rerun
+(72%, 92 false alarms), the same numbers the README and the Brief quote, so its
+figures can go on screen as they are.
 
 ---
 

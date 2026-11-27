@@ -7,9 +7,8 @@ plus 20 minutes of questions. Every team member should be able to give each answ
 below in their own words without notes.
 
 Where the numbers come from: the README section "Current results (development rerun,
-2026-11-23)" and the docs named in each answer. `docs/results/` is still the November 2
-snapshot and differs slightly (71% and 81 false alarms there; 72% and 92 here), so it
-needs a re-export before anyone quotes from it. Everything is replaced after the final
+2026-11-23)" and the docs named in each answer. `docs/results/` holds the same
+November 23 rerun (re-exported 2026-11-27). Everything is replaced after the final
 test.
 
 Rule for every answer: say the number, say the limitation, say the next step. Judges

@@ -1,6 +1,7 @@
 # Backtest protocol (pre-registration)
 
-> **Status: DRAFT. Freeze before Dec 7, 2026 (TODO D-4).** Freezing = the commit that
+> **Status: DRAFT. Freeze by Dec 17, 2026 (TODO D-4; moved from Dec 7 on 2026-11-23, before any
+> test-season scoring, to fit the GOES, hourly and alert upgrades).** Freezing = the commit that
 > changes this line to "FROZEN" and is pushed *before* anyone runs
 > `serein backtest --final`. The commit hash and time are our timestamp.
 
@@ -19,7 +20,7 @@ forecasts, on wildfire-season days it never trained on?
 | Split | Seasons (Jun-Oct) | Used for |
 |---|---|---|
 | Train | 2021, 2022 | fitting model weights |
-| Calibrate | 2023 | even ISO weeks: early stopping; odd weeks: conformal calibration |
+| Calibrate | 2023 | final run: even ISO weeks for early stopping, odd weeks for conformal calibration and warning cut-offs. Dev mode (no test seasons): even weeks do early stopping, conformal calibration and warning cut-offs, and odd weeks are scored |
 | **Test** | **2024, 2025** | **scored once, at the end** |
 
 Region: `configs/west_us.yaml` (CA, OR, WA, NV, ID, west AZ).
@@ -167,7 +168,7 @@ Dev-mode results with these settings (scored on odd ISO weeks of 2023; NOT the
 test result; rerun 2026-11-23 on current code, see the change log): RMSE
 4.4 / 7.8 / 9.7 / 11.6 µg/m³ at leads 0-3 vs. best NOAA 10.1 / 11.0 / 12.3 / 15.5;
 at monitors hidden from the model (leave-sites-out, now also hidden from early
-stopping and calibration): 6.9 / 8.4 / 9.9 / 11.4 vs. NOAA 10.5 / 11.1 / 11.9 / 14.1.
+stopping, calibration and the fitted preprocessing; rerun 2026-11-27): 7.0 / 8.5 / 10.0 / 11.5 vs. NOAA 10.5 / 11.1 / 11.9 / 14.1.
 Morning persistence at lead 0: 7.4 (better than NOAA's 10.1, worse than SmokeCast).
 USG warnings vs. EPA's official forecast (reporting areas): hit rate 72% vs. 46% at
 day 1 and 62% vs. 37% at day 2.
@@ -176,7 +177,12 @@ See `outputs/backtest/west_us_dev/report.md`.
 Caveat for the write-up: these settings were picked by looking at dev-week
 scores, so dev numbers are slightly optimistic. The test seasons are the honest
 number. Interval coverage and the warning hit rate on dev weeks are partly
-in-sample: the same odd weeks set the conformal offsets and the warning cut-offs.
+optimistic in two ways. First, in dev mode the even weeks are used three times (early
+stopping, conformal offsets, warning cut-offs) and the odd weeks are scored, so
+those settings are not tuned on the scored rows, but they were chosen while the team
+looked at odd-week scores. Second, separating issue weeks does not separate target
+days: a Sunday lead-1 forecast and a Monday lead-0 forecast share Monday's reading,
+so labels near week boundaries appear in both roles ([SPLIT_AUDIT.md](SPLIT_AUDIT.md)).
 The 2024-25 test is the only fully out-of-sample estimate of either.
 
 ## 7. Allowed after freezing
@@ -232,3 +238,4 @@ yet (`serein live`, run daily at 11:45 AM Pacific by `scripts/run_live.sh`).
 | 2026-11-23 | D-4 preparation from the 2026-11-08 review (no model settings changed) | Change-log rows for Nov 4-18 (item 1); in-sample caveat (2); the exact final commands (3); Diebold-Mariano test written in as metric 6 (4); posting-time limitation and no-AQM sensitivity (5); why `noaa_best` and per-product rows (6); `persistence_morning` competitor for L0-L1, code in `src/serein/models/baselines.py` (7); AQM v7 covers the whole test period, results split 2024 vs. 2025 (8); lead 3 framing (9); test-season files counted by name, 0 missing days (11); what "we lose" looks like (12); Northeast uses West calibration (13); archive hashes (14). Dev and hidden-monitor backtests rerun on code 7334216 with the rebuilt 2026-11-22 tables (figures, map and ablations not rerun): RMSE 4.4 / 7.8 / 9.7 / 11.6; hidden monitors 6.9 / 8.4 / 9.9 / 11.4 (the rerun the 2026-11-19 row asked for); 90% coverage 0.89-0.91. Test seasons still untouched |
 | 2026-11-23 | Final evaluation steps made exact; summary code added (no model settings changed) | The no-AQM sensitivity is now its own listed run (`final_no_aqm`) instead of an unstated extra; `src/serein/eval/final_report.py` computes the primary PASS/FAIL, the 2024 vs. 2025 split, per-competitor row counts and the SHA-256 archive hashes from saved outputs only. It was tested on synthetic data and on the 2023 dev run (dev: PASS, matching the backtest's own head-to-head) before any test-season run |
 | 2026-11-24 | Transfer test head-to-head on identical rows (no settings changed) | `serein transfer` printed and saved each model's RMSE on that model's own rows, against section 5. In the transfer run SmokeCast has no value for a monitor outside the points registry, and a competitor has none where its input is missing, so the two RMSEs could come from different monitor-days. It now also writes `head_to_head.csv` like the backtest: the rows where SmokeCast, the competitor and the observation all exist, with the row count, both RMSEs, skill and the day-bootstrap interval. `metrics.csv` is unchanged. The transfer test has not been run |
+| 2026-11-27 | Pre-freeze review fixes from an outside review (no model settings changed) | (1) Leave-sites-out: the hidden monitors are now chosen before preprocessing is fitted, and `Prep` is fitted without them, so their readings no longer enter the input scaling statistics or the global climatology (their own history, readings and base forecast were already hidden). Test: `test_hidden_monitors_never_reach_preprocessing`. Hidden-monitor dev rerun (`dev_holdout_prepfix`, same 85 hidden monitors): 6.92 / 8.39 / 9.90 / 11.38 -> 6.99 / 8.53 / 10.05 / 11.52, NOAA unchanged; the all-monitor run is not affected. (2) The head-to-head row count and RMSEs now use the same rows as the bootstrap (SmokeCast, competitor and observation all present); the dev numbers did not change because SmokeCast has a value on every row. (3) Section 2 and section 6 now describe the dev-mode roles correctly (even weeks: early stopping, conformal offsets and warning cut-offs; odd weeks scored) and the week-boundary label overlap. (4) Freeze date moved to Dec 17 (decided 2026-11-23). Test seasons still untouched |

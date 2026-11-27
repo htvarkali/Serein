@@ -21,16 +21,21 @@ PurpleAir are not counted here.
 
 ## Does Serein work far from a monitor?
 
-Development run `dev_holdout` (2023 scoring weeks, 20% of monitors hidden from the
-model with seed 1234). RMSE in µg/m³ at the hidden monitors, by distance to the
-nearest monitor the model could see:
+Development run `dev_holdout_prepfix` (2026-11-27; 2023 scoring weeks, 20% of monitors
+hidden from the model with seed 1234, preprocessing fitted without them). RMSE in µg/m³
+at the hidden monitors, by distance to the nearest monitor the model could see:
 
 | Distance band | Hidden sites | Day 1: Serein vs. NOAA best | Day 2: Serein vs. NOAA best |
 |---|---|---|---|
-| under 15 km | 34 | 6.5 vs. 7.4 | 6.4 vs. 7.4 |
-| 15-30 km | 26 | 10.7 vs. 14.0 | 12.1 vs. 14.5 |
-| 30-60 km | 21 | 7.8 vs. 12.3 | 11.8 vs. 14.7 |
-| 60 km or more | 3 | 2.8 vs. 3.7 | 3.4 vs. 4.2 |
+| under 15 km | 35 | 6.6 vs. 7.5 | 6.4 vs. 7.5 |
+| 15-30 km | 26 | 10.8 vs. 14.0 | 12.3 vs. 14.5 |
+| 30-60 km | 21 | 8.1 vs. 12.3 | 12.1 vs. 14.7 |
+| 60 km or more | 3 | 2.7 vs. 3.7 | 3.3 vs. 4.2 |
+
+Recomputed from the run's saved predictions (great-circle distance to the nearest
+visible monitor, rows where both forecasts and the observation exist). The same
+method on the earlier `dev_holdout` run gives the table this page used to show,
+except one site that it counts under 15 km where the old table had 34.
 
 Serein is better than NOAA's best forecast in every band. The 60+ km band has only 3
 sites, too few to rely on. These are development numbers; the final test repeats the

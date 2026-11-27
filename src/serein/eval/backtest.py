@@ -242,8 +242,17 @@ def run_backtest(study: Study, args) -> dict:
                         k=study.raw["graph"]["k_neighbors"], max_km=study.raw["graph"]["max_km"])
     log(f"graph: {len(node_ids)} nodes, {g.n_edges} edges")
 
+    # Leave-sites-out (B-7b): pick the hidden monitors before anything is fitted, so
+    # their readings never enter the scaling statistics or climatologies either.
+    holdout = np.zeros(len(node_ids), bool)
+    frac = float(getattr(args, "holdout_sites", 0.0) or 0.0)
+    if frac > 0:
+        rng = np.random.default_rng(1234)
+        holdout[rng.choice(len(node_ids), round(frac * len(node_ids)), replace=False)] = True
+    hidden_ids = set(np.array(node_ids)[holdout])
     prep = Prep(exclude=tuple(drop),
-                use_obs_base=not any(p.startswith("obs_") for p in drop)).fit(train)
+                use_obs_base=not any(p.startswith("obs_") for p in drop)).fit(
+        train[~train["point_id"].isin(hidden_ids)])
     gds = {k: to_graph_data(v, prep, node_ids)
            for k, v in {"train": train, "val": val, "conf": conf, "test": test}.items()}
     F = gds["train"].X.shape[2]
@@ -260,8 +269,6 @@ def run_backtest(study: Study, args) -> dict:
     # readings/history are hidden everywhere, so the model must
     # forecast them from neighbors and NOAA inputs alone, like a neighborhood without
     # a sensor.
-    holdout = np.zeros(len(node_ids), bool)
-    frac = float(getattr(args, "holdout_sites", 0.0) or 0.0)
     names = gds["train"].feat_names
     val_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and not n.endswith("__missing")]
     flag_cols = [i for i, n in enumerate(names) if is_sensor_feature(n) and n.endswith("__missing")]
@@ -273,8 +280,6 @@ def run_backtest(study: Study, args) -> dict:
         X[:, holdout] = sub
 
     if frac > 0:
-        rng = np.random.default_rng(1234)
-        holdout[rng.choice(len(node_ids), round(frac * len(node_ids)), replace=False)] = True
         for gd in gds.values():
             hide_holdout(gd.X)
         gds["train"].Y[:, holdout] = np.nan
@@ -449,7 +454,9 @@ def run_backtest(study: Study, args) -> dict:
             ci = bootstrap_rmse_diff(allp["smokecast"][:, li], allp[b][:, li], obs[:, li], dates)
             if not ci:
                 continue
-            ok = np.isfinite(allp[b][:, li]) & np.isfinite(obs[:, li])
+            # Same mask as the bootstrap: both forecasts and the observation exist.
+            ok = (np.isfinite(allp["smokecast"][:, li]) & np.isfinite(allp[b][:, li])
+                  & np.isfinite(obs[:, li]))
             r_s = point_metrics(allp["smokecast"][ok, li], obs[ok, li])["rmse"]
             r_b = point_metrics(allp[b][ok, li], obs[ok, li])["rmse"]
             h2h.append({"lead": lead, "vs": b, "n": int(ok.sum()), "rmse_smokecast": r_s,

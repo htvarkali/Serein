@@ -22,7 +22,7 @@ categories:
 
 forecast_line: "Pronóstico de humo cerca de usted: unos {pm} µg/m³ (podría llegar a {pm_hi}). Índice de calidad del aire (ICA): {category}."
 risk_line: "Probabilidad de que {name} tenga síntomas de asma {day}: alrededor de {risk}%."
-personal_note: "Según el registro de {name}, el humo a este nivel ya le ha causado síntomas."
+personal_note: "En el registro de {name}, los días con humo a este nivel tuvieron más síntomas."
 
 zones:
   green:

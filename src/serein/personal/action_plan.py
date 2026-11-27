@@ -8,10 +8,11 @@ Floors from EPA guidance for sensitive groups (children with asthma):
   forecast AQI category >= USG (orange)          -> at least YELLOW
   forecast AQI category >= Very Unhealthy        -> RED
 
-Personal escalation uses the risk CAUSED BY SMOKE: the child's predicted risk
+Personal escalation uses the smoke-related part of the risk: the child's predicted risk
 under the forecast vs. the same child, same day, with clean air (5 µg/m³ today
 and the two days before). A child whose asthma flares for other reasons (a cold)
-should not get a smoke warning on a clean day.
+should not get a smoke warning on a clean day. This is a contrast inside the model,
+not proof that smoke caused a symptom.
   smoke-attributable: +5 points or 1.3x -> YELLOW;   +15 points or 2x -> RED
 These cut-offs are design choices to review with a clinician (TODO C-8).
 Serein is not a medical device; every message says to follow the child's own

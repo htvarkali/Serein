@@ -17,7 +17,7 @@ Serein closes all three gaps:
 | | What it does | How |
 |---|---|---|
 | **Model 1: SmokeCast** | Corrects NOAA's smoke forecast with live sensor readings and gives a forecast for every neighborhood, with an honest uncertainty range | A graph neural network on the network of air sensors. Each sensor learns from its neighbors (NOAA forecasts, weather and fires are inputs too). Calibrated with conformal prediction. |
-| **Model 2: AirPlan** | Learns each child's own smoke sensitivity from a symptom and inhaler log and turns tomorrow's forecast into a personal action plan in the family's own language | A hierarchical Bayesian model. It starts from what the medical literature says about all kids, then personalizes as the log grows. |
+| **Model 2: AirPlan** | Learns each child's own smoke sensitivity from a symptom and inhaler log and turns tomorrow's forecast into a personal action plan in the family's own language | A Bayesian model fitted to each child. It starts from population priors taken from the medical literature (fixed, not fitted to a group of children), then personalizes as the log grows. Tested on simulated children only so far. |
 | **Proof: Backtest** | Tests SmokeCast against NOAA's and EPA's real forecasts on the same days. The final test is on 2024-25 fire seasons the model never trained or was tuned on (not run yet; current numbers are 2023 development results) | A pre-registered backtest protocol on held-out seasons, with fixed metrics (see [docs/BACKTEST_PROTOCOL.md](docs/BACKTEST_PROTOCOL.md)) |
 
 ---
@@ -171,11 +171,13 @@ until the protocol is frozen (TODO D-4/D-5).
 | **SmokeCast** | **4.4** | **7.8** | **9.7** | **11.6** |
 | AQM → HRRR → persistence fallback | 10.1 | 11.0 | 12.3 | 15.5 |
 | Same model, graph turned off | 4.5 | 8.2 | 10.1 | 12.0 |
-| **At monitors hidden from SmokeCast** (no sensor) | **6.9** | **8.4** | **9.9** | **11.4** |
+| **At monitors hidden from SmokeCast** (no sensor) | **7.0** | **8.5** | **10.0** | **11.5** |
 | NOAA at those same hidden monitors | 10.5 | 11.1 | 11.9 | 14.1 |
 
 The fallback selects forecasts by availability, in the order shown. Its day-3
-prediction can be persistence when NOAA forecasts are unavailable.
+prediction can be persistence when NOAA forecasts are unavailable; in the 2023 dev
+weeks that was every day-3 row, so the day-3 column is a comparison with persistence.
+Hidden-monitor row: rerun 2026-11-27 after the preprocessing fix in the protocol change log.
 
 - Beats that fallback at every lead (day-bootstrap 95% CIs all below zero), and
   beats NOAA at 90% of 344 individual monitors (day 1, monitors with at least 20 scored days).
@@ -303,8 +305,8 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 |---|---|
 | Nov 2 | Data pipeline works for 1 season; baselines scored (M1) |
 | Nov 16 | First GNN beats raw HRRR on validation season (M2) |
-| Nov 30 | Backtest protocol frozen; uncertainty calibrated; AirPlan simulation done (M3) |
-| Dec 7 | **Run the final held-out test once.** Freeze numbers (M4) |
+| Nov 30 | Uncertainty calibrated; AirPlan simulation done (M3) |
+| Dec 17 | **Freeze the backtest protocol, then run the final held-out test once.** Freeze numbers (M4) (moved from Dec 7 on 2026-11-23) |
 | Dec 14 | Demo app + action plans in 3+ languages reviewed by native speakers (M5) |
 | Dec 21 | Innovation Brief + business plan drafts; expert feedback (M6) |
 | Jan 1 | Everything final (M7) |

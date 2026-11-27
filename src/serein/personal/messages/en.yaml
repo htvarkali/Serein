@@ -20,7 +20,7 @@ categories:
 
 forecast_line: "Smoke forecast near you: about {pm} µg/m³ (could reach {pm_hi}). Air quality: {category}."
 risk_line: "Chance {name} has asthma symptoms {day}: about {risk}%."
-personal_note: "Based on {name}'s own log, smoke at this level has caused symptoms before."
+personal_note: "In {name}'s own log, days with smoke at this level came with more symptoms."
 
 zones:
   green:

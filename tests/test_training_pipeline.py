@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 
 from serein.config import Study
@@ -164,3 +165,59 @@ def test_hidden_monitors_never_reach_early_stopping_or_calibration(tmp_path, mon
         blank = np.isnan(y) if y.ndim == 1 else np.isnan(y).all(axis=1)
         assert 3 * blank.sum() == len(y)
         assert np.isfinite(y[~blank]).all()
+
+
+def test_hidden_monitors_never_reach_preprocessing(tmp_path, monkeypatch):
+    points = pd.DataFrame({
+        "point_id": ["A", "B", "C"], "kind": "epa",
+        "lat": [38.0, 38.1, 38.2], "lon": [-121.0, -121.1, -121.2],
+    })
+    cache = tmp_path / "processed"
+    cache.mkdir()
+    train = _synthetic_table(date(2021, 7, 1), 8, points)
+    _synthetic_table(date(2023, 7, 1), 21, points).to_parquet(
+        cache / "table_calibrate.parquet", index=False)
+    monkeypatch.setattr(backtest, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(backtest, "processed_dir", lambda study: cache)
+    monkeypatch.setattr(backtest, "load_points", lambda name: points.copy())
+    monkeypatch.setattr(backtest, "load_forecasts", lambda days: pd.DataFrame())
+    fitted = []
+    real_fit = backtest.Prep.fit
+
+    def recording_fit(self, table):
+        fitted.append(set(table["point_id"]))
+        out = real_fit(self, table)
+        fitted.append((dict(out.mean), dict(out.std), out.global_clim))
+        return out
+
+    monkeypatch.setattr(backtest.Prep, "fit", recording_fit)
+
+    class StopAfterPrep(Exception):
+        pass
+
+    monkeypatch.setattr(backtest, "to_graph_data",
+                        lambda *a, **k: (_ for _ in ()).throw(StopAfterPrep()))
+    study = Study({"name": "synthetic_holdout", "leads": [0, 1],
+                   "graph": {"k_neighbors": 2, "max_km": 300}})
+    args = SimpleNamespace(final=False, tag="holdout", train="train", calibrate="calibrate",
+                           test="test", seed=4, seeds=1, epochs=2, hidden=16, layers=1,
+                           dropout=0.0, smoke_weight=1.0, no_gbm=True, no_ablation=True,
+                           holdout_sites=0.34)
+
+    def run(table):
+        table.to_parquet(cache / "table_train.parquet", index=False)
+        with pytest.raises(StopAfterPrep):
+            backtest.run_backtest(study, args)
+        return fitted[-2], fitted[-1]
+
+    ids, stats = run(train)
+    assert len(ids) == 2
+    (hidden,) = set(points["point_id"]) - ids
+    # Wildly different readings at the hidden monitor must not change anything fitted.
+    changed = train.copy()
+    rows = changed["point_id"] == hidden
+    for c in [c for c in changed.columns if c.startswith(("y_L", "obs_"))]:
+        changed.loc[rows, c] = changed.loc[rows, c] * 50 + 400
+    ids2, stats2 = run(changed)
+    assert ids2 == ids
+    assert stats2 == stats

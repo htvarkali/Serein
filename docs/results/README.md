@@ -15,10 +15,10 @@ alarms) is in git history.
 | Files | Run | Code |
 |---|---|---|
 | `dev_report.md`, `dev_summary.md`, `metrics.csv`, `head_to_head.csv`, `vs_epa_forecast.csv`, `peak_report.csv`, `impact.txt`, `figures/fig_*.png` | `west_us_dev`, 2026-11-23, 5-member ensemble | 9f01f4d |
-| `dev_holdout_report.md` | `west_us_dev_holdout`, 2026-11-23 | 7334216 |
+| `dev_holdout_report.md` | `west_us_dev_holdout_prepfix`, 2026-11-27, after the preprocessing fix (hidden monitors left out of `Prep`) | 30a1690 plus that fix, committed right after the run |
 | `figures/map_20230818.png`, `figures/airplan_learning_curve.png`, `airplan_simulation_summary.csv`, `logs/` | older runs (Nov 1-2) | see below |
 
-Between 7334216 and 9f01f4d only warning-probability outputs and the final-test
+Between 7334216 and 9f01f4d (main run) only warning-probability outputs and the final-test
 summary were added; the trained model is the same (identical `smokecast.pt` hash).
 The figures were regenerated from the 9f01f4d predictions and came out byte-identical.
 Both report headers say "+ uncommitted changes": the run did not record which local
@@ -30,7 +30,7 @@ edits those were, so treat this snapshot as reproducible to the commit, not to t
 |---|---|
 | `dev_summary.md` | One-page summary: the pre-registered primary criterion (PASS on dev), RMSE vs NOAA's best forecast with 95% day-bootstrap intervals |
 | `dev_report.md` | Full dev backtest report: RMSE by lead, smoke-day RMSE, warning scores, interval coverage, head-to-head with 95% CIs, comparison with EPA forecasts |
-| `dev_holdout_report.md` | Same, with 20% of monitors hidden from the model (forecasting places with no sensor) |
+| `dev_holdout_report.md` | Same, with 20% of monitors (85 of 425) hidden from the model (forecasting places with no sensor). RMSE at hidden monitors 7.0 / 8.5 / 10.0 / 11.5 vs NOAA 10.5 / 11.1 / 11.9 / 14.1; before the fix it was 6.9 / 8.4 / 9.9 / 11.4 |
 | `metrics.csv` | Every metric for every model, lead and subset |
 | `head_to_head.csv` | SmokeCast vs. each baseline on identical rows, with day-bootstrap CIs |
 | `vs_epa_forecast.csv` | Category accuracy + warnings vs. EPA's official AQI forecast |

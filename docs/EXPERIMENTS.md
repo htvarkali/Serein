@@ -395,6 +395,33 @@ larger late smoke weight, 2020 data, µg/m³ loss term) all trade day 0-1 accura
 small, non-significant day 3 gain. With all leads sharing one network, a change aimed
 at days 2-3 leaks into days 0-1; a separate day 2-3 output head is the remaining idea.
 
+## 2026-11-27 B-15: a separate network for days 2-3 (`backtest --late-net 2`)
+
+Hypothesis: one network makes all four forecasts, so days 0-1 (which lean on today's
+monitor readings and HRRR smoke) and days 2-3 (which have to lean on AQM, weather and
+the larger smoke picture) compete for the same hidden units and the same early-stopping
+epoch. Every earlier day 2-3 change also moved days 0-1. Change: for each of the 5
+seeds, train a second network of the same size and settings whose loss and early
+stopping use only leads 2-3; leads 0-1 come from the current network, unchanged, and
+leads 2-3 from the new one. Conformal calibration, warning cut-offs and probabilities
+are then fitted as now on the combined forecast. Leads 0-1 are identical to the current
+model by construction (checked by comparing the predictions). Expected: lower RMSE at
+lead 2, perhaps lead 3, mostly on smoke days.
+
+Two variants, both fixed now, before any run:
+
+- V1 `b15_late` / `inner_b15_late`: the provided tables, the same inputs for both networks.
+- V2 `b15_latep` / `inner_b15_latep`: the `b16p` tables (provided tables plus the
+  partial-day inputs `hrrr_smoke_first_L2`, `aqm_first_L3` of B-16 try 2); those two
+  inputs go only to the day 2-3 network, so the day 0-1 network still sees exactly the
+  current inputs. In B-16 try 2 they moved lead 2 the right way on both folds but also
+  moved lead 0 through the shared network; here they cannot.
+
+Baselines `base_20261127` and `inner_base_20261127` (today's code, provided tables).
+Same acceptance rule; with two variants a pass must hold on both folds, and the
+hidden-monitor run (`--holdout-sites 0.2 --no-gbm`) is made only for a variant that
+passes the primary test.
+
 ## 2026-11-23 W-13: hour-by-hour accuracy (evaluation, no model change)
 
 Full results in `docs/HOURLY_ACCURACY.md`. The Serein-scaled hourly field beats NOAA's raw

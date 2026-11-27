@@ -60,7 +60,8 @@ with CSV export and a **Clear session log** button; they are not saved to a data
 Run `uv run pytest -q` and `uv run ruff check .` before a push. The suite includes
 the app interactions and a small, real two-seed training → calibration → export →
 forecast check using synthetic environmental data. GitHub Actions runs these checks
-with CPU PyTorch and app extras on pull requests and pushes to `main`.
+with CPU PyTorch and app extras on pull requests and pushes to `main`, and also type
+checks and builds the website from `website-src/` and checks its links.
 
 See [the next steps](docs/NEXT_STEPS.md) for the order of remaining work and
 [PurpleAir QC](docs/PURPLEAIR_QC.md) for the new offline sensor-screening command.
@@ -476,7 +477,7 @@ Both workflows are development diagnostics.
 | W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |
 | W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; first real update on the next run) | In progress | Aadi-Tiwari | 2026-11-23 |
-| W-12 | Lighter version that runs on phones and slow computers ([check and fixes](docs/WEBSITE_CHECK_2026-11-26.md), 2026-11-26: phones get still images instead of the background videos, the home page draws only while on screen, "reduce motion" is respected, and Home went from 3.1 MB to 1.1 MB on a phone; the map page's slow start is still open) | In progress | AbhinavGGarg | 2026-11-26 |
+| W-12 | Lighter version that runs on phones and slow computers ([check and fixes](docs/WEBSITE_CHECK_2026-11-26.md), 2026-11-26: phones get still images instead of the background videos, the home page draws only while on screen, "reduce motion" is respected, and Home went from 3.1 MB to 1.1 MB on a phone; later the map page: it now starts the map only when it scrolls near view and draws at most 2x, so on a phone it is usable in 5.1 s instead of about 15 s; still to do: a check on real phones) | In progress | AbhinavGGarg | 2026-11-26 |
 | W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-15 | "Where does this data come from" panel: every source, and what is measured vs. forecast vs. estimated | Done | Aadi-Tiwari | 2026-11-23 |

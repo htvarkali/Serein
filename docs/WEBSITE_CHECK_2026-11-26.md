@@ -260,4 +260,38 @@ Other checks after the fixes:
 - **L4**, one name for the map page: a team decision.
 - **L8**, the empty role on the team card: the team.
 - **L9**, unused images: left in place because `docs/drafts/pitch_deck.md` points at one.
-- The map page's start-up time, and a check on a real iPhone and Android phone.
+- A check on a real iPhone and Android phone.
+
+## Map page start-up, 2026-11-26 (later)
+
+A CPU profile at phone speed showed the site's own code using about 1 s; loading the page
+with the map library blocked cut the frozen time from about 3.8 s to 0.2 s. So the map
+library was nearly all of it. Two changes in `ForecastMap.tsx`, neither changing what the
+map shows:
+
+- The map starts only when it is within 200 px of the screen, after the forecast has
+  loaded (or 3 s have passed) so the layout has settled. On a phone the forecast card sits
+  above the map, so the page is usable before the map starts. On a wide screen the map is
+  visible at once and starts as before.
+- The map is drawn at no more than 2 times the screen's pixel size. Phones are 3 times,
+  so this draws 2.25 times fewer pixels.
+
+| Map page, phone audit (two runs each) | Before | After |
+|---|---|---|
+| Lighthouse performance | 23 and 42 | 77 and 78 |
+| Time until usable | 14.3 to 15.3 s | 5.1 s |
+| Blocked time | 7,400 to 8,500 ms | 60 to 70 ms |
+| Downloaded at load | 979 KB | 688 KB |
+
+Measured directly at phone speed (two runs each): frozen time in the first 10 s went
+from 3.7 to 4.7 s down to 0.15 to 0.23 s. Scrolling to the map then freezes the page for
+2.6 to 3.2 s while it starts, less than before because of the pixel cap. On a 1280 px
+screen nothing changed (3.6 to 4.3 s both ways), as expected. Picking a place before the
+map starts still moves the map there once it loads, and tapping the map still picks a
+point. These timings are from a machine with no graphics card, which makes map drawing
+slower than on a real phone.
+
+The automatic checks now also build the site (`.github/workflows/ci.yml`, job `website`):
+a fresh install, a type check, a build into a temporary folder and
+`scripts/check_website.py` on the result. The committed `website/` is not compared,
+because builds on different machines differ in the last decimal of a few CSS colors.

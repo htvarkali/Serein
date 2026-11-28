@@ -8,8 +8,8 @@ import { Wordmark } from "@/components/site/SiteLayout"
 import { Button } from "@/components/ui/button"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { Switch } from "@/components/ui/switch"
-import { AQI, chanceLabel, loadPeople, loadWorld, localTime, nearestPoint, outlookExtras, peopleUnderSmoke, relativeDay, valueAt,
-  type People, type Which, type WorldData } from "@/lib/world"
+import { AQI, chanceLabel, loadPeople, loadPlaces, loadWorld, localTime, nearestPoint, outlookExtras, peopleUnderSmoke, placesUnderSmoke, relativeDay, valueAt,
+  type People, type Places, type Which, type WorldData } from "@/lib/world"
 
 const PLACES = {
   seattle: { name: "Seattle area", coordinates: [-122.32, 47.60] },
@@ -110,6 +110,7 @@ export default function World() {
   const [place, setPlace] = useState<Place | Coordinates>("seattle")
   const [focus, setFocus] = useState<Coordinates | null>(null)
   const [people, setPeople] = useState<People | null>(null)
+  const [places, setPlaces] = useState<Places | null>(null)
   const [peopleFailed, setPeopleFailed] = useState(false)
   const [showPeople, setShowPeople] = useState(false)
   const [farOnly, setFarOnly] = useState(false)
@@ -127,6 +128,8 @@ export default function World() {
   }, [data, picked])
   const counts = useMemo(() => data && people && showPeople ? peopleUnderSmoke(data, which, selectedHour, people) : null,
     [data, people, showPeople, which, selectedHour])
+  const placeCounts = useMemo(() => data && places && showPeople && places.schools.length + places.hospitals.length > 0
+    ? placesUnderSmoke(data, which, selectedHour, places) : null, [data, places, showPeople, which, selectedHour])
   const start = data ? Date.parse(data.start_utc) : 0
   const expired = mode === "live" && data && Date.now() >= start + data.hours * 3_600_000
   const stale = mode === "live" && data && Date.now() - start >= 36 * 3_600_000
@@ -166,6 +169,8 @@ export default function World() {
     if (!enabled || people) return
     setPeopleFailed(false)
     loadPeople().then(setPeople).catch(() => setPeopleFailed(true))
+    // Schools and hospitals are optional: without the file the counts simply do not show.
+    loadPlaces().then(setPlaces).catch(() => undefined)
   }
 
   return (
@@ -277,6 +282,9 @@ export default function World() {
                   <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Dot size shows population. Color shows tract income quintile, from orange to green. A red ring marks tracts 25 km or farther from a monitor.</p>
                   {counts && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                     About <strong className="text-foreground">{compact.format(farOnly ? counts.farUsg : counts.usg)}</strong> residents live in the {farOnly ? "selected distant tracts" : "tracts"} where this hourly illustration exceeds 35.5 µg/m³. This estimate uses census tract centers and outdoor concentrations.
+                  </p>}
+                  {placeCounts && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                    At this hour, <strong className="text-foreground">{placeCounts.schools.toLocaleString("en-US")}</strong> public schools and <strong className="text-foreground">{placeCounts.hospitals.toLocaleString("en-US")}</strong> hospitals are where the map exceeds 35.5 µg/m³ (outdoor air).
                   </p>}
                 </> : <p className="mt-3 text-xs text-muted-foreground" role="status">Loading population data…</p>)}
               </div>

@@ -205,14 +205,14 @@ chance is on days the correction never saw; the backtest saves it
 it. [TEAM: run that on the development predictions before the Summit, or after D-5 on
 the test years, and put the result here.]
 
-**25. I opened your website and it never mentions asthma or children. Why?**
-Because the website shows what runs today for anyone: the smoke forecast and an
-activity plan for a place. The per-child model is in the demo app
-(`app/streamlit_app.py`, screenshots in `docs/demo/`) and has been tested only on
-simulated children, so we do not put it in front of the public yet. Real families come
-after a clinician reviews the wording (README C-8) and we have parent interviews
-(E-1). [TEAM: if the AirPlan page gets a short section on the child plan, or a new
-name, change this answer to match. See H1 in `docs/WEBSITE_CHECK_2026-11-26.md`.]
+**25. Your website's planner is the same for everyone. Where is the plan for a child
+with asthma?**
+On the AirPlan page, under "A plan for one child with asthma" (added 2026-11-27): the
+evening check-in, the model that learns how strongly that child reacts to smoke, and a
+screenshot of the green, yellow or red plan from our demo app (`app/streamlit_app.py`,
+more screenshots in `docs/demo/`). The public planner stays general because the child
+model has been tested only on simulated children. Real families come after a clinician
+reviews the wording (README C-8) and we have parent interviews (E-1).
 
 ## Numbers to have memorized (development, 2023; replace after D-5)
 

@@ -47,6 +47,31 @@ export default function AirPlan() {
         </div>
       </Section>
 
+      <Section id="child-plan" className="pt-0">
+        <Split>
+          <div>
+            <Eyebrow>In testing, not yet public</Eyebrow>
+            <Heading>A plan for one child with asthma.</Heading>
+            <Lead>The outlook above is the same for everyone. Serein’s second part learns how strongly one child reacts to smoke and turns tomorrow’s forecast into a green, yellow or red plan for that child.</Lead>
+          </div>
+          <div className="space-y-4" data-reveal="">
+            <ol className="list-decimal space-y-2 pl-5 text-base leading-relaxed">
+              <li>Each evening a parent answers six questions with taps: symptoms, quick-relief inhaler puffs, night waking, time outdoors, a cold, and the daily controller medicine.</li>
+              <li>A small statistical model learns from those answers how much that child’s symptoms rise on smoky days.</li>
+              <li>The plan combines that with the forecast range. A forecast of air unhealthy for sensitive groups is always at least yellow, whatever the child’s log says, and every plan points back to the child’s own asthma action plan from their doctor.</li>
+            </ol>
+            <figure>
+              <img src={asset("img/demo-family-plan.webp")} width={552} height={388} loading="lazy"
+                alt="Demo app screenshot: a red plan for a fictional child, Maya, two days ahead, with the smoke forecast, her chance of symptoms and steps such as staying indoors with an air purifier and keeping the rescue inhaler close."
+                className="w-full rounded-xl border bg-white" />
+              <figcaption className="mt-2 text-sm text-muted-foreground">The family plan in our demo app, for a fictional child.</figcaption>
+            </figure>
+            <p className="text-sm text-muted-foreground">So far this has been tested only on simulated children. It stays in the demo app until a clinician has reviewed the wording and we have talked with families. The code is in the{" "}
+              <a href="https://github.com/htvarkali/Serein/tree/main/src/serein/personal" className="underline underline-offset-4">project repository</a>.</p>
+          </div>
+        </Split>
+      </Section>
+
       <Section tone="dark" id="pilot">
         <Split>
           <div>

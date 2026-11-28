@@ -211,6 +211,22 @@ export const loadPeople = () => (peopleCache ??= fetchData<People>("people").cat
   throw error
 }))
 
+export type Places = { source: string; schools: [number, number][]; hospitals: [number, number][] } // lat, lon
+let placesCache: Promise<Places> | null = null
+export const loadPlaces = () => (placesCache ??= fetchData<Places>("places").catch(error => {
+  placesCache = null
+  throw error
+}))
+
+/** Schools and hospitals where this hour's map is at or above 35.5 µg/m³ (W-17). */
+export function placesUnderSmoke(d: WorldData, which: Which, hour: number, places: Places) {
+  const count = (list: [number, number][]) => list.reduce((n, [lat, lon]) => {
+    const v = sampleAt(d, which, hour, lat, lon)
+    return v !== null && v >= 35.5 ? n + 1 : n
+  }, 0)
+  return { schools: count(places.schools), hospitals: count(places.hospitals) }
+}
+
 // People living where this hour's smoke is at or above each level.
 export function peopleUnderSmoke(d: WorldData, which: Which, hour: number, people: People) {
   let usg = 0, unhealthy = 0, farUsg = 0

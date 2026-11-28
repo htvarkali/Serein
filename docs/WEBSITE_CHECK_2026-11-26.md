@@ -106,6 +106,10 @@ tested on simulated children only), so this is a decision for the team, not a bu
 - or the AirPlan page gets one short section that describes the child plan and labels
   it as tested on simulated children.
 
+Done 2026-11-27 (second option): the AirPlan page now has a section "A plan for one
+child with asthma", labelled as tested on simulated children, with a screenshot of the
+demo app's family plan.
+
 **H2. The home page never stops drawing.** The dot map redraws on every animation
 frame, on screen or off, to make the dots pulse
 (`components/site/LiveForecast.tsx:94-132`). With nothing happening, the home page

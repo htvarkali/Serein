@@ -37,7 +37,7 @@ say whether that holds.
 We tested that. The same model with the graph turned off has higher error at every
 lead (8.2 against 7.8 one day ahead), and the gap is largest where there is no sensor:
 at monitors we hid from the model, the graph cut today's error by 18% and day 3's by
-17%. The graph is how a neighborhood without a monitor borrows from its neighbors.
+16%. The graph is how a neighborhood without a monitor borrows from its neighbors.
 
 **4. What are your false alarm rates?**
 One day ahead we had fewer false alarms than EPA's official forecast (92 against 98)

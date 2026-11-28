@@ -190,7 +190,7 @@ Hidden-monitor row: rerun 2026-11-27 after the preprocessing fix in the protocol
 - **Peaks:** on smoky days, the day-1 forecast reaches a median 76% of the true level
   (NOAA: 31%); day 2: 55%, day 3: 29%. Two fixes tried on 2026-11-23 did not help
   ([experiment log](docs/EXPERIMENTS.md)).
-- The graph matters most where there is **no sensor**: 18% lower error today and 17% on
+- The graph matters most where there is **no sensor**: 18% lower error today and 16% on
   day 3 at hidden monitors vs. the same model without neighbors.
 - 90% ranges contain the truth 89-91% of the time.
 - Weak spots we report: big peaks are still under-forecast at days 2-3; day-2 warnings
@@ -383,7 +383,7 @@ checked against main on 2026-11-23.
 | B-11 | Explainability: `serein explain` shows which input groups moved a forecast (integrated gradients) and which neighbors the graph listened to (`docs/METHODS.md`) | Done | Aadi-Tiwari | 2026-11-02 |
 | B-12 | 5-seed ensemble (`--seeds 5`, now the default) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-12b | Export/load every ensemble member for maps, transfer and explanations; compare graph/no-graph with equal seed counts. Merged in PR #2; checked 2026-11-23: the live model `west_us_live_v1` loads as a 5-member ensemble | Done | htvarkali | 2026-11-04 |
-| B-13 | Smoke days weighted 6x in training: day-1 forecasts reach a median 80% of the true peak (NOAA: 31%) | Done | Aadi-Tiwari | 2026-11-01 |
+| B-13 | Smoke days weighted 6x in training: day-1 forecasts reached a median 80% of the true peak at the time (2026-11-23 rerun: 76%; NOAA: 31%) | Done | Aadi-Tiwari | 2026-11-01 |
 | B-14 | Places without a sensor get a base forecast from neighbors' readings | Done | Aadi-Tiwari | 2026-11-01 |
 | B-15 | Peaks still under-predicted at days 2-3. Options: add 2020 as training data (no HRRR smoke fields that year, but AQMv5 and weather exist), or a heavy-tailed output. Tried 2026-11-23 (mean-style point forecast; larger day 2-3 smoke weight): both failed, see [EXPERIMENTS.md](docs/EXPERIMENTS.md). Also failed: 2020 as training data (2026-11-23) and a training-loss term on the error in µg/m³ (2026-11-26), and a separate network for days 2-3 (2026-11-27) | Open | | |
 | B-16 | Smoke-transport features HRRR lacks (plume age, fire growth rate), or drop fire inputs to simplify. Tried 2026-11-23: dropping fires is worse (Nov 2 ablation); a previous-day FRP input failed, see [EXPERIMENTS.md](docs/EXPERIMENTS.md). Also failed: forecast hours of partly covered days (2026-11-23) and HMS smoke-cover history 2-3 days back as a plume-age stand-in (2026-11-24) | Open | | |

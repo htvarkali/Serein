@@ -9,6 +9,11 @@ Example (issue day 2024-09-01, issue_hour_utc 18.5, obs_lag_hours 1.5):
   * the HRRR and AQM runs are the 12z runs of 2024-09-01 (posted ~14Z and ~18Z);
   * the HMS smoke map is the one for 2024-08-31;
   * fires detected 2024-08-31 18:30 .. 2024-09-01 18:30 UTC are usable.
+
+``fire_lag_hours`` (default 0) moves the end of that fire window earlier, for
+detections that are posted some hours after the satellite pass: with 3, fires
+detected 2024-08-31 15:30 .. 2024-09-01 15:30 UTC are used. The default keeps every
+existing table unchanged (see docs/CODE_REVIEW_2026-11-27.md, item 1).
 """
 
 from __future__ import annotations
@@ -41,9 +46,10 @@ class Availability:
     obs_lag_hours: float = 1.5
     hms_lag_days: int = 1
     firms_window_hours: float = 24
+    fire_lag_hours: float = 0
 
     def __post_init__(self) -> None:
-        for name in ("issue_hour_utc", "obs_lag_hours", "firms_window_hours"):
+        for name in ("issue_hour_utc", "obs_lag_hours", "firms_window_hours", "fire_lag_hours"):
             _validate_hours(name, getattr(self, name))
         if self.issue_hour_utc >= 24:
             raise ValueError("issue_hour_utc must be less than 24")
@@ -71,8 +77,9 @@ class Availability:
         return d - timedelta(days=self.hms_lag_days)
 
     def firms_window(self, d: date) -> tuple[datetime, datetime]:
-        t = self.issue_time(d)
-        return t - timedelta(hours=self.firms_window_hours), t
+        """(start, end] of the fire detections a forecast issued on d may use."""
+        end = self.issue_time(d) - timedelta(hours=self.fire_lag_hours)
+        return end - timedelta(hours=self.firms_window_hours), end
 
     def check_model_cycle(self, d: date, cycle: int, posted_lag_hours: float) -> bool:
         """True if a model run of day d / cycle was public before issue time."""

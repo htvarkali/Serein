@@ -28,6 +28,7 @@ availability:
   obs_lag_hours: 1.5      # sensor hours ending <= 17Z are usable
   hms_lag_days: 1         # yesterday's HMS analysis (today's is incomplete)
   firms_window_hours: 24  # detections in the 24 h before issue time
+  fire_lag_hours: 0       # end the fire window this many hours before issue (posting delay; 0 = none)
 
 leads: [0, 1, 2, 3]       # local days after issue day (0 = today)
 

@@ -112,8 +112,12 @@ def bearing_rad(lat1, lon1, lat2, lon2):
 
 def fire_features(fires: pd.DataFrame, points: pd.DataFrame, issue_time: datetime,
                   window_hours: float = 24, u: np.ndarray | None = None,
-                  v: np.ndarray | None = None) -> pd.DataFrame:
+                  v: np.ndarray | None = None,
+                  acquisition_lag_hours: float = 0) -> pd.DataFrame:
     """Fire radiative power (FRP, MW) near each point in the window before issue time.
+
+    The window is (end - window_hours, end], with end = issue_time minus
+    ``acquisition_lag_hours`` (0 keeps detections right up to issue time).
 
     ``frp_upwind_250`` weights each fire by how much the point is downwind of it,
     using the point's wind (u east, v north, m/s).
@@ -123,8 +127,11 @@ def fire_features(fires: pd.DataFrame, points: pd.DataFrame, issue_time: datetim
     out["fire_dist_km"] = 1000.0
     if fires is None or fires.empty:
         return out
-    t0 = issue_time - timedelta(hours=window_hours)
-    f = fires[(fires["time_utc"] > t0) & (fires["time_utc"] <= issue_time)]
+    if not np.isfinite(acquisition_lag_hours) or acquisition_lag_hours < 0:
+        raise ValueError("acquisition_lag_hours must be finite and nonnegative")
+    end = issue_time - timedelta(hours=acquisition_lag_hours)
+    t0 = end - timedelta(hours=window_hours)
+    f = fires[(fires["time_utc"] > t0) & (fires["time_utc"] <= end)]
     if f.empty:
         return out
     flat, flon, frp = (f["latitude"].to_numpy(), f["longitude"].to_numpy(),

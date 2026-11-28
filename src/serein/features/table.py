@@ -199,7 +199,8 @@ def build_table(study: Study, days: list[date], points: pd.DataFrame,
             wind = tab[tab["issue_date"] == d].set_index("point_id").reindex(sub["point_id"])
             u = wind.get("wind_now_u10", pd.Series(np.nan, index=wind.index)).to_numpy()
             v = wind.get("wind_now_v10", pd.Series(np.nan, index=wind.index)).to_numpy()
-            ff = firms.fire_features(fires, sub, av.issue_time(d), av.firms_window_hours, u, v)
+            ff = firms.fire_features(fires, sub, av.issue_time(d), av.firms_window_hours, u, v,
+                                     acquisition_lag_hours=av.fire_lag_hours)
             ff["issue_date"], ff["point_id"] = d, sub["point_id"].to_numpy()
             fire_parts.append(ff)
     tab = tab.merge(pd.concat(hms_cols), on=["issue_date", "point_id"], how="left")

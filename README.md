@@ -322,6 +322,8 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 
 ### Summary: what is left (recounted from the rows below, 2026-11-27)
 
+Who does what next, with deadlines: [docs/OPEN_TASKS.md](docs/OPEN_TASKS.md).
+
 | Area | Done | In progress | Open | Blocked |
 |---|---|---|---|---|
 | A: Data pipeline | 14 | 0 | 1 | 0 |
@@ -330,7 +332,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 3 | 4 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
-| W: Smoke World | 14 | 5 | 1 | 0 |
+| W: Smoke World | 15 | 4 | 1 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -428,7 +430,7 @@ Both workflows are development diagnostics.
 | D-2 | Backtest runner with strict season split and a `--final` lock file | Done | Aadi-Tiwari | 2026-11-01 |
 | D-2b | Warning rule: warn when P(PM2.5 ≥ 35.5) beats a cut-off tuned on calibration weeks | Done | Aadi-Tiwari | 2026-11-01 |
 | D-3 | **(non-code)** PurpleAir research access: draft in `docs/drafts/purpleair_data_request.md`, not sent; someone must decide whether to send it | Blocked | | |
-| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08). Review items 1-14 applied 2026-11-23 and the dev numbers rerun; change-log rows for the 2026-11-23 probability outputs added and the dev run reproduced on clean committed code 2026-11-25; what is left is the freeze commit itself Before freezing, decide item 1 of the [code review](docs/CODE_REVIEW_2026-11-27.md) (fire detections up to issue time with no posting delay; protocol section 3 says FIRMS, the code defaults to HMS). | Open | | |
+| D-4 ⭐ | Read and **freeze** `docs/BACKTEST_PROTOCOL.md` before scoring the test seasons (the commit time is the proof) ([pre-freeze review](docs/drafts/protocol_review_2026-11-08.md), 2026-11-08). Review items 1-14 applied 2026-11-23 and the dev numbers rerun; change-log rows for the 2026-11-23 probability outputs added and the dev run reproduced on clean committed code 2026-11-25; what is left is the freeze commit itself ([freeze checklist](docs/drafts/freeze_checklist.md), 2026-11-27). Before freezing, decide item 1 of the [code review](docs/CODE_REVIEW_2026-11-27.md) (fire detections up to issue time with no posting delay; protocol section 3 says FIRMS, the code defaults to HMS). | Open | | |
 | D-5 ⭐ | Run the final test once (`--final`), with day-bootstrap 95% CIs and a Diebold-Mariano test vs. each baseline | Open | | |
 | D-6a | Northeast June 2023 transfer test prepared: data downloaded, `serein transfer` built | Done | Aadi-Tiwari | 2026-11-01 |
 | D-6b ⭐ | Run the transfer test once, right after D-5 | Open | | |
@@ -463,9 +465,9 @@ Both workflows are development diagnostics.
 | S-5 | **(non-code)** Brief Q6-Q10: market, competition, go-to-market, business model, fundraising (E-4 to E-7) (Q6, Q8, Q9, Q10 merged 2026-11-08; Q8 to Q10 revised 2026-11-25, see the [review note](docs/drafts/brief_review_2026-11-25.md); `[TEAM]` slots left in Q6, Q8 and Q10, plus a maintenance note in Q9; Q7 alternative paragraph in the draft file; word limits checked with `python3 scripts/check_brief.py`) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-6 | Brief Q4 and Q5: replace dev numbers with final test numbers after D-5 | Open | | |
 | S-7 | Draft website (`website/index.html`) with results, figures, safety section | Done | Aadi-Tiwari | 2026-11-01 |
-| S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). Rebuilt 2026-11-23 as one React and shadcn/ui app (`website-src/`) in the original page structure: Home, SmokeCast (results, August 2023 replay), Smoke World (3D, hour by hour), AirPlan (live plans, breathing rates), Data and methods; team section included. A dedicated contact address is still pending. | In progress | Aadi-Tiwari | 2026-11-23 |
+| S-8 | **(non-code)** [Website on GitHub Pages](https://htvarkali.github.io/Serein/). Rebuilt 2026-11-23 as one React and shadcn/ui app (`website-src/`) in the original page structure: Home, SmokeCast (results, August 2023 replay), Smoke World (3D, hour by hour), AirPlan (live plans, breathing rates), Data and methods; team section included. A dedicated contact address is still pending. 2026-11-27: the AirPlan page now has a section on the per-child plan, labelled as tested on simulated children (website check H1). | In progress | Aadi-Tiwari | 2026-11-23 |
 | S-9 | **(non-code)** 3-5 minute video: the problem, the app map, the backtest chart, a plan being generated. YouTube/Vimeo link + MP4 under 800 MB | Open | | |
-| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)). Draft 3 (2026-11-23): all 61 references checked, titles, DOIs and dead links fixed. 2026-11-25: 4 open items settled and entries 58 to 66 added; left are 2 [TEAM] items (the CDC control definition, and the list of AI tools that Conrad's rules require us to cite) and the 2 attachments (best after the final test) | In progress | AbhinavGGarg | 2026-11-08 |
+| S-10 | **(non-code)** Reference list and up to 2 attachments (backtest figure, map or app screenshot) ([draft](docs/drafts/references_DRAFT.md)). Draft 3 (2026-11-23): all 61 references checked, titles, DOIs and dead links fixed. 2026-11-25: 4 open items settled and entries 58 to 66 added; left is 1 [TEAM] item, the list of AI tools that Conrad's rules require us to cite (fill-in template added 2026-11-27; the CDC control definition was settled 2026-11-27, entry A6a) and the 2 attachments (best after the final test) | In progress | AbhinavGGarg | 2026-11-08 |
 | S-11 | **(non-code)** Pay the $499 fee or apply for financial aid (applications close 2026-12-03); submit everything in the portal | Open | | |
 
 ### W: Smoke World (3D, hour by hour; plan in [docs/SMOKE_WORLD_PLAN.md](docs/SMOKE_WORLD_PLAN.md))
@@ -478,16 +480,16 @@ Both workflows are development diagnostics.
 | W-5 | Time controls: play, pause, speed, hour 0-72 slider, local date and time on screen | Done | Aadi-Tiwari | 2026-11-23 |
 | W-6 | Moving wind arrows; stop after hour 48 where NOAA's wind forecast ends, with a note | Done | Aadi-Tiwari | 2026-11-23 |
 | W-7 | Fire points sized by fire strength | Done | Aadi-Tiwari | 2026-11-23 |
-| W-8 | Click anywhere: that place's 72-hour smoke curve, chance of unhealthy air, confidence flag and advice (smoke curve, advice and a breathing-dose panel done 2026-11-23. 2026-11-26: `serein.world` now adds each day's calibrated chance of a USG day, the scored warning and the low-confidence flag, using the same rules as `serein.crew`, and the map and AirPlan cards show them. They appear only when `outputs/backtest/<run>/` has `prob_recal.json`, `warn_cutoffs.json` and `flag_width.json`, so the next daily run on the machine with the trained model adds them. To add them to the August 2023 example: `uv run python -m serein.world --daily-only --forecast app/sample/forecast_20230818.parquet --out website-src/public/data/aug2023.json`, then rebuild) | In progress | Aadi-Tiwari, AbhinavGGarg | 2026-11-26 |
+| W-8 | Click anywhere: that place's 72-hour smoke curve, chance of unhealthy air, confidence flag and advice (smoke curve, advice and a breathing-dose panel done 2026-11-23. 2026-11-26: `serein.world` now adds each day's calibrated chance of a USG day, the scored warning and the low-confidence flag, using the same rules as `serein.crew`, and the map and AirPlan cards show them. They appear only when `outputs/backtest/<run>/` has `prob_recal.json`, `warn_cutoffs.json` and `flag_width.json`, so the next daily run on the machine with the trained model adds them. To add them to the August 2023 example: `uv run python -m serein.world --daily-only --forecast app/sample/forecast_20230818.parquet --out website-src/public/data/aug2023.json`, then rebuild. 2026-11-27: the live file of Nov 27 still has none of them, so check that `outputs/backtest/west_us_live_v1/` has the three files; see [open tasks](docs/OPEN_TASKS.md)) | In progress | Aadi-Tiwari, AbhinavGGarg | 2026-11-26 |
 | W-9 | Switch between NOAA's raw forecast and Serein's corrected one | Done | Aadi-Tiwari | 2026-11-23 |
 | W-10 | 3D buildings when zoomed into a town (OpenStreetMap / Microsoft footprints) (OpenStreetMap buildings from zoom 13; photorealistic cities not checked yet) | In progress | Aadi-Tiwari | 2026-11-23 |
-| W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; first real update on the next run) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-11 | Daily live update: the scheduled job rebuilds the world data each morning (set up 2026-11-23: the runner pushes only `website/data/live.json` and its source copy after the 11:45 forecast; the job pushed new forecasts on 2026-11-25, 11-26 and 11-27) | Done | Aadi-Tiwari | 2026-11-27 |
 | W-12 | Lighter version that runs on phones and slow computers ([check and fixes](docs/WEBSITE_CHECK_2026-11-26.md), 2026-11-26: phones get still images instead of the background videos, the home page draws only while on screen, "reduce motion" is respected, and Home went from 3.1 MB to 1.1 MB on a phone; later the map page: it now starts the map only when it scrolls near view and draws at most 2x, so on a phone it is usable in 5.1 s instead of about 15 s; still to do: a check on real phones) | In progress | AbhinavGGarg | 2026-11-26 |
 | W-13 | Hourly accuracy test on real 2023 days: corrected vs. NOAA hourly smoke against real hourly monitor readings ([results](docs/HOURLY_ACCURACY.md): the correction beats NOAA hour by hour, but the hour-to-hour pattern is not reliable) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-14 | Replay mode: August 2023 in the 3D world, with a switch to what really happened (August 2023 mode in Smoke World plus a 3-panel forecast vs. measured replay on the SmokeCast page) | Done | Aadi-Tiwari | 2026-11-23 |
 | W-15 | "Where does this data come from" panel: every source, and what is measured vs. forecast vs. estimated | Done | Aadi-Tiwari | 2026-11-23 |
 | W-16 | People layer: neighborhoods by income and how many people are under smoke each hour (data in `docs/EQUITY.md`) | Done | Aadi-Tiwari | 2026-11-23 |
-| W-17 | Places that matter: schools, hospitals, farms and work sites under unhealthy smoke each hour (schools and hospitals shown from OpenStreetMap; not counted yet; farms and work sites not added) | In progress | Aadi-Tiwari | 2026-11-23 |
+| W-17 | Places that matter: schools, hospitals, farms and work sites under unhealthy smoke each hour (schools and hospitals shown from OpenStreetMap; farms and work sites not added. 2026-11-27: the map counts schools and hospitals under 35.5 µg/m³ each hour with the population overlay; `python -m serein.places` builds the file from NCES and HIFLD downloads, still to run once) | In progress | Aadi-Tiwari | 2026-11-23 |
 | W-18 | Highlight places more than 25 km from any air monitor | Done | Aadi-Tiwari | 2026-11-23 |
 | W-19 | **(non-code)** Watch 5 people use the 3D world for the first time and note where they get stuck. Script and recording sheet: [docs/SMOKE_WORLD_FIRST_USE_TEST.md](docs/SMOKE_WORLD_FIRST_USE_TEST.md) (2026-11-26); nobody has been tested yet | Open | | |
 | W-20 | **(non-code)** Credit every data source on the website (several licenses require it) | Done | Aadi-Tiwari | 2026-11-23 |

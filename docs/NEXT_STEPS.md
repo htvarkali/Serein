@@ -1,5 +1,9 @@
 # Next steps after the reliability and sensor-QC work
 
+> **Historical note (2026-11-27):** this page records the November 4 increment, which
+> has since been merged and rerun. For the current order of work, use the README's
+> "Most urgent open work" list and task board.
+
 Updated November 4, 2026. This supplements the README task board. Code on a feature
 branch remains in progress until reviewed and merged.
 

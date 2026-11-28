@@ -66,7 +66,7 @@ forecast check using synthetic environmental data. GitHub Actions runs these che
 with CPU PyTorch and app extras on pull requests and pushes to `main`, and also type
 checks and builds the website from `website-src/` and checks its links.
 
-See [the next steps](docs/NEXT_STEPS.md) for the order of remaining work and
+See the task board below for the order of remaining work ([the November 4 next steps](docs/NEXT_STEPS.md) are kept for history) and
 [PurpleAir QC](docs/PURPLEAIR_QC.md) for the new offline sensor-screening command.
 
 ### Step 5 (optional). Download the data and train models

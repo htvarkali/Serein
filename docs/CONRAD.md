@@ -6,11 +6,12 @@ Source: official [2026-2027 Student Guide](https://conrad.spacecenter.org/wp-con
 | What | When |
 |---|---|
 | Team registration + **Lean Canvas** | **Oct 29, 2026, 11:59 pm CT** (already passed: confirm it was submitted in the Award Force portal) |
+| Financial aid for the $499 fee: applications open | Nov 2 to **Dec 3, 2026, 11:59 pm** (the event page says ET, the calendar entry CST; treat the earlier one as the deadline) |
 | **Innovation Stage: Brief + Video + Website + $499 fee** | **Jan 7, 2027, 11:59 pm CT** (team's internal target: Jan 1) |
 | Innovators/Finalists announced | February 2027 |
 | Innovation Summit (finalists), Space Center Houston | April 21-24, 2027 |
 
-Financial aid for the fee is available (apply via the portal link in the guide).
+Financial aid for the fee is available (apply via the portal link in the guide; one form per team, linked from the Innovation Stage page). Dates added 2026-11-27 from the Conrad pages cited in `docs/drafts/references_DRAFT.md` (entries 64 and 65).
 
 ## Category
 Options: Aerospace & Aviation, Cyber-Technology & Security, **Energy & Environment**,

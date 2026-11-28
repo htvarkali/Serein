@@ -91,3 +91,15 @@ def test_cli_writes_the_table(tmp_path, capsys):
     assert len(rows) == 9
     assert "net_before_pay_usd" in rows[0]
     assert "| scenario |" in capsys.readouterr().out
+
+
+def test_district_market_is_enrollment_times_the_per_student_price():
+    low, high = business.district_market()
+    students = 5_731_260 + 539_644 + 1_096_000
+    assert (low, high) == (students * 0.50, students * 1.50)
+    # The figures the Brief and the business plan quote.
+    assert f"{low / 1e6:.1f}" == "3.7" and f"{high / 1e6:.1f}" == "11.1"
+    assert business.district_market({"X": 10_000}, (1.0, 2.0)) == (10_000, 20_000)
+    with pytest.raises(ValueError):
+        business.district_market({"X": -1})
+

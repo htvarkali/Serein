@@ -36,6 +36,13 @@ HEALTH_PLAN_PER_CHILD_USD = (10.0, 20.0)
 # CDC, 2023 National Health Interview Survey: 6.7% of US children have current asthma.
 CHILD_ASTHMA_SHARE = 0.067
 
+# Public school enrollment, fall 2025 (read 2026-11-27):
+# California 2025-26, K-12 including charter schools (CDE, Fingertip Facts on Education);
+# Oregon, first school day of October 2025 (ODE, Statewide Report Card 2025-26);
+# Washington, October 2025, prekindergarten through 12th grade (OSPI data as reported
+# by the Seattle Times, January 9, 2026; rounded to the thousand there).
+ENROLLMENT_FALL_2025 = {"CA": 5_731_260, "OR": 539_644, "WA": 1_096_000}
+
 # Assumption, not a measurement: alerts sent to one family in a heavy smoke season.
 # The Brief's worked example uses 60. Twenty and forty are shown next to it.
 ALERTS_HEAVY_SEASON = 60
@@ -59,6 +66,19 @@ def district_fee(students: float, per_student: float) -> float:
     if students < 0 or per_student < 0:
         raise ValueError("students and price cannot be negative")
     return max(students * per_student, DISTRICT_FLOOR_USD)
+
+
+def district_market(
+    enrollment: dict[str, int] | None = None,
+    per_student: tuple[float, float] = DISTRICT_PER_STUDENT_USD,
+) -> tuple[float, float]:
+    """Yearly revenue if every public school student in the states were covered, at the
+    low and high per-student price. The district minimum fee is left out, so this is a
+    lower bound for each price: the floor only ever raises a small district's fee."""
+    students = sum((ENROLLMENT_FALL_2025 if enrollment is None else enrollment).values())
+    if students < 0:
+        raise ValueError("enrollment cannot be negative")
+    return students * per_student[0], students * per_student[1]
 
 
 def district_messaging_share(
@@ -187,6 +207,10 @@ def main(argv: list[str] | None = None) -> None:
             writer.writeheader()
             writer.writerows(rows)
     print(markdown_table(rows))
+    students = sum(ENROLLMENT_FALL_2025.values())
+    low, high = district_market()
+    print(f"\nDistrict market, CA + OR + WA: {students:,} students, ${low / 1e6:.1f} to "
+          f"${high / 1e6:.1f} million a year before the ${DISTRICT_FLOOR_USD:,.0f} minimum")
 
 
 if __name__ == "__main__":

@@ -436,7 +436,7 @@ Both workflows are development diagnostics.
 | D-8 | Impact calculator: smoky days warned a day ahead, Serein vs. EPA | Done | Aadi-Tiwari | 2026-11-01 |
 | D-9 | Results snapshot in `docs/results/` so results can be read without the data download | Done | Aadi-Tiwari | 2026-11-01 |
 | D-10 | Independent rubric-based review of the whole entry; fixes applied to README and website wording | Done | Aadi-Tiwari | 2026-11-01 |
-| D-11 | Live forecast pinned to a separately trained 5-seed run (`west_us_live_v1`, set with `SEREIN_LIVE_RUN` in `scripts/run_live.sh`), so development reruns no longer replace the live model; scoreboard split at 2026-11-23 (protocol section 8) | Done | Aadi-Tiwari | 2026-11-22 |
+| D-11 | Live forecast pinned to a separately trained 5-seed run (`west_us_live_v1`, set with `SEREIN_LIVE_RUN` in the scheduled task's environment, which `scripts/run_live.sh` reads), so development reruns no longer replace the live model; scoreboard split at 2026-11-23 (protocol section 8) | Done | Aadi-Tiwari | 2026-11-22 |
 
 ### E: Product & pitch
 | ID | Task | Status | Owner | Date |

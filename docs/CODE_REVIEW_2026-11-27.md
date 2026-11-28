@@ -1,7 +1,7 @@
 # Code review before the protocol freeze, 2026-11-27
 
 A read of the code that every headline number depends on, done before the protocol is
-frozen (D-4, Dec 17). Nothing in `src/` was changed by this review. Findings that would
+frozen (D-4, Dec 17). The only change to `src/` is the small fix in item 6. Findings that would
 change model inputs or scores are written up here for the team to decide, because the
 protocol says such changes go through its change log.
 
@@ -23,6 +23,12 @@ GPU, six are Windows-only), `ruff check .` (clean), and a stricter one-off ruff 
 | Safety floor | `personal/action_plan.py`, `messages/en.yaml` | "Unhealthy for Sensitive Groups" or worse is at least YELLOW, "Very Unhealthy" or worse is RED; personal risk can only raise the zone. YELLOW's actions (indoor activity instead of hard outdoor activity) fit EPA's advice for sensitive groups at "Unhealthy". Tested in `tests/test_personal.py` |
 | Live scoring | `live.py` `score`, `model_parts` | Only complete days are scored (14-hour margin), late forecasts excluded, scoreboard split when the model changes |
 | Units | `data/aqm.py` | Ozone converted from the GRIB unit label, not from magnitude |
+| Inputs | `features/prepare.py` | Scaling from training seasons only; missing values flagged; sensor-only and site-history features marked so they can be hidden; site history built from training targets (affects training rows only) |
+| Training | `models/train.py` | Days shuffled; 15% of sensors hidden per step, with their past days and with the neighbor-based starting forecast; early stopping on validation weeks; best checkpoint restored; deterministic GPU algorithms |
+| Network | `models/gnn.py` | Messages built from inputs only, never from targets; wind enters through edge features; quantiles cannot cross (median plus or minus cumulative positive steps); pinball loss ignores missing targets |
+| Maps | `models/infer.py` | Grid points get the neighbor-based starting forecast, the same rule hidden sensors get in training |
+| Personal model | `personal/model.py` | Laplace posterior with damped Newton steps; risk integrates over the whole smoke forecast distribution, tails included, and over the child's coefficients |
+| Equity | `eval/equity.py` | Census income and population per tract, population-weighted shares within income fifths, great-circle distance to the nearest EPA monitor (see item 5) |
 
 ## Needs a team decision before the freeze
 
@@ -95,10 +101,34 @@ Already written up in [PURPLEAIR_CORRECTION_CHECK.md](PURPLEAIR_CORRECTION_CHECK
 EPA's smoke correction is for the cf_atm channels; the code feeds it cf_1. No current
 result uses PurpleAir.
 
+### 5. Equity distances stop at the study box (low)
+
+`eval/equity.py` measures each tract's distance to the nearest EPA monitor in the
+study's points registry, which only holds monitors inside the region box (west of
+-114°, 32° to 49° N). A tract near the box edge, for example in eastern Nevada or
+southern Idaho, can have a closer monitor just outside it, so its distance is
+overstated. This most likely changes the 10.8% vs. 0.6% little, but on the machine with
+the data it is a quick check: recompute with monitors from a slightly larger box, or
+count the "25 km or more" people living within 25 km of the box edge.
+
+### 6. Which live model the daily job uses (note, and one fix made)
+
+`scripts/run_live.sh` uses `SEREIN_LIVE_RUN` from the environment and falls back to
+`west_us_dev`. That is deliberate (the scheduled task on Aadi's PC sets it to
+`west_us_live_v1`), and each forecast's `.json` record names the run that made it, so a
+wrong setting would show on the live scoreboard. The README row for D-11 says the run
+is "set with `SEREIN_LIVE_RUN` in `scripts/run_live.sh`"; it is set in the scheduled
+task's environment, not in the script.
+
+Fix made in this review: `serein.world` used the same environment variable to find the
+calibration settings for the map file, so running it from another terminal could have
+paired the live model's forecast with the development run's settings. It now reads the
+run name from the forecast's own `.json` record first (`world.default_run_dir`, tested
+in `tests/test_world_outlook.py`).
+
 ## Not reviewed line by line
 
 The evaluation diagnostics (`eval/spatial*.py`, `episodes.py`, `discrimination.py`,
-`map_support.py`, `split_*`, plotting) and the model and training code (`models/gnn.py`,
-`models/train.py`, `models/infer.py`) were covered only by the test suite and the lint
-passes. A deeper check of the model code would mean rerunning experiments on the
+`map_support.py`, `split_*`, plotting) were covered only by the test suite and the lint
+passes. Checking any model result itself would mean rerunning experiments on the
 machine with the 150 GB of data.

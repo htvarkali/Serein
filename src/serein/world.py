@@ -142,8 +142,21 @@ QUANTILE_LEVELS = (0.05, 0.25, 0.5, 0.75, 0.95)  # serein.models.gnn.QUANTILES
 UNHEALTHY_SENSITIVE = 35.5  # daily PM2.5 at AQI 101, the level warnings are scored on
 
 
-def default_run_dir() -> Path:
-    """The trained run whose settings the live forecast uses (same default as serein.live)."""
+def default_run_dir(forecast: Path | None = None) -> Path:
+    """The trained run whose settings belong with this forecast.
+
+    A live forecast saves a record next to itself (``<date>.json``) naming the run that
+    made it (``model_run``); that run is used, so the chance and flags always come from
+    the same model as the forecast. Without a record, ``$SEREIN_LIVE_RUN`` is used, as in
+    ``scripts/run_live.sh``, and then ``west_us_dev``."""
+    if forecast is not None:
+        try:
+            info = json.loads(Path(forecast).with_suffix(".json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            info = None
+        run = info.get("model_run") if isinstance(info, dict) else None
+        if isinstance(run, str) and run.strip() and "/" not in run and "\\" not in run:
+            return REPO_ROOT / "outputs" / "backtest" / run.strip()
     return REPO_ROOT / "outputs" / "backtest" / os.environ.get("SEREIN_LIVE_RUN", "west_us_dev")
 
 
@@ -275,14 +288,16 @@ def main(argv=None):
     ap.add_argument(
         "--run-dir", type=Path, default=None,
         help="trained run with prob_recal.json, warn_cutoffs.json and flag_width.json "
-        "(default: outputs/backtest/$SEREIN_LIVE_RUN, else west_us_dev)",
+        "(default: the run named in the forecast's .json record, else "
+        "outputs/backtest/$SEREIN_LIVE_RUN, else west_us_dev)",
     )
     ap.add_argument(
         "--daily-only", action="store_true",
         help="only replace the daily outlook in an existing --out file (same forecast run)",
     )
     args = ap.parse_args(argv)
-    run_dir = args.run_dir or default_run_dir()
+    run_dir = args.run_dir or default_run_dir(args.forecast)
+    print(f"calibration settings from {run_dir}")
     settings = run_settings(run_dir)
     missing = {"recal", "cutoffs", "flag"} - settings.keys()
     if missing:

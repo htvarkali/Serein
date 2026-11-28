@@ -116,3 +116,20 @@ def test_daily_only_refuses_a_different_forecast_run(tmp_path):
     with pytest.raises(SystemExit, match="issued 2023-08-18"):
         world.main(["--daily-only", "--forecast", str(SAMPLE), "--out", str(out),
                     "--run-dir", str(tmp_path)])
+
+
+def test_settings_come_from_the_run_named_in_the_forecast_record(tmp_path, monkeypatch):
+    monkeypatch.setenv("SEREIN_LIVE_RUN", "west_us_dev")
+    forecast = tmp_path / "20261127.parquet"
+    # No record: the environment decides, as in scripts/run_live.sh.
+    assert world.default_run_dir(forecast).name == "west_us_dev"
+    # The record written by serein.live names the run that made the forecast.
+    forecast.with_suffix(".json").write_text(json.dumps({"model_run": "west_us_live_v1"}))
+    assert world.default_run_dir(forecast).name == "west_us_live_v1"
+    # A broken or odd record falls back to the environment.
+    for bad in ("not json", json.dumps({"model_run": "../elsewhere"}), json.dumps([1])):
+        forecast.with_suffix(".json").write_text(bad)
+        assert world.default_run_dir(forecast).name == "west_us_dev"
+    monkeypatch.delenv("SEREIN_LIVE_RUN")
+    assert world.default_run_dir(None).name == "west_us_dev"
+

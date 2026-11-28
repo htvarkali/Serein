@@ -1,0 +1,152 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Serein: plans for clinical review</title><style>
+body { font: 11pt/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #111;
+       max-width: 46rem; margin: 2rem auto; padding: 0 1rem; }
+h1 { font-size: 20pt; margin: 0 0 .3rem; } h2 { font-size: 14pt; margin: 1.6rem 0 .4rem;
+  border-bottom: 1px solid #ccc; padding-bottom: .2rem; } h3 { font-size: 11.5pt; margin: 1rem 0 .3rem; }
+.note { color: #555; font-size: 10pt; } table { border-collapse: collapse; width: 100%; font-size: 9.5pt; }
+th, td { border: 1px solid #bbb; padding: .3rem .4rem; text-align: left; vertical-align: top; }
+th { background: #f2f2f2; } pre { white-space: pre-wrap; font: 10pt/1.4 inherit; background: #fafafa;
+  border-left: 4px solid var(--z, #999); padding: .5rem .7rem; margin: .3rem 0 .8rem; }
+.green { --z: #2e9e4f; } .yellow { --z: #d9a400; } .red { --z: #d6333a; }
+.blank { height: 3.2rem; } .page { page-break-before: always; }
+@media print { body { margin: 0 auto; } }
+</style></head><body>
+<h1>Serein: smoke-day asthma plans for review</h1>
+<p class="note">Student project for the Conrad Challenge (Foothill High School, Pleasanton, CA).
+Generated from the code on the date of printing. Maya is a made-up child and the numbers are
+illustrative. Nothing here has been sent to a real family.</p>
+
+<h2>What we are asking</h2>
+<p>About 20 minutes, in writing. The five questions are on the last page; "fine" is a complete
+answer. We will make every change you ask for or tell you why not.</p>
+
+<h2>What Serein does</h2>
+<p>It forecasts wildfire smoke (daily average PM2.5) for a family's neighborhood one to three
+days ahead, with a range. For a child with asthma it turns tomorrow's forecast into a green,
+yellow or red plan the evening before, in English or Spanish, by text message with a link to
+the full plan. It never diagnoses, never changes medication, and always defers to the child's
+own asthma action plan.</p>
+
+<h2>How the zone is chosen</h2>
+<table>
+<tr><th>Rule</th><th>Zone</th></tr>
+<tr><td>Forecast median "Unhealthy for Sensitive Groups" or worse (PM2.5 at or above 35.5 µg/m³),
+or the upper end of the forecast range "Unhealthy" or worse</td><td>at least YELLOW</td></tr>
+<tr><td>Forecast median "Very Unhealthy" or worse</td><td>RED</td></tr>
+<tr><td>The child's own log: estimated chance of symptoms tomorrow at least 1.3 times, or 5
+percentage points above, the same child on a clean-air day</td><td>at least YELLOW</td></tr>
+<tr><td>The same, at least 2 times or 15 points above</td><td>RED</td></tr>
+</table>
+<p>The child's log can only make a plan stricter than the public guidance, never looser. The
+1.3x / 5-point and 2x / 15-point cut-offs are our design choices and the main thing we would
+like a clinician to judge. Only the smoke differs between "tomorrow" and the clean-air
+comparison, so a cold or a high-pollen day by itself does not trigger a smoke warning.</p>
+
+<h2>The evening check-in (six taps)</h2>
+<ol>
+<li>Any asthma symptoms today? none / mild / moderate / severe</li>
+<li>Rescue (quick-relief) inhaler puffs today, not counting before exercise? 0 / 1-2 / 3-4 / 5+</li>
+<li>Woke up at night because of asthma? yes / no</li>
+<li>Time outdoors today? little (under 1 h) / some (1-3 h) / a lot (3 h+)</li>
+<li>Has a cold or is sick? yes / no</li>
+<li>Took daily controller medicine? yes / no / doesn't have one</li>
+</ol>
+<p>A "symptom day", the outcome the model learns, is any symptoms, any rescue puffs, or night
+waking. The model is a Bayesian logistic regression that starts from published effect sizes
+(next section) and updates them for each child as days are logged. So far it has been tested
+only on 300 simulated children.</p>
+
+<h2>The messages, in English</h2>
+<h3>GREEN: full plan</h3><pre class="green">GREEN for Maya tomorrow: normal day.
+Smoke forecast near you: about 8 µg/m³ (could reach 15). Air quality: Good.
+Chance Maya has asthma symptoms tomorrow: about 10%.
+
+- Take daily controller medicine as prescribed.
+- Outdoor play is fine.
+- Keep the rescue inhaler with Maya as usual.
+
+GET HELP NOW (call 911) if Maya struggles to breathe or talk, their lips or nails turn blue or gray, or the rescue inhaler isn&#x27;t helping.
+Serein gives forecasts, not medical advice. Always follow the asthma action plan from your child&#x27;s doctor.</pre><h3>GREEN: text message</h3><pre class="green">Serein: GREEN for Maya tomorrow. Smoke about 8 ug/m3 (Good). Normal day; keep the rescue inhaler as usual. Plan: [link] Reply STOP to end.</pre><h3>YELLOW: full plan</h3><pre class="yellow">YELLOW for Maya tomorrow: smoke may cause symptoms.
+Smoke forecast near you: about 40 µg/m³ (could reach 70). Air quality: Unhealthy for Sensitive Groups.
+Chance Maya has asthma symptoms tomorrow: about 22%.
+
+- Keep the rescue inhaler with Maya at all times, including at school.
+- Swap hard outdoor activity (running, sports practice) for indoor activity.
+- Keep windows and doors closed; run an air purifier (HEPA) if you have one.
+- Follow the YELLOW zone of Maya&#x27;s asthma action plan if symptoms start.
+- Tell the school nurse or coach that it is a smoke day.
+
+GET HELP NOW (call 911) if Maya struggles to breathe or talk, their lips or nails turn blue or gray, or the rescue inhaler isn&#x27;t helping.
+Serein gives forecasts, not medical advice. Always follow the asthma action plan from your child&#x27;s doctor.</pre><h3>YELLOW: text message</h3><pre class="yellow">Serein: YELLOW for Maya tomorrow. Smoke about 40 ug/m3 (Unhealthy for Sensitive Groups). Keep the rescue inhaler with Maya, choose indoor activity, close windows. Plan: [link] Trouble breathing or talking, or blue lips? Call 911. Reply STOP to end.</pre><h3>RED: full plan</h3><pre class="red">RED for Maya tomorrow: high smoke risk. Plan to stay indoors.
+Smoke forecast near you: about 66 µg/m³ (could reach 155). Air quality: Unhealthy.
+Chance Maya has asthma symptoms tomorrow: about 63%.
+In Maya&#x27;s own log, days with smoke at this level came with more symptoms.
+
+- Stay indoors in a room with windows closed and an air purifier running.
+- No outdoor exercise. Use the car&#x27;s recirculate setting when driving.
+- Keep the rescue inhaler close and follow Maya&#x27;s asthma action plan.
+- Call your child&#x27;s doctor today if symptoms are worse than usual.
+- If you must go outside briefly, limit the time; ask your doctor whether a well-fitting mask is right for Maya.
+
+GET HELP NOW (call 911) if Maya struggles to breathe or talk, their lips or nails turn blue or gray, or the rescue inhaler isn&#x27;t helping.
+Serein gives forecasts, not medical advice. Always follow the asthma action plan from your child&#x27;s doctor.</pre><h3>RED: text message</h3><pre class="red">Serein: RED for Maya tomorrow. Smoke about 66 ug/m3 (Unhealthy). Stay indoors with windows closed, no outdoor exercise, follow the asthma plan. Plan: [link] Trouble breathing or talking, or blue lips? Call 911. Reply STOP to end.</pre>
+
+<h2 class="page">The same messages, in Spanish</h2>
+<p class="note">A native-speaker review is a separate request; we include these so you can
+flag anything medical.</p>
+<h3>GREEN: full plan</h3><pre class="green">VERDE para Maya mañana: día normal.
+Pronóstico de humo cerca de usted: unos 8 µg/m³ (podría llegar a 15). Índice de calidad del aire (ICA): Bueno.
+Probabilidad de que Maya tenga síntomas de asma mañana: alrededor de 10%.
+
+- Dele a Maya su medicamento de control diario como se lo recetaron.
+- Puede jugar afuera.
+- Que Maya lleve su inhalador de alivio rápido (de rescate) como siempre.
+
+BUSQUE AYUDA DE INMEDIATO (llame al 911) si a Maya le cuesta respirar o hablar, se le ponen los labios o uñas azules o grises, o el inhalador de alivio rápido no le ayuda.
+Serein da pronósticos, no consejos médicos. Siga siempre el plan de acción para el asma que le dio el médico de su hijo/a.</pre><h3>GREEN: text message</h3><pre class="green">Serein: VERDE para Maya mañana. Humo de unos 8 ug/m3 (Bueno). Todo normal; lleve el inhalador de rescate como siempre. Plan: [link] Responda STOP para cancelar.</pre><h3>YELLOW: full plan</h3><pre class="yellow">AMARILLO para Maya mañana: el humo podría causar síntomas.
+Pronóstico de humo cerca de usted: unos 40 µg/m³ (podría llegar a 70). Índice de calidad del aire (ICA): Insalubre para grupos sensibles.
+Probabilidad de que Maya tenga síntomas de asma mañana: alrededor de 22%.
+
+- Que Maya tenga su inhalador de alivio rápido (de rescate) en todo momento, también en la escuela.
+- Cambie la actividad física intensa al aire libre (correr, deportes) por actividades bajo techo.
+- Mantenga puertas y ventanas cerradas; use un purificador de aire portátil con filtro HEPA si tiene uno.
+- Si empiezan los síntomas, siga la zona AMARILLA del plan de acción para el asma de Maya.
+- Avise a la enfermera de la escuela o al entrenador que es un día de humo.
+
+BUSQUE AYUDA DE INMEDIATO (llame al 911) si a Maya le cuesta respirar o hablar, se le ponen los labios o uñas azules o grises, o el inhalador de alivio rápido no le ayuda.
+Serein da pronósticos, no consejos médicos. Siga siempre el plan de acción para el asma que le dio el médico de su hijo/a.</pre><h3>YELLOW: text message</h3><pre class="yellow">Serein: AMARILLO para Maya mañana. Humo de unos 40 ug/m3 (Insalubre para grupos sensibles). Que Maya lleve su inhalador de rescate; actividades bajo techo; ventanas cerradas. Plan: [link] ¿Le cuesta respirar o hablar, o tiene los labios azules? Llame al 911. Responda STOP para cancelar.</pre><h3>RED: full plan</h3><pre class="red">ROJO para Maya mañana: riesgo alto por humo. Planee quedarse adentro.
+Pronóstico de humo cerca de usted: unos 66 µg/m³ (podría llegar a 155). Índice de calidad del aire (ICA): Insalubre.
+Probabilidad de que Maya tenga síntomas de asma mañana: alrededor de 63%.
+En el registro de Maya, los días con humo a este nivel tuvieron más síntomas.
+
+- Quédense adentro, en un cuarto con las ventanas cerradas y un purificador de aire encendido.
+- Nada de ejercicio al aire libre. En el carro, use el modo de recirculación de aire.
+- Tenga el inhalador de alivio rápido a la mano y siga el plan de acción para el asma de Maya.
+- Llame hoy al médico de su hijo/a si los síntomas están peor que de costumbre.
+- Si tiene que salir, que sea poco tiempo; pregunte a su médico si una mascarilla bien ajustada es adecuada para Maya.
+
+BUSQUE AYUDA DE INMEDIATO (llame al 911) si a Maya le cuesta respirar o hablar, se le ponen los labios o uñas azules o grises, o el inhalador de alivio rápido no le ayuda.
+Serein da pronósticos, no consejos médicos. Siga siempre el plan de acción para el asma que le dio el médico de su hijo/a.</pre><h3>RED: text message</h3><pre class="red">Serein: ROJO para Maya mañana. Humo de unos 66 ug/m3 (Insalubre). Quédense adentro con ventanas cerradas, sin ejercicio afuera; sigan el plan de asma. Plan: [link] ¿Le cuesta respirar o hablar, o tiene los labios azules? Llame al 911. Responda STOP para cancelar.</pre>
+
+<h2 class="page">Starting assumptions (priors)</h2>
+<p class="note">From docs/METHODS.md. Odds ratios per day; the model updates them for each
+child.</p>
+<table><tr><th>Coefficient</th><th>Prior (odds ratio)</th><th>Evidence</th><th>Caveat</th></tr><tr><td>Clean-day symptom rate</td><td>12% of days</td><td>In CDC&#x27;s Asthma Call-back Survey classification, symptoms on more than 8 of 30 days (≥ 9, about 30%) make asthma not well controlled (adult survey table, Mazurek et al. 2015 supplement; used here for children as an approximation). Well controlled: 56% of children with current asthma in CDC&#x27;s 21-state data, 2018-2020; 78% in Illinois, 2017</td><td>Our assumption, below that threshold</td></tr><tr><td>Same-day PM2.5, per +10 µg/m³</td><td>1.04 (prior SD 0.25 on log scale)</td><td>Sugrue et al. 2026, GeoHealth 10(2):e2025GH001530: pediatric asthma hospital encounters, wildfire-specific PM2.5, RR 1.04 (0-8%) at lag 0</td><td>Severe events, not daily symptoms; one region (Alameda/Contra Costa)</td></tr><tr><td>Prior 2 days PM2.5, per +10 µg/m³</td><td>1.03 (SD 0.20)</td><td>Same study: RR 1.02-1.04 at lags 3-4; cumulative RR 1.13 (1.09-1.18) over lags 0-5</td><td>We simplify the lag structure to the 2 previous days (TODO: test longer lags)</td></tr><tr><td>Extra effect when outdoors</td><td>1.02 (SD 0.15)</td><td>No pediatric estimate found</td><td>Assumption; outdoor time raises dose</td></tr><tr><td>Respiratory virus / cold</td><td>4.0 (SD 0.5)</td><td>Khetsuriani et al. 2007, J Allergy Clin Immunol 119:314: any virus OR 5.6 (2.7-11.6), rhinovirus OR 6.8; a Hong Kong study found OR 2.77 (1.51-5.11)</td><td>Exacerbations, not daily symptoms</td></tr><tr><td>Missed controller medicine</td><td>1.6 (SD 0.4)</td><td>Williams et al. 2011, J Allergy Clin Immunol 128:1185: HR 0.61 (0.41-0.90) for &gt; 75% vs ≤ 25% ICS adherence; 24% of exacerbations attributable to nonadherence</td><td>Mixed-age cohort; some pediatric studies find reverse associations (confounding by severity)</td></tr><tr><td>8-h ozone above 30 ppb, per +10 ppb (C-10)</td><td>1.027 (SD 0.10)</td><td>Strickland et al. 2010, Am J Respir Crit Care Med 182:307, Table 2: pediatric asthma ED visits, Atlanta, warm season RR 1.082 (1.043-1.123) per 29.2 ppb (IQR) of 3-day average 8-h ozone; dose-response from about 30 ppb</td><td>ED visits, one city; scaled linearly to 10 ppb</td></tr><tr><td>Hot day, max ≥ 32 °C / 90 °F (C-10)</td><td>1.0 (SD 0.4)</td><td>No verified pediatric per-day estimate: studies disagree (Brisbane: hot days raise child asthma ED visits; New York: lower risk for children with asthma)</td><td>Assumption centered on &quot;no effect&quot;; the child&#x27;s log decides</td></tr><tr><td>High pollen day (C-10)</td><td>1.0 (SD 0.4)</td><td>Only all-age evidence found (Atlanta, Darrow et al.: about +10-15% ED visits on 95th-percentile grass and oak days, as reported in the press; primary paper not yet checked)</td><td>Assumption centered on &quot;no effect&quot;; no free US pollen forecast, so this comes from the family&#x27;s check-in</td></tr></table>
+
+<h2 class="page">Review sheet</h2>
+<p>Reviewer role and affiliation: ______________________ &nbsp; May we name you?
+yes / role and affiliation only / anonymously / no</p>
+<ol>
+<li><b>Safety floor.</b> Plans can only be stricter than EPA's guidance for sensitive groups,
+always say to follow the child's asthma action plan, and list emergency signs. Is anything
+missing?<div class="blank"></div></li>
+<li><b>Wording.</b> Is there any sentence you would not want a parent to read? Please mark it
+and say why.<div class="blank"></div></li>
+<li><b>Zone rules.</b> Do the yellow and red rules on page 1, including the 1.3x / 5-point and
+2x / 15-point cut-offs, make clinical sense?<div class="blank"></div></li>
+<li><b>Starting assumptions.</b> Is any effect size in the priors table implausible for
+children?<div class="blank"></div></li>
+<li><b>Check-in.</b> What would make a smoke-sensitivity estimate from the six-tap check-in
+misleading? What should we never infer from it?<div class="blank"></div></li>
+</ol>
+</body></html>

@@ -11,7 +11,10 @@ regional asthma coalition (California: RAMP, rampasthma.org; Oregon: Oregon Asth
 Network; Washington: Washington Asthma Initiative); a university respiratory-therapy
 program; your school nurse for an introduction.
 
-Make it a 20-minute ask with everything attached. Clinicians say yes to small,
+Make it a 20-minute ask with everything attached. **Ready to attach (2026-11-27):**
+[`docs/review/clinician_packet.pdf`](../review/clinician_packet.pdf), which holds attachments 1 to 3
+below, generated from the code by `scripts/build_review_packets.py`. Rebuild it after any
+change to the messages or the priors. Clinicians say yes to small,
 specific, bounded requests and no to "can we chat sometime."
 
 ---
@@ -22,7 +25,7 @@ Subject: 20-minute review request: smoke-day asthma messages for families (stude
 
 Dear Dr. [Name],
 
-I'm a high school student on a four-person team building Serein, a free tool for
+I'm a high school student on a five-person team building Serein, a free tool for
 families of children with asthma. It forecasts wildfire smoke for a family's
 neighborhood one to three days ahead and sends a short green, yellow or red plan for
 their child the evening before, in English or Spanish. We are entering it in the
@@ -77,10 +80,12 @@ Please answer in a sentence or two each; "fine" is a complete answer.
    helping, call 911). Is anything missing from that floor?
 2. **Wording.** Is there any sentence in the six messages you would not want a
    parent to read? Please mark it and say why.
-3. **Thresholds.** The yellow zone starts when the child's estimated chance of
-   symptoms tomorrow is above a personal threshold, and red when the forecast
-   median PM2.5 is in the "Unhealthy for Sensitive Groups" range or higher. Does
-   that ordering make clinical sense?
+3. **Thresholds.** The plan is at least yellow when the forecast median is
+   "Unhealthy for Sensitive Groups" or worse (or the upper end of the range is
+   "Unhealthy"), and red when it is "Very Unhealthy". The child's log can raise the
+   zone: yellow when the estimated chance of symptoms is 1.3 times, or 5 points
+   above, the same child on a clean-air day; red at 2 times or 15 points. Does that
+   make clinical sense?
 4. **Priors.** Do the starting assumptions in the table match your clinical
    experience? Is any effect size implausible for children?
 5. **Learning from check-ins.** We estimate a child's smoke sensitivity from a

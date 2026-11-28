@@ -108,7 +108,8 @@ parental consent, and we would ask an adult advisor about insurance first.
 **13. Have you tested the personal model on real children?**
 No. It is tested on 300 simulated children, where it recovers each child's true
 sensitivity and beats a one-size-fits-all model after about two weeks of logs. The
-check-in form in the app takes fictional entries and does not yet feed that model. The
+check-in form in the app takes fictional entries and does not yet feed that model
+(screenshots of the plan and the check-in: `docs/demo/README.md`). The
 starting assumptions come from published studies (Sugrue 2026, Khetsuriani 2007,
 Williams 2011). A real pilot needs consent, a clinician and ethics review; that is our
 first step after the Summit, not before.

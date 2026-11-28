@@ -50,6 +50,9 @@ uv run streamlit run app/streamlit_app.py             # demo app; uses the sampl
 ```
 Check: the first command prints a green and a red action plan; the second opens a map in the browser.
 
+No time to install? [Screenshots of the demo app](docs/demo/README.md) show the family
+plan, the crew outlook and the daily check-in on a smoky day.
+
 The family-plan tab uses a synthetic child and simulated symptom history, including when
 you change the number of history days. Daily check-ins are a separate demonstration:
 use fictional entries only. They are held in memory on the app server for the session,

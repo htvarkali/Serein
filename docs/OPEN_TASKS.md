@@ -20,7 +20,7 @@ done from a laptop with the repo.
 | after D-4 | D-5 ⭐ | Final test, once | Data PC | The five steps in protocol section 6 |
 | after D-5 | D-6b ⭐ | Transfer test, once | Data PC | `uv run serein transfer --run west_us_final` |
 | after D-5 | S-6 | Brief Q4 and Q5 final numbers | Anyone | Paste from `final_report`; rerun `python3 scripts/check_brief.py` |
-| **Jan 1** | S-9 | 3-5 minute video | Team | [Script and shot list](drafts/video_script.md). Record Smoke World and the app at 1920x1080 |
+| **Jan 1** | S-9 | 3-5 minute video | Team | [Script and shot list](drafts/video_script.md); title card, end card, slides, phone text and captions are ready in [`video/`](video/README.md). Record Smoke World, the app and the team at 1920x1080 |
 | **Jan 1** | S-3 | Jagath's role, advisor, "why us" sentence | Team | Fill the three `[TEAM]` lines in Brief section 2 |
 | **Jan 1** | S-4 | Interview and clinician findings in Brief Q3 and Q5 | Team | Needs E-1 and C-8 |
 | **Jan 1** | S-5 | Brief `[TEAM]` slots in Q6, Q8, Q10 | Team | Each needs interviews or the pilot plan; the rest of Q6-Q10 is done |
@@ -32,8 +32,8 @@ done from a laptop with the repo.
 
 | Task | What is left | Who | Next step |
 |---|---|---|---|
-| C-8 | A clinician reviews the action-plan wording and the priors | Team | [Review request](drafts/clinician_review_request.md); start with a team parent's pediatrician |
-| C-7 | Native Spanish speaker reviews `messages/es.yaml` | Team | Ask a Spanish teacher or a native-speaker parent; record changes in the file's history |
+| C-8 | A clinician reviews the action-plan wording and the priors | Team | [Review request](drafts/clinician_review_request.md) with the ready packet [`review/clinician_packet.pdf`](review/clinician_packet.pdf); start with a team parent's pediatrician |
+| C-7 | Native Spanish speaker reviews `messages/es.yaml` | Team | Send [`review/spanish_review.pdf`](review/spanish_review.pdf) (or the `.csv`) to a Spanish teacher or a native-speaker parent; copy their changes into `es.yaml` |
 | C-11, E-3b | More languages, a third mockup language | Anyone, after C-7 | Wait for C-7 to set the review process |
 | E-7 | Letters of support | Team | [Letter template](drafts/letter_of_support_template.md) and [district one-pager](drafts/district_one_pager.md); ask after an interview goes well |
 | E-2b | Polish the app from interview feedback | Anyone, after E-1 | |
@@ -73,3 +73,6 @@ done from a laptop with the repo.
   children, with a demo screenshot.
 - W-17: school and hospital counts built and tested, waiting for the data file.
 - W-11: confirmed working.
+- Later the same day: video graphics (`docs/video/`), the clinician and Spanish review
+  packets (`docs/review/`), and a number check across the README, Brief, website,
+  judge Q&A, pitch, one-pager and video script (two stale numbers fixed).

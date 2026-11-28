@@ -64,6 +64,14 @@ Options, cheapest first:
 3. **Use yesterday's HMS fire file only**, like the smoke polygons (`hms_lag_days: 1`).
    Same cost as option 2.
 
+Added after this review: a `fire_lag_hours` setting in `configs/west_us.yaml` (0, off,
+by default, so current results are unchanged). It ends the fire window that many hours
+before issue time, still 24 hours long, in both the backtest and live runs
+(`Availability.firms_window`, `firms.fire_features`; tested in `tests/test_fire_lag.py`).
+To measure option 2: set it to 3 in a copy of the config, rebuild the tables, rerun the
+development backtest and compare. If the team keeps it, the new value goes in the
+protocol change log before the freeze.
+
 ### 2. HRRR smoke units are decided by magnitude (low)
 
 `hrrr.smoke_to_ugm3` multiplies by 1e9 when the whole CONUS field's maximum is below 1,
@@ -84,8 +92,13 @@ for p in sorted(interim_dir("west_us/hrrr").glob("*.parquet")):
 print(len(big), big[:5])   # expect 0
 ```
 
-For future extractions, deciding from the GRIB unit label (as `aqm.ozone_to_ppb` does),
-with the magnitude rule as a cross-check, would remove the risk.
+Added after this review: the conversion now refuses a field whose converted values
+pass a physical ceiling (100,000 µg/m³ for near-surface smoke, 100,000 mg/m² for the
+column), so a field scaled a billion times stops the extraction instead of being
+written (`hrrr._checked`, tested in `tests/test_data_parsing.py`). The GRIB label was
+not used instead: the WMO table defines mass density in kg m-3, so the decoded label
+may say kg/m³ even for files from before NOAA's change. Existing caches still need the
+check above.
 
 ### 3. Development coverage is slightly optimistic (note only)
 
@@ -108,8 +121,14 @@ study's points registry, which only holds monitors inside the region box (west o
 -114°, 32° to 49° N). A tract near the box edge, for example in eastern Nevada or
 southern Idaho, can have a closer monitor just outside it, so its distance is
 overstated. This most likely changes the 10.8% vs. 0.6% little, but on the machine with
-the data it is a quick check: recompute with monitors from a slightly larger box, or
-count the "25 km or more" people living within 25 km of the box edge.
+the data it is a quick check.
+
+Added after this review: `python -m serein.eval.equity` now also writes
+`edge_check.csv`. A monitor outside the box is at least as far as the box edge, so a
+tract's distance can only be overstated when the edge is nearer than its nearest
+monitor. For each income fifth the file gives the people 25 km or more from a monitor,
+how many of them are in that situation, and the share that would remain if all of them
+were in fact covered (an upper bound on the error; tested in `tests/test_equity.py`).
 
 ### 6. Which live model the daily job uses (note, and one fix made)
 

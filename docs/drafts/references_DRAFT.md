@@ -173,3 +173,30 @@ two that carry the most of the argument on their own.
 Not recommended as attachments: `fig_rmse_by_lead_all.png` (RMSE is already in the text
 and a line chart of error adds little for non-specialists); `airplan_learning_curve.png`
 (simulated children; a judge may read it as real data unless captioned carefully).
+### Fill-in template (2026-11-27)
+
+One row per tool per member. Leave nothing out: a tool used once for one paragraph
+still gets a row. Ask each member separately, and include tools used only for code.
+
+| Member | Tool and maker | Version or model | Months used | Address | Used for |
+|---|---|---|---|---|---|
+| [name] | [tool] ([company]) | [version] | [Mon YYYY to Mon YYYY] | [https://...] | [code / documentation / literature search / drafting / editing / images] |
+
+Reference-list form, one per tool (APA 7th style, the form APA gives for AI tools):
+
+> [Company]. ([year of the version used]). *[Tool name]* ([version or model]) [Large
+> language model]. [https://...]
+
+Statement for the Brief or the website, to finish once the table is filled in:
+
+> We used [tools] for [what, in plain words]. The research question, the study design,
+> the choice of data and of the test years, the protocol and its acceptance rule, every
+> number we report, and every decision about the product were made by the team, and we
+> checked every line of code and text we kept.
+
+Only claim in that statement what is true for every member. Before writing it, check:
+
+- [ ] Every member has filled in their own rows, including "none" if that is true.
+- [ ] The tools are also named in the reference list, in the form above.
+- [ ] The statement matches the table (no tool used for something the statement leaves out).
+- [ ] Judge Q&A answer 22 (`docs/drafts/judge_qa_prep.md`) says the same thing.

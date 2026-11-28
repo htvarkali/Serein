@@ -136,7 +136,7 @@ name and yours in the email, not here.
 > about ten questions in 15 minutes, by phone or video. No names are recorded and nothing
 > is sold. If you are willing, reply to [team email address].
 
-[TEAM: a shared team address is still pending (README task S-8). Do not put a personal
+[TEAM: a shared team address is still pending (no README task tracks it yet). Do not put a personal
 address in a note that will be forwarded.]
 
 **If you phone:** "Hi, my name is ___, I'm a student at Foothill High in Pleasanton.
@@ -145,6 +145,44 @@ right person to ask for a 15-minute interview?" Then stop talking and write down
 name and how they want to be contacted.
 
 **If there is no reply after five working days:** one short follow-up, then move on.
+
+**Subject lines** (short, no "urgent", no attachments in the first email):
+
+- Nurse or district: "Student question: how schools decide on smoke days (15 min)"
+- Asthma program: "Student project on smoke days and kids with asthma (15 min)"
+- Clinician: "Student question about advice for smoke days (15 min)"
+- Air district: "Student question about the School Air Quality Activity Recommendations"
+
+**Follow-up after five working days** (reply in the same thread):
+
+> Hello again, just bringing this to the top of your inbox in case it got buried. If
+> someone else would be better to ask, I would be grateful for their name. Thank you.
+
+**Thank-you after an interview** (same day):
+
+> Thank you for your time today. The most useful thing we learned was [one specific
+> thing]. We will send you a short summary of what we changed because of it. No names
+> are recorded in our notes.
+
+## Monday, November 30: send list
+
+Do these in order. One person sends each email; write the date in Tracking right away.
+
+- [ ] Coach named and agreed to be copied (Rules above). Without this, do not send.
+- [ ] Team email address set up, or decide that replies go to the coach.
+- [ ] 1. Foothill High health office: walk in before or after school, use the phone
+      script, ask who the District Nurse is and how they prefer to be contacted.
+- [ ] 2. San Ramon Valley USD Health Services: phone the office, ask for the District
+      Nurse Coordinator's preferred contact, then send the nurse email.
+- [ ] 3. CSNO Bay Coast Section: email the state office with the nurse email plus one
+      line asking whether the section would forward it to members.
+- [ ] 4. Alameda County Asthma Start: phone the program line, then send the program
+      email to the address they give.
+- [ ] 5. RAMP: use the PHI contact page with the program email.
+- [ ] 6. Bay Area air district: email Community Engagement with the air district text.
+- [ ] Put every reply date and next step in Tracking the same day.
+- [ ] Friday, December 4: follow up on anything without a reply; send the next three
+      (Axis Community Health, Breathe California, a team parent's pediatrician).
 
 ## Tracking
 

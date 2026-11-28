@@ -181,6 +181,39 @@ true once the reference list names the tools. Conrad's rules say a submission "m
 copy or use other materials- including artificial intelligence (AI) tools- without
 properly citing the source." See the note at the end of `references_DRAFT.md`.]
 
+## Added 2026-11-27 (from the code review and the website check)
+
+**23. Your forecast counts fire detections up to issue time. Would a live forecast
+really have all of them?**
+Not quite, and we checked. In the backtest the fire points come from NOAA's finished
+daily file; a live run at 11:30 a.m. Pacific sees only what had posted by then. Taking
+fire inputs out entirely changed error by 1-4% (`docs/METHODS.md`), so this cannot
+move our numbers by more than that. The code now has a posting-delay setting
+(`fire_lag_hours` in `configs/west_us.yaml`, off by default) so the effect can be
+measured. [TEAM: finish this answer with what was decided under D-4: either "we wrote
+it into the protocol before freezing" or "we added a 3-hour delay and reran
+development before freezing". See item 1 of `docs/CODE_REVIEW_2026-11-27.md`.]
+
+**24. The site says "20% chance". Chance of what, and is that number honest?**
+The chance that the day's average reaches 35.5 µg/m³, the start of "Unhealthy for
+Sensitive Groups". It comes from our forecast range, then a correction fitted on the
+calibration days only (isotonic regression, `fit_probability_recalibration`), so that
+"20%" means it happened on about 20% of similar past days. The site never shows the
+raw, uncorrected number. What we have not yet shown is how reliable the corrected
+chance is on days the correction never saw; the backtest saves it
+(`smokecast_probcal_L*` in `predictions.parquet`) and `serein.eval.reliability` scores
+it. [TEAM: run that on the development predictions before the Summit, or after D-5 on
+the test years, and put the result here.]
+
+**25. I opened your website and it never mentions asthma or children. Why?**
+Because the website shows what runs today for anyone: the smoke forecast and an
+activity plan for a place. The per-child model is in the demo app
+(`app/streamlit_app.py`, screenshots in `docs/demo/`) and has been tested only on
+simulated children, so we do not put it in front of the public yet. Real families come
+after a clinician reviews the wording (README C-8) and we have parent interviews
+(E-1). [TEAM: if the AirPlan page gets a short section on the child plan, or a new
+name, change this answer to match. See H1 in `docs/WEBSITE_CHECK_2026-11-26.md`.]
+
 ## Numbers to have memorized (development, 2023; replace after D-5)
 
 | | Serein | NOAA fallback | Persistence | EPA official |

@@ -179,7 +179,7 @@ line search fixed it (see `tests/test_personal.py`).
 
 | Coefficient | Prior (odds ratio) | Evidence | Caveat |
 |---|---|---|---|
-| Clean-day symptom rate | 12% of days | CDC Asthma Call-back Survey defines *not well controlled* as symptoms on ≥ 9 of 30 days (30%); Illinois 2017 ACBS: 78% of children with asthma well controlled | Our assumption within that range |
+| Clean-day symptom rate | 12% of days | In CDC's Asthma Call-back Survey classification, symptoms on more than 8 of 30 days (≥ 9, about 30%) make asthma *not well controlled* (adult survey table, Mazurek et al. 2015 supplement; used here for children as an approximation). Well controlled: 56% of children with current asthma in CDC's 21-state data, 2018-2020; 78% in Illinois, 2017 | Our assumption, below that threshold |
 | Same-day PM2.5, per +10 µg/m³ | 1.04 (prior SD 0.25 on log scale) | Sugrue et al. 2026, *GeoHealth* 10(2):e2025GH001530: pediatric asthma hospital encounters, wildfire-specific PM2.5, RR 1.04 (0-8%) at lag 0 | Severe events, not daily symptoms; one region (Alameda/Contra Costa) |
 | Prior 2 days PM2.5, per +10 µg/m³ | 1.03 (SD 0.20) | Same study: RR 1.02-1.04 at lags 3-4; cumulative RR 1.13 (1.09-1.18) over lags 0-5 | We simplify the lag structure to the 2 previous days (TODO: test longer lags) |
 | Extra effect when outdoors | 1.02 (SD 0.15) | No pediatric estimate found | Assumption; outdoor time raises dose |

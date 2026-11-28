@@ -165,7 +165,7 @@ To reach the Summit and run one pilot season we need about $3,000 to $5,000: the
 
 ## References (attachment)
 
-The full, checked reference list is `docs/drafts/references_DRAFT.md` (draft 3, every entry checked 2026-11-23 against Crossref, PubMed or the source page). Before submitting, keep only the references the final text cites, renumber them in citation order, and recheck the links the day before. Two `[TEAM]` items are left in it: the CDC page that defines "not well controlled", and the list of AI tools we used, which Conrad's rules require us to cite. The Gabbay data source and the Conrad prize line were settled 2026-11-25.
+The full, checked reference list is `docs/drafts/references_DRAFT.md` (draft 3, every entry checked 2026-11-23 against Crossref, PubMed or the source page). Before submitting, keep only the references the final text cites, renumber them in citation order, and recheck the links the day before. One `[TEAM]` item is left in it: the list of AI tools we used, which Conrad's rules require us to cite (a fill-in template is there). The "not well controlled" source was settled 2026-11-27 (entry A6a). The Gabbay data source and the Conrad prize line were settled 2026-11-25.
 
 ## Optional attachments (up to 2)
 1. `docs/results/figures/` rmse-by-lead chart (Serein vs. NOAA vs. EPA).

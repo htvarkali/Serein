@@ -67,7 +67,7 @@ class PopulationPrior:
     which is exactly what the personal model then learns from the log.
     """
     mean: np.ndarray = field(default_factory=lambda: np.array(
-        [np.log(0.12 / 0.88),  # ~12% of days with symptoms on clean days [assumption; ACBS: >=9/30 days = not well controlled]
+        [np.log(0.12 / 0.88),  # ~12% of days with symptoms on clean days [assumption; ACBS: >8/30 days = not well controlled]
          np.log(1.04),         # same-day, per +10 µg/m³ wildfire PM2.5: RR 1.04 (0-8%) [Sugrue 2026]
          np.log(1.03),         # lagged days: RR 1.02-1.04 at lags 3-4; 1.13 cumulative over 0-5 d [Sugrue 2026]
          np.log(1.02),         # extra when outdoors [assumption: no pediatric estimate found]

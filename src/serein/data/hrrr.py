@@ -69,13 +69,30 @@ def parse_idx(text: str) -> list[tuple[int, int | None, str]]:
     return rows
 
 
+# Sanity ceilings after conversion. Real HRRR-Smoke values stay far below these (a few
+# thousand µg/m³ near the largest fires); a field over them was scaled twice, for example
+# a µg/m³ field so clean that the magnitude rule mistook it for kg/m³. The decoded GRIB
+# label is not used instead: the WMO parameter table defines mass density in kg m-3, so
+# the label need not follow NOAA's 2021-12-21 change (docs/CODE_REVIEW_2026-11-27.md).
+MAX_SMOKE_UGM3 = 1e5
+MAX_COLMD_MGM2 = 1e5
+
+
+def _checked(v: np.ndarray, ceiling: float, what: str) -> np.ndarray:
+    finite = v[np.isfinite(v)]
+    if finite.size and float(finite.max()) > ceiling:
+        raise ValueError(f"HRRR {what} reaches {float(finite.max()):.3g} after unit conversion, "
+                         f"above the physical ceiling {ceiling:.0e}: check the units of this field")
+    return v
+
+
 def colmd_to_mgm2(values: np.ndarray) -> np.ndarray:
     """Column smoke: kg/m2 -> mg/m2 (same magnitude rule as MASSDEN)."""
     v = values.astype(np.float32)
     finite = v[np.isfinite(v)]
     if finite.size and np.nanmax(finite) < 1.0:
         v = v * 1e6
-    return v
+    return _checked(v, MAX_COLMD_MGM2, "column smoke (mg/m2)")
 
 
 def smoke_to_ugm3(values: np.ndarray) -> np.ndarray:
@@ -83,7 +100,7 @@ def smoke_to_ugm3(values: np.ndarray) -> np.ndarray:
     finite = v[np.isfinite(v)]
     if finite.size and np.nanmax(finite) < 1.0:
         v = v * 1e9  # kg/m³ -> µg/m³
-    return v
+    return _checked(v, MAX_SMOKE_UGM3, "near-surface smoke (µg/m³)")
 
 
 def _fetch_fields(d: date, cycle: int, fhr: int, wanted: list[str]):

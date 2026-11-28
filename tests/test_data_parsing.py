@@ -138,3 +138,19 @@ def test_time_zone_from_nearest_monitor_not_longitude():
     assert standard_offset([-116.0])[0] == -8          # longitude alone gets Boise wrong
     assert nearest_site_offset([43.5], [-116.0], sites)[0] == -7
     assert nearest_site_offset([47.0], [-122.0], sites)[0] == -8
+
+
+def test_smoke_conversion_refuses_physically_impossible_values():
+    from serein.data.hrrr import colmd_to_mgm2
+
+    # Real fields convert as before.
+    assert smoke_to_ugm3(np.array([0.0, 2e-6, 4e-6]))[2] == pytest.approx(4000.0, rel=1e-4)
+    assert colmd_to_mgm2(np.array([0.0, 1e-3]))[1] == pytest.approx(1000.0, rel=1e-4)
+    # A µg/m³ field so clean that the magnitude rule takes it for kg/m³ would be
+    # scaled a billion times; that must stop, not be written.
+    with pytest.raises(ValueError, match="physical ceiling"):
+        smoke_to_ugm3(np.array([0.0, 0.2, 0.6]))
+    with pytest.raises(ValueError, match="physical ceiling"):
+        colmd_to_mgm2(np.array([0.0, 0.5]))
+    # Missing values are ignored, and an all-missing field passes through.
+    assert np.isnan(smoke_to_ugm3(np.array([np.nan, np.nan]))).all()

@@ -129,6 +129,15 @@ unless the outdoor-employer buyer is added to Brief section 6.
 65. Conrad Challenge. Financial Aid Opens for Phase 2: Innovation Stage. https://conrad.spacecenter.org/calendar/financial-aid-opens-for-phase-2-innovation-stage-2/
 66. USPTO. Trademark Status and Document Retrieval, serial numbers 90636402 and 98444557 (status pages generated 2026-11-26 01:00 EST). https://tsdr.uspto.gov/ (Supports `docs/drafts/ip_decision_memo.md`; not cited in the Brief.)
 
+## Market size, Brief section 6, added 2026-11-27
+
+Read 2026-11-27. The total (7,366,904 students) and the $3.7 to $11.1 million range are
+computed in `src/serein/business.py` (`district_market`) and tested.
+
+67. California Department of Education. Fingertip Facts on Education in California, 2025-26 (5,731,260 students, K-12 including charter schools; 1,011 districts including county offices). https://www.cde.ca.gov/DS/ad/ceffingertipfacts.asp
+68. Oregon Department of Education. Oregon Statewide Report Card 2025-26 (539,644 students on the first school day of October 2025; 197 districts). https://www.oregon.gov/ode/schools-and-districts/reportcards/Documents/rptcd2026.pdf
+69. Superville, D. R. 2026 (January 9). Public school enrollment falls across Washington state. The Seattle Times, reprinted in The Spokesman-Review (1.096 million students in prekindergarten through 12th grade in October 2025, citing OSPI data). https://www.spokesman.com/stories/2026/jan/09/public-school-enrollment-falls-across-wa/ [TEAM: OSPI's own report card page would not load for us; if someone can open https://reportcard.ospi.k12.wa.us, replace this with OSPI's exact figure.]
+
 ## AI tools (required by the Rules and Regulations)
 
 Conrad's Rules and Regulations, "Use of and Standards for Competition Submissions",

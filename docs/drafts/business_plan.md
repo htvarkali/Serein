@@ -76,6 +76,16 @@ Prices are set against what these buyers already pay, as in Brief Q9.
 | Air district or health department | Yearly license, price not set | None found; no public contract for smoke alerts alone |
 | Outdoor employer | Not set | None found |
 
+**How big the district market is.** Public schools in California, Oregon and Washington
+enrolled 7,366,904 students in fall 2025 (California 5,731,260; Oregon 539,644;
+Washington about 1,096,000). At $0.50 to $1.50 per student that is $3.7 million to
+$11.1 million a year if every district bought, before the $1,500 minimum, which only
+adds. Small districts matter for the minimum: in Oregon, 64.5% of districts have 1,650
+students or fewer but they enroll 12.4% of students (ODE Statewide Report Card
+2025-26). `python -m serein.business` prints the total; references 67 to 69 give the
+sources. This replaces the earlier "1,427 districts at $5,000", which priced every
+district like a 10,000-student one.
+
 For a health plan, one avoided hospital stay ($7,464 mean hospital cost in 2022) equals
 373 child-years of Serein at $20 and 746 at $10. That is a comparison of prices. It is
 not a claim that Serein avoids stays.

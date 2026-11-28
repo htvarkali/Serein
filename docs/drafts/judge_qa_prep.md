@@ -143,7 +143,9 @@ child with asthma enrolls. What we have not priced is people: none of us is paid
 We do not have a forecast, because no district has been asked. Our plan shows three
 scenarios for the third year: 3, 10 and 70 paying districts. Seventy is 5% of the
 1,427 districts in California, Oregon and Washington and is a ceiling. The first year
-is one free pilot (`docs/drafts/business_plan.md`).
+is one free pilot (`docs/drafts/business_plan.md`). If every district in the three
+states bought, it would be $3.7 to $11.1 million a year: 7.4 million students at $0.50
+to $1.50 each. We say that as the size of the market, not as what we expect to win.
 
 **19. Could employers use this? Some states have smoke rules for outdoor work.**
 California, Oregon and Washington all have one. California's and Oregon's tell

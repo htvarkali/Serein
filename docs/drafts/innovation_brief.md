@@ -111,7 +111,7 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 2. Medicaid managed care plans and children's hospitals: 4.4 million California, 463,000 Oregon and 810,000 Washington children are enrolled in Medicaid or CHIP (KFF, July 2026). Medi-Cal reimburses asthma self-management education at $26.66 per 30-minute unit. In 2025-26 UW Medicine texted smoke guidance to 64,000 asthma and COPD patients using neighborhood-level pollution data; 14% engaged.
 3. Air districts and health departments: the Bay Area district alone budgets $1.95 million a year for Spare the Air advertising and alerts.
 
-**Bottom-up size.** At $5,000 per district per year, the 1,427 districts in our three states are a $7.1 million annual market; 70 districts (5%) within three years is $350,000 a year. [TEAM: adjust once the first interviews tell us which districts actually make smoke-day decisions.]
+**Bottom-up size.** Public schools in the three states enroll 7.4 million students (fall 2025): $3.7 to $11.1 million a year at $0.50 to $1.50 per student. Seventy 10,000-student districts (5%) at the low price is $350,000 a year. [TEAM: adjust once the first interviews tell us which districts actually make smoke-day decisions.]
 
 
 ## 7. Competition (300 words)

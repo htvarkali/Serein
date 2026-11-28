@@ -31,9 +31,9 @@ export const warnings = [
 ]
 
 export const hiddenByDistance = [
-  { band: "< 15 km", sites: 34, serein: 6.5, noaa: 7.4 },
-  { band: "15-30 km", sites: 26, serein: 10.7, noaa: 14.0 },
-  { band: "30-60 km", sites: 21, serein: 7.8, noaa: 12.3 },
+  { band: "< 15 km", sites: 35, serein: 6.6, noaa: 7.5 },
+  { band: "15-30 km", sites: 26, serein: 10.8, noaa: 14.0 },
+  { band: "30-60 km", sites: 21, serein: 8.1, noaa: 12.3 },
 ]
 
 export const equity = [

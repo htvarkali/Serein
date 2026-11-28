@@ -76,7 +76,7 @@ export default function SmokeCast() {
                 <h3 className="text-lg font-semibold">Next-day error at hidden monitors</h3>
                 <CardDescription>
                   Monitors are grouped by distance to the nearest visible monitor. In the 30–60 km group, SmokeCast scored
-                  7.8 vs. 12.3 µg/m³ for the benchmark across 21 sites. The group beyond 60 km had three sites and is omitted here.
+                  8.1 vs. 12.3 µg/m³ for the benchmark across 21 sites. The group beyond 60 km had three sites and is omitted here.
                 </CardDescription>
               </CardHeader>
               <CardContent className="px-3 sm:px-6"><HiddenChart /></CardContent>

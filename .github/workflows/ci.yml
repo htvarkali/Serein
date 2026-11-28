@@ -52,7 +52,7 @@ jobs:
     # The site in website/ is built from website-src/ by hand and committed, so nothing
     # else would notice a change that no longer type checks or builds.
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -68,3 +68,11 @@ jobs:
           npx vite build --outDir "$RUNNER_TEMP/site" --emptyOutDir
       - name: Check the fresh build's files and links
         run: python3 scripts/check_website.py "$RUNNER_TEMP/site"
+      - name: Browser smoke test of the fresh build (phone and laptop size)
+        # Page errors, missing files, sideways scrolling and serious accessibility issues.
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/tools" playwright@1.63.0 axe-core@4.10.3
+          "$RUNNER_TEMP/tools/node_modules/.bin/playwright" install --with-deps chromium
+          node scripts/site_check/serve.js "$RUNNER_TEMP/site" 8766 &
+          sleep 1
+          NODE_PATH="$RUNNER_TEMP/tools/node_modules" node scripts/site_check/ci_smoke.js http://localhost:8766

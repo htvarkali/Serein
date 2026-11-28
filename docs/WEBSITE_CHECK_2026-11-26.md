@@ -36,6 +36,10 @@ node scripts/site_check/interaction_check.js
 npx lighthouse "http://localhost:8766/#/" --only-categories=performance,accessibility
 ```
 
+A shorter version, `scripts/site_check/ci_smoke.js`, now runs in CI on every push (the
+`website` job): five pages at 360 px and 1280 px, failing on script errors, missing
+files, sideways scrolling, a missing or extra h1, or serious and critical axe issues.
+
 ## What already works
 
 - No sideways scrolling on any page at 390, 360 or 320 px.

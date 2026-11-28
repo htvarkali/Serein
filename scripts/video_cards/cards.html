@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Serein video cards</title>
+<!-- Source for the video graphics in docs/video/ (task S-9). Render with
+     node scripts/video_cards/render.js  (needs Playwright; fonts from website-src). -->
+<style>
+@font-face { font-family: Poppins; font-weight: 400; src: url(../../website-src/node_modules/@fontsource/poppins/files/poppins-latin-400-normal.woff2); }
+@font-face { font-family: Poppins; font-weight: 500; src: url(../../website-src/node_modules/@fontsource/poppins/files/poppins-latin-500-normal.woff2); }
+@font-face { font-family: Poppins; font-weight: 600; src: url(../../website-src/node_modules/@fontsource/poppins/files/poppins-latin-600-normal.woff2); }
+@font-face { font-family: Caveat; font-weight: 500; src: url(../../website-src/node_modules/@fontsource/caveat/files/caveat-latin-500-normal.woff2); }
+:root { --ink: #0a0a0a; --paper: #f3f3f3; --accent: #5b6cf6; --accent-2: #8f9bff; --muted: #a3a3a3;
+        --green: #4caf50; --yellow: #f6d32d; --orange: #f0883e; }
+* { box-sizing: border-box; margin: 0; }
+body { background: #333; font-family: Poppins, sans-serif; }
+.card { width: 1920px; height: 1080px; position: relative; overflow: hidden; background: var(--ink);
+        color: #f5f5f5; padding: 120px 140px; display: flex; flex-direction: column; justify-content: center; }
+.card + .card { margin-top: 40px; }
+.glow { position: absolute; inset: 0; background: radial-gradient(1200px 700px at 85% 110%, #5b6cf633, transparent 60%),
+        radial-gradient(900px 600px at 0% -10%, #f0883e22, transparent 60%); }
+.wordmark { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1; position: relative; }
+.wordmark .pill { transform: rotate(-6deg); background: #fff; color: var(--ink); border-radius: 999px;
+        padding: .18em .7em; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+.wordmark .name { font-weight: 600; letter-spacing: -.03em; text-transform: uppercase; margin-top: -.05em; }
+.script { font-family: Caveat, cursive; font-weight: 500; color: var(--accent-2); }
+.lead { font-size: 54px; line-height: 1.2; letter-spacing: -.02em; max-width: 30ch; position: relative; }
+.small { font-size: 30px; color: var(--muted); position: relative; }
+h2 { font-size: 92px; font-weight: 500; letter-spacing: -.045em; line-height: 1; position: relative; }
+.row { display: flex; gap: 40px; align-items: stretch; position: relative; }
+.box { flex: 1; border: 2px solid #ffffff2a; border-radius: 28px; padding: 44px 40px; background: #ffffff08; }
+.box h3 { font-size: 40px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 18px; }
+.box p { font-size: 28px; line-height: 1.35; color: #d4d4d4; }
+.box.hero { border-color: var(--accent-2); background: #5b6cf61f; }
+.arrow { align-self: center; font-size: 64px; color: var(--accent-2); }
+.box .price { font-size: 46px; font-weight: 600; color: #fff; margin: 10px 0 14px; letter-spacing: -.02em; }
+.status-dot { display: inline-block; width: .45em; height: .45em; border-radius: 50%; background: #3ddc84; margin-left: .3em; vertical-align: middle; }
+/* phone */
+.phone { width: 520px; height: 1000px; border-radius: 72px; background: linear-gradient(160deg, #23263f, #0d0e16 60%);
+         border: 14px solid #1c1c1e; box-shadow: 0 0 0 3px #3a3a3c, 0 40px 120px #000a; position: relative; padding: 70px 26px; color: #fff; }
+.phone .notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 150px; height: 36px; border-radius: 20px; background: #000; }
+.phone .time { text-align: center; font-size: 104px; font-weight: 500; letter-spacing: -.03em; margin-top: 40px; }
+.phone .date { text-align: center; font-size: 26px; color: #ddd; }
+.notif { margin-top: 70px; background: #f2f2f7e6; color: #111; border-radius: 30px; padding: 22px 24px; font-size: 21px; line-height: 1.32; }
+.notif .top { display: flex; justify-content: space-between; color: #555; font-size: 18px; margin-bottom: 6px; }
+.notif b { font-weight: 600; }
+/* captions (transparent background) */
+.cap { width: 1920px; height: 1080px; position: relative; background: transparent; }
+.cap span { position: absolute; left: 96px; bottom: 96px; font-size: 40px; font-weight: 500; padding: 14px 30px;
+            background: #0a0a0ad9; color: #fff; border-radius: 999px; border: 2px solid #ffffff30; }
+.cap span::before { content: ""; display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: var(--accent-2); margin-right: 18px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<section class="card" id="title_card">
+  <div class="glow"></div>
+  <div class="wordmark" style="font-size: 190px"><span class="pill" style="font-size: 34px">Falcon Devs</span><span class="name">Serein</span></div>
+  <p class="lead" style="margin-top: 70px">Wildfire smoke forecasts for each neighborhood, one to three days ahead, with a plan for each child with asthma.</p>
+  <p class="small" style="margin-top: 40px">Foothill High School · Pleasanton, California</p>
+</section>
+
+<section class="card" id="how_it_works">
+  <div class="glow"></div>
+  <h2>How Serein works</h2>
+  <div class="row" style="margin-top: 80px">
+    <div class="box"><h3>What exists today</h3><p>NOAA's smoke forecast, live readings from about 400 EPA monitors in the West, weather and fire detections. All free public data.</p></div>
+    <div class="arrow">→</div>
+    <div class="box hero"><h3>Serein</h3><p>A graph neural network treats the monitors as a network: each one learns from its neighbors and corrects NOAA's forecast.</p></div>
+    <div class="arrow">→</div>
+    <div class="box"><h3>For a family</h3><p>A forecast for their neighborhood, one to three days ahead, with a range, and a green, yellow or red plan for their child.</p></div>
+  </div>
+  <p class="script" style="font-size: 54px; margin-top: 60px; position: relative">checked against NOAA's and EPA's own forecasts</p>
+</section>
+
+<section class="card" id="who_pays">
+  <div class="glow"></div>
+  <h2>Families never pay.</h2>
+  <p class="small" style="margin-top: 26px">Organizations that act on smoke days pay a yearly subscription.</p>
+  <div class="row" style="margin-top: 70px">
+    <div class="box"><h3>School districts</h3><p class="price">$500–$1,000</p><p>per school building a year, a quarter to half of one emergency-software license</p></div>
+    <div class="box"><h3>Health plans and children's hospitals</h3><p class="price">$10–$20</p><p>per enrolled child with asthma a year</p></div>
+    <div class="box"><h3>Air districts and health departments</h3><p class="price">License</p><p>to put the forecast in the alerts they already send</p></div>
+  </div>
+  <p class="small" style="margin-top: 56px">Inputs: free public data from NOAA, NASA and EPA. The model runs in a fraction of a second on an ordinary computer.</p>
+</section>
+
+<section class="card" id="phone_text" style="align-items: center; padding: 40px">
+  <div class="glow"></div>
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="time">7:42</div>
+    <div class="date">Thursday, August 17</div>
+    <div class="notif">
+      <div class="top"><b style="color:#111">Messages</b><span>now</span></div>
+      <b>Serein</b><br>
+      Serein: YELLOW for Maya tomorrow. Smoke about 42 ug/m3 (Unhealthy for Sensitive Groups). Keep the rescue inhaler with Maya, choose indoor activity, close windows. Plan: (plan link) Trouble breathing or talking, or blue lips? Call 911. Reply STOP to end.
+    </div>
+  </div>
+</section>
+
+<section class="card" id="end_card">
+  <div class="glow"></div>
+  <div class="wordmark" style="font-size: 150px"><span class="pill" style="font-size: 28px">Falcon Devs</span><span class="name">Serein</span></div>
+  <p class="lead" style="margin-top: 56px">Kids with asthma shouldn't find out about smoke from a cough.</p>
+  <p style="margin-top: 70px; font-size: 44px; font-weight: 500; position: relative">htvarkali.github.io/Serein <span class="status-dot"></span></p>
+  <p class="small" style="margin-top: 18px">github.com/htvarkali/Serein · Conrad Challenge 2026-27</p>
+</section>
+
+<section class="cap" id="caption_development"><span>Development results, 2023 held-out weeks</span></section>
+<section class="cap" id="caption_simulated"><span>Simulated child</span></section>
+<section class="cap" id="caption_per_day"><span>Tested per day, not per hour</span></section>
+<section class="cap" id="caption_gnn"><span>Graph neural network</span></section>
+
+</body>
+</html>

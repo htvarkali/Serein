@@ -65,6 +65,9 @@ runs long, cut the "tested per day, not per hour" row to one sentence before cut
 
 ## Shot list and assets
 
+Title card, end card, the who-pays slide, the three-box diagram, the phone text and
+the four captions are ready as images in [`docs/video/`](../video/README.md) (2026-11-27).
+
 - Phone lock-screen text: send the mockup text to your own phone and film it arriving,
   or screen-record a phone mockup. Use the exact wording from `docs/mockups/messages.md`.
 - AirNow reporting-area screenshot: airnow.gov for your metro, forecast tab.

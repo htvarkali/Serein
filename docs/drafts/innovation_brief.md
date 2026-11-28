@@ -55,7 +55,7 @@ AirPlan prototypes a personal risk estimate using a population prior and per-chi
 
 **What is new.** Each piece has related work; the combination is what we did not find published.
 1. A graph network over the U.S. monitor network that corrects NOAA's HRRR-Smoke and AQM forecasts, scored on held-out days against EPA's official AQI forecasts. NOAA has corrected its own PM2.5 forecast with past analogs (Huang et al., 2017) and with machine learning that does not use a graph (Hamer et al., 2023), machine learning without a graph has corrected HRRR-Smoke in Alaska using PurpleAir sensors (Dong et al., 2026), a graph network has corrected the CMAQ model's PM2.5 forecasts in South Korea (Dimri et al., 2024), and another has forecast California PM2.5 without NOAA inputs or an official comparison (Liao et al., 2025).
-2. A measured check at places with no monitor. When we hid 20% of monitors from the model, its forecasts there still beat NOAA's (8.4 vs. 11.1 µg/m³ error, one day ahead). Grid forecasts already exist (for example Google's Air Quality API); what we add is evidence of accuracy away from monitors.
+2. A measured check at places with no monitor. When we hid 20% of monitors from the model, its forecasts there still beat NOAA's (8.5 vs. 11.1 µg/m³ error, one day ahead). Grid forecasts already exist (for example Google's Air Quality API); what we add is evidence of accuracy away from monitors.
 3. A per-child smoke sensitivity estimate from a check-in a parent can finish in under a minute. A hierarchical model lets a child with few reports borrow from the group, and the estimate sets that child's green, yellow and red plan. Apps such as AirRater already log symptoms and personal triggers; we add an uncertainty-aware estimate tied to a smoke forecast.
 [TEAM: literature search done 2026-11-23 (notes in docs/drafts/novelty_check_2026-11-23.md). Dong et al. 2026 is reference 36, checked against NOAA's publication record on 2026-11-07. Dimri et al. 2024 (reference 52): the abstract was read 2026-11-25 and matches the sentence above (183 Korean monitors, 72 hours, no comparison with an official forecast); the publisher's page would not load for us on 2026-11-26, so someone still has to open the full text in a browser before submitting.]
 
@@ -77,18 +77,18 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 
 ## 5. Validation and progress (450 words)
 
-**What we built.** Smoke World (htvarkali.github.io/Serein), a public 3D map of the western U.S. that updates every day with the next 72 hours of smoke, wind and fires, shows the tested daily forecast and its range for any place clicked, and counts how many people live under unhealthy smoke each hour. Behind it, a working pipeline that downloads five fire seasons (2021 to 2025) of free public data from NOAA, NASA and EPA, trains SmokeCast, scores it, and draws forecast maps. A demo app shows the neighborhood map, a family's plan and the daily check-in. The project has automated tests that run on every change.
+**What we built.** Smoke World (htvarkali.github.io/Serein), a public 3D map of the western U.S. that updates daily with the next 72 hours of smoke, wind and fires, shows the tested daily forecast and its range for any place clicked, and counts how many people live under unhealthy smoke. Behind it, a pipeline downloads five fire seasons (2021-2025) of free NOAA, NASA and EPA data, then trains, scores and maps SmokeCast. A demo app shows a family's plan and the daily check-in; automated tests run on every change.
 
-**Evaluation plan.** The draft protocol (docs/BACKTEST_PROTOCOL.md) reserves 2024-25 for a final test after the team freezes the methods. That final test has not run. Development trains on 2021-22 and uses 2023 for tuning and scoring. Availability cutoffs are enforced using documented posting-lag assumptions; historical availability still needs an audit. Comparisons use archived forecasts for paired places and days.
+**Evaluation plan.** The draft protocol (docs/BACKTEST_PROTOCOL.md) reserves 2024-25 for one final test after the methods are frozen; it has not run. Development trains on 2021-22 and tunes and scores on 2023. Forecasts use only data posted before issue time; the posting lags still need a historical audit. Comparisons pair archived forecasts by place and day.
 
 **What the tests showed (development weeks of 2023).**
-- One day ahead, Serein's RMSE was 7.8 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). We report persistence on its own because a 2026 evaluation in BAMS found that for day-level decisions it matched or beat every operational smoke model; Serein's warning skill one day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
+- One day ahead, Serein's RMSE was 7.8 µg/m³ vs. 11.0 for the AQM-first fallback and 13.8 for persistence (yesterday's reading carried forward). A 2026 BAMS study found persistence matched or beat operational smoke models for day-level decisions; Serein's warning skill a day ahead was 0.53 vs. 0.26 for persistence (critical success index, USG or worse).
 - It warned on 72% of "Unhealthy for Sensitive Groups" days vs. 46% for EPA, with fewer false alarms.
-- With 20% of monitors hidden, it still beat NOAA at the hidden sites, in every distance band, so it can forecast for neighborhoods with no monitor. This matters for fairness: in the lowest-income fifth of western neighborhoods, 10.8% of people live 25 km or more from any EPA monitor, vs. 0.6% in the highest-income fifth (Census ACS 2019-2023; docs/EQUITY.md).
-- Warning probabilities were recalibrated so a stated 60% chance of an unhealthy day comes true about 60% of the time, and a low-confidence flag marks the days with the largest misses.
-- Hour by hour, against real hourly monitor readings, Serein's corrected values beat NOAA's hourly forecast on days 0-2, but neither could tell which hours of a day would be worst; a flat daily value was as accurate. So our advice is per day, not per hour (docs/HOURLY_ACCURACY.md).
-- Nine ideas to improve accuracy failed our fixed acceptance test (bigger models, more seasons, fire growth, satellite smoke, five blends). All are logged in docs/EXPERIMENTS.md.
-- We removed one input at a time to see what matters. Without NOAA's HRRR smoke and weather forecasts, tomorrow's error got 29% worse. Without live monitor readings, today's error got 66% worse. Wind direction between monitors, which we expected to help, made no difference, and satellite fire detections helped only a little (1-4%). We report both.
+- With 20% of monitors hidden, it beat NOAA at the hidden sites in every distance band (8.5 vs. 11.1 µg/m³ a day ahead), so it can serve neighborhoods with no monitor. In the lowest-income fifth of western neighborhoods, 10.8% of people live 25 km or more from any EPA monitor, vs. 0.6% in the highest-income fifth (Census ACS 2019-2023; docs/EQUITY.md).
+- Warning probabilities were recalibrated: a stated 60% chance of an unhealthy day comes true about 60% of the time. A low-confidence flag marks the largest misses.
+- Hour by hour, Serein beat NOAA on days 0-2, but neither could tell which hours would be worst and a flat daily value was as accurate, so our advice is per day (docs/HOURLY_ACCURACY.md).
+- Twelve model changes failed our fixed acceptance test (more seasons, fire growth, satellite smoke, more ensemble members, a separate network for days 2-3), and five blends did no better (all logged in docs/EXPERIMENTS.md).
+- Removing inputs one at a time: without HRRR, tomorrow's error rose 29%; without live monitors, today's rose 66%; wind direction between monitors added nothing; fire detections helped 1-4%.
 
 [TEAM: final test results, 2024-25. Run once as a team. Paste the headline numbers here.]
 
@@ -99,7 +99,7 @@ Against EPA's official AQI forecast, one day ahead: Serein had the right AQI cat
 [TEAM: C-7. Native Spanish speaker review of the Spanish messages.]
 [TEAM: E-1. Interview count and the one change we made because of what we heard.]
 
-**Next steps before the Summit.** Add PurpleAir's low-cost sensors in two test metros (Sacramento and Portland) to see how much denser sensors help, add more languages, and run a small opt-in pilot of the check-in with families, with a clinician advising. [TEAM: confirm the pilot plan and ethics review with an adult advisor before writing it here. See docs/ETHICS.md.]
+**Next steps before the Summit.** Add PurpleAir sensors in two test metros (Sacramento and Portland) to measure how much denser sensors help, add languages, and run a small opt-in pilot of the check-in with families, with a clinician advising. [TEAM: confirm the pilot plan and ethics review with an adult advisor before writing it here. See docs/ETHICS.md.]
 
 ## 6. Market (300 words)
 

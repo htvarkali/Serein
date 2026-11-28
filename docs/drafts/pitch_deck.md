@@ -117,9 +117,9 @@ On the slide:
 - 12.3
 - 15.5
 - Serein, at monitors hidden from it
-- 8.4
-- 9.9
-- 11.4
+- 8.5
+- 10.0
+- 11.5
 - NOAA, at those same monitors
 - 11.1
 - 11.9
@@ -141,9 +141,9 @@ On the slide:
 - The personal model is tested on 300 simulated children. A pilot needs consent, a clinician and an ethics review.
 - No customer yet
 - No district, health plan or employer has been interviewed. That comes before any sale.
-- Nine attempts to improve accuracy failed our acceptance test. All nine are in our public log.
+- Twelve attempts to improve accuracy failed our acceptance test. All twelve are in our public log.
 
-Say: 4:45 to 5:30. This slide is on purpose. Judges score practicality on whether a team knows its own limits. One: the numbers so far are development results; the final test runs once, after the method is frozen, and we will report it whatever it shows. Two: we still forecast big smoke days too low, though less than NOAA, which reaches 31% a day ahead. Three: the child model has never met a real child. Four: nobody has agreed to pay. And we kept every failed experiment: nine runs marked as failing our own acceptance rule, with one change that passed.
+Say: 4:45 to 5:30. This slide is on purpose. Judges score practicality on whether a team knows its own limits. One: the numbers so far are development results; the final test runs once, after the method is frozen, and we will report it whatever it shows. Two: we still forecast big smoke days too low, though less than NOAA, which reaches 31% a day ahead. Three: the child model has never met a real child. Four: nobody has agreed to pay. And we kept every failed experiment: twelve runs marked as failing our own acceptance rule, with one change that passed.
 
 ## 9. Who pays: families never do
 

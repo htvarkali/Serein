@@ -78,15 +78,17 @@ worst, and a flat daily value was as accurate. So our advice is per day, not per
 and the site says so (`docs/HOURLY_ACCURACY.md`).
 
 **10. What did you try that failed?**
-A lot, and we wrote each one down before running it. The experiment log has nine runs
-marked as failing our acceptance rule as of November 25: a different point forecast,
-heavier weighting of smoky days, fire growth, partial-day inputs, an extra training
-season, satellite smoke haze, temporary fire monitors twice, and ten ensemble members
-in place of five. One change passed: recalibrating the warning probabilities. We keep
-the failures because they show the acceptance rule is real (`docs/EXPERIMENTS.md`).
+A lot, and we wrote each one down before running it. The experiment log has twelve
+runs marked as failing our acceptance rule as of November 27: a different point
+forecast, heavier weighting of smoky days, training on the error in µg/m³, a separate
+network for days 2-3, fire growth, partial-day inputs, smoke-cover history, an extra
+training season, satellite smoke haze, temporary fire monitors twice, and ten ensemble
+members in place of five. One change passed: recalibrating the warning probabilities.
+We keep the failures because they show the acceptance rule is real
+(`docs/EXPERIMENTS.md`).
 
 **11. Does it work where there is no monitor, and who lives there?**
-With one monitor in five hidden, our day-ahead error at the hidden sites was 8.4
+With one monitor in five hidden, our day-ahead error at the hidden sites was 8.5
 against NOAA's 11.1, and we were ahead in every distance band, though the farthest
 band has only 3 sites. In the lowest-income fifth of western neighborhoods, 10.8% of
 people live 25 km or more from an EPA monitor; in the highest-income fifth, 0.6%
@@ -190,7 +192,7 @@ properly citing the source." See the note at the end of `references_DRAFT.md`.]
 | Share of the true peak forecast, 1 day ahead | 76% | 31% | | |
 | 90% interval coverage | 89-91% | | | |
 | Error without live sensors, today (ablation of 2026-11-02) | +66% | | | |
-| Error at hidden monitors, 1 day ahead | 8.4 | 11.1 | | |
+| Error at hidden monitors, 1 day ahead | 8.5 | 11.1 | | |
 
 Sources: README "Current results (development rerun, 2026-11-23)"; the persistence and
 CSI figures are in Brief section 5; `docs/EQUITY.md`; `docs/HOURLY_ACCURACY.md`.

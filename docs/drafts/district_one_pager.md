@@ -41,7 +41,7 @@ On fire-season weeks of 2023 that the model never saw:
 | False alarms | 92 | 98 |
 
 At monitors we hid from the model, to stand in for neighborhoods without one, its
-error a day ahead was 8.4 µg/m³ against 11.1 for NOAA's forecast.
+error a day ahead was 8.5 µg/m³ against 11.1 for NOAA's forecast.
 
 These are development results. Our final test, on 2024 and 2025, has not been run yet,
 and we will report it whatever it shows. All of it is public: htvarkali.github.io/Serein

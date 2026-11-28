@@ -1,7 +1,9 @@
 # Brief review, 2026-11-25 (tasks S-5, S-10, E-6, E-8)
 
 A pass over the pitch material against the repo as it stood on 2026-11-25 (main at
-a0f25a1). It records what was changed, what was found, and what only the team can do.
+a0f25a1). Update 2026-11-27: `docs/results/` has since been re-exported from the
+November 23 rerun, section 5 of the Brief was cut to fit its limit, and the
+hidden-monitor numbers were rerun (8.5 vs. 11.1 a day ahead). It records what was changed, what was found, and what only the team can do.
 Model code, the website and Smoke World were not touched.
 
 ## 1. Things with a date on them

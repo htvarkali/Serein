@@ -309,8 +309,8 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | Nov 2 | Data pipeline works for 1 season; baselines scored (M1) |
 | Nov 16 | First GNN beats raw HRRR on validation season (M2) |
 | Nov 30 | Uncertainty calibrated; AirPlan simulation done (M3) |
-| Dec 17 | **Freeze the backtest protocol, then run the final held-out test once.** Freeze numbers (M4) (moved from Dec 7 on 2026-11-23) |
 | Dec 14 | Demo app + action plans in 3+ languages reviewed by native speakers (M5) |
+| Dec 17 | **Freeze the backtest protocol, then run the final held-out test once.** Freeze numbers (M4) (moved from Dec 7 on 2026-11-23) |
 | Dec 21 | Innovation Brief + business plan drafts; expert feedback (M6) |
 | Jan 1 | Everything final (M7) |
 
@@ -320,7 +320,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 
 **Status key:** **Done** = finished and merged · **In progress** = claimed, being worked on · **Open** = free to claim · **Blocked** = waiting on something outside the repo. ⭐ = on the critical path for the headline result. **(non-code)** = needs a person, not code.
 
-### Summary: what is left (updated 2026-11-23)
+### Summary: what is left (recounted from the rows below, 2026-11-27)
 
 | Area | Done | In progress | Open | Blocked |
 |---|---|---|---|---|
@@ -330,7 +330,7 @@ Official 2026-27 Conrad dates ([Student Guide](https://conrad.spacecenter.org/wp
 | D: Proof & science | 9 | 0 | 3 | 1 |
 | E: Product & pitch | 4 | 3 | 4 | 0 |
 | S: Submission (Conrad) | 2 | 4 | 5 | 0 |
-| W: Smoke World | 14 | 4 | 2 | 0 |
+| W: Smoke World | 14 | 5 | 1 | 0 |
 | Q: Code quality | 9 | 0 | 0 | 0 |
 
 The `htvarkali` items (A-12, B-12b, Q-8, Q-9) were merged in PR #2 on 2026-11-04 and
@@ -338,7 +338,7 @@ checked against main on 2026-11-23.
 
 **Most urgent open work, in order:**
 1. S-1 Confirm in the Conrad portal that the Lean Canvas was submitted (due Oct 29) and which category was chosen. If it was not submitted, the entry cannot compete. Also S-11: Conrad financial aid applications for the $499 fee close **December 3, 2026**.
-2. S-3 to S-6 Finish the Innovation Brief: every `[TEAM: ...]` slot in [docs/drafts/innovation_brief.md](docs/drafts/innovation_brief.md), especially questions 6-10 (market, competition, go-to-market, business model, fundraising).
+2. S-3 to S-6 Finish the Innovation Brief: every `[TEAM: ...]` slot in [docs/drafts/innovation_brief.md](docs/drafts/innovation_brief.md). All ten sections are drafted and within their word limits as of 2026-11-27 (`python3 scripts/check_brief.py`); what is left is facts only the team has (interviews, clinician review, advisor, Jagath's role) and the final-test numbers.
 3. S-8 Website team section and contact line. S-9 the 3-5 minute video.
 4. D-4, D-5, D-6b ⭐ Freeze the protocol, then run the final test and the transfer test once.
 5. C-8 One clinician review and E-1 interviews: the strongest outside evidence a judge can see.
@@ -359,7 +359,7 @@ checked against main on 2026-11-23.
 | A-11 | AQM archive v5/v6/v7 loader (v5 to 2021-07-19 is 48 h only) | Done | Aadi-Tiwari | 2026-11-01 |
 | A-12 | Offline PurpleAir QC: auditable A/B, indoor, stuck and neighbor screening; CLI and synthetic tests ([guide](docs/PURPLEAIR_QC.md)). Merged in PR #2; checked 2026-11-23: `serein purpleair qc` and `tests/test_purpleair_qc.py` on main, suite passes. Tested on synthetic data only until PurpleAir data exists (A-14) | Done | htvarkali | 2026-11-04 |
 | A-13 | HRRR weather at sites: 10 m wind, PBL height, RH, 2 m temperature (precipitation not yet added) | Done | Aadi-Tiwari | 2026-11-01 |
-| A-14 | PurpleAir history for ~300 sensors in 2 test metros (Sacramento, Portland), after the cost estimate is approved | Open | | |
+| A-14 | PurpleAir history for ~300 sensors in 2 test metros (Sacramento, Portland), after the cost estimate is approved. Read the [correction check](docs/PURPLEAIR_CORRECTION_CHECK.md) first (2026-11-27): EPA's smoke correction uses the cf_atm channels, which changes which fields to buy, at the same cost | Open | | |
 | A-15 | Data dictionary generated from the real table: `docs/DATA_DICTIONARY.md` | Done | Aadi-Tiwari | 2026-11-01 |
 
 ### B: SmokeCast (Model 1)

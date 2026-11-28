@@ -11,6 +11,13 @@ For each tract inside the study box: distance from its representative point to t
 nearest monitor. Tracts are grouped into income quintiles (population-weighted
 summaries). This describes monitor coverage only; it says nothing about health.
 
+Edge check: the registry only holds monitors inside the study box, so a tract near the
+box edge may have a closer monitor just outside it. A monitor outside the box is at
+least as far away as the box edge, so a tract's distance can only be overstated when it
+lies closer to the edge than to its nearest monitor inside. `edge_check` reports how
+many of the far-from-a-monitor people are in that situation (an upper bound: all four
+edges count, including the Pacific coast and the borders).
+
     uv run python -m serein.eval.equity --out outputs/equity
 """
 
@@ -82,6 +89,35 @@ def nearest_km(t: pd.DataFrame, monitors: pd.DataFrame) -> np.ndarray:
     return out
 
 
+def km_to_box_edge(t: pd.DataFrame, region: dict) -> np.ndarray:
+    """Distance (km) from each tract point inside the box to the nearest box edge."""
+    lat, lon = t["lat"].to_numpy(float), t["lon"].to_numpy(float)
+    ns = np.minimum(lat - region["lat_min"], region["lat_max"] - lat) * 111.2
+    # East and west edges are meridians: the shortest way there runs along the parallel.
+    ew = np.minimum(lon - region["lon_min"], region["lon_max"] - lon)
+    ew = ew * 111.2 * np.cos(np.radians(lat))
+    return np.maximum(np.minimum(ns, ew), 0.0)
+
+
+def edge_check(t: pd.DataFrame, far_km: float = FAR_KM[0]) -> pd.DataFrame:
+    """Per income quintile: people over far_km from a monitor, and how many of them could
+    have a closer monitor outside the box (box edge nearer than the nearest monitor)."""
+    t = t.dropna(subset=["income"]).copy()
+    t["quintile"] = pd.qcut(t["income"], 5, labels=["1 (lowest)", "2", "3", "4", "5 (highest)"])
+    rows = []
+    for q, g in t.groupby("quintile", observed=True):
+        far = g[g["km"] > far_km]
+        maybe = far[far["edge_km"] < far["km"]]
+        rows.append({
+            "income_quintile": q,
+            f"people_over_{far_km:g}km": int(far["population"].sum()),
+            "of_them_possibly_closer_outside_box": int(maybe["population"].sum()),
+            "share_of_quintile_if_all_removed": float(
+                (far["population"].sum() - maybe["population"].sum()) / g["population"].sum()),
+        })
+    return pd.DataFrame(rows)
+
+
 def summarize(t: pd.DataFrame) -> pd.DataFrame:
     """Population-weighted coverage by income quintile (quintiles of tracts by income)."""
     t = t.dropna(subset=["income"]).copy()
@@ -121,6 +157,11 @@ def main(argv=None):
     s.to_csv(args.out / "by_income.csv", index=False)
     print(f"{len(t)} tracts, {int(t['population'].sum()):,} people, {len(monitors)} monitors")
     print(s.round(3).to_string(index=False))
+    t["edge_km"] = km_to_box_edge(t, study.raw["region"])
+    e = edge_check(t)
+    e.to_csv(args.out / "edge_check.csv", index=False)
+    print("\nEdge check (upper bound on distances overstated by the study box):")
+    print(e.round(3).to_string(index=False))
 
 
 if __name__ == "__main__":

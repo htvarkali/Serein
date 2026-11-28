@@ -78,8 +78,9 @@ is adjusted to that interval. A run always requires at least two samples.
 ## Scientific limits
 
 The A/B function and EPA correction reuse the existing implementation in
-`src/serein/data/purpleair.py`. The correction coefficients still need the review
-noted there before final evaluation. These new stuck and neighbor thresholds are
+`src/serein/data/purpleair.py`. The coefficients were checked on 2026-11-27
+([correction check](PURPLEAIR_CORRECTION_CHECK.md)): they match EPA's, but the sources
+apply them to the cf_atm channels, not cf_1, which needs a decision before A-14. These new stuck and neighbor thresholds are
 **configurable engineering heuristics**, not experimentally validated fault labels.
 A genuine localized plume can disagree with nearby sensors; inspect the audit
 rather than claiming every rejected reading is wrong. Sparse areas may have no

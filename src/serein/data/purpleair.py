@@ -250,7 +250,8 @@ def epa_correction(pa_cf1, rh):
     smoke by Barkjohn et al. (2022, Sensors 22:9669). Input: mean cf_1 PM2.5 of
     channels A and B (µg/m³) and the sensor's relative humidity (%).
     Inputs follow NumPy broadcasting rules, including scalar humidity.
-    TODO(A-12): double-check coefficients against the papers before the final test.
+    TODO(A-12): coefficients checked 2026-11-27 (docs/PURPLEAIR_CORRECTION_CHECK.md);
+    the sources apply this extended correction to cf_atm, not cf_1. Decide before A-14.
     """
     x, rh = np.broadcast_arrays(np.asarray(pa_cf1, dtype=float), np.asarray(rh, dtype=float))
     out = np.full(x.shape, np.nan)

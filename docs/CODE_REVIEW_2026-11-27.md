@@ -60,7 +60,7 @@ Options, cheapest first:
    the upper bound on its effect.
 2. **Add a posting delay** for fire detections, for example only detections at least
    3 hours before issue time. This changes model inputs, so it needs a rebuilt table and
-   a dev rerun under the acceptance rule, before the freeze.
+   a dev rerun before the freeze (steps in `docs/drafts/freeze_checklist.md`).
 3. **Use yesterday's HMS fire file only**, like the smoke polygons (`hms_lag_days: 1`).
    Same cost as option 2.
 
